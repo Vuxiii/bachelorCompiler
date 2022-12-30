@@ -2,7 +2,7 @@
 
 ## Short intro and Why
 Welcome to my Bachelors Repo.
-This Compiler Project uses two of my own tools, `Parsley` & `Regex`, which are used instead of the traditional tools: Bison & Flex.
+This Compiler Project uses two of my own tools, `Parsley` & `Regex`, which are used instead of the traditional tools: `Bison` & `Flex`.
 Now why did I make my own tools instead of using freely-available tools?
 Because this is a Project designed to teach myself as much about compilers as possible. This involves doing every step from scratch.
 
@@ -18,5 +18,13 @@ The main goal is to provide different scoping techniques (Static Scoping and Dyn
 
 Other than the above, my aim is to have as much fun as possible while developing this compiler.
 
+## How to compile & run
 To be able to compile and run this compiler yourself (or for myself in the future when I have forgotten how to do it :S), you need to download the dependencies listed above (Parsley and Regex), and install them on your local machine with maven: `mvn clean install compile package`. 
 For this project I am using `Java 17`
+
+## Naming ideas - breh
+* Juhl
+* Fischer Juhl
+* Fischer Uldall Juhl
+* FUJ
+* JUF
