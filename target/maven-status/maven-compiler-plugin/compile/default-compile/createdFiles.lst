@@ -1,0 +1,11 @@
+com/vuxiii/compiler/Parser/Terms.class
+com/vuxiii/compiler/Lexer/Tokens/Leaf/LexIdent.class
+com/vuxiii/compiler/Parser/Parser.class
+com/vuxiii/compiler/App.class
+com/vuxiii/compiler/Lexer/Tokens/Leaf/TokenType.class
+com/vuxiii/compiler/Lexer/Lexer.class
+com/vuxiii/compiler/Lexer/Tokens/Leaf/LexInt.class
+com/vuxiii/compiler/Lexer/Tokens/Leaf/LexPlus.class
+com/vuxiii/compiler/Lexer/Tokens/Leaf/LexSemicolon.class
+com/vuxiii/compiler/Lexer/Tokens/Leaf/LexType.class
+com/vuxiii/compiler/Lexer/Tokens/Leaf/LexEqual.class
