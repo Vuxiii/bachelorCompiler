@@ -1,13 +1,16 @@
 # Bachelor Compiler
 
+## Short intro and Why
 Welcome to my Bachelors Repo.
 This Compiler Project uses two of my own tools, `Parsley` & `Regex`, which are used instead of the traditional tools: Bison & Flex.
 Now why did I make my own tools instead of using freely-available tools?
 Because this is a Project designed to teach myself as much about compilers as possible. This involves doing every step from scratch.
 
+## Dependencies
 Parsley and Regex were made in the fall of 2022 as a side project (I was bored), and I decided it would be fun to actually use the tools i had created for something.
 Naturally this pointed me in the direction of Compilers.
 
+## Goals for this Project
 The Compiler will be written as a part of my Bachelors Project in the Spring of 2023.
 
 My hope for this project is that it can be used as a teaching tool for the course DM552 Programming Languages at SDU.
