@@ -23,7 +23,12 @@ public final class App {
     public static void main(String[] args) {
         
 
-        String input = "a=3;print(a);b=a+5;print(2);";
+        String input = """
+            a = 3;
+            print(a);
+            b=a+5;
+            print(2);
+        """;
         // String input = "a = 2;\nb= a + 3;\ny = b+a;print(a);";
         // String input = "a1 = 2;\nb= a2v + 3;\ny = b+a;print; a;";
 
@@ -50,6 +55,7 @@ public final class App {
 
         // [[ Code Optimization ]]
 
-        // [[ Code Emit]]
+        // [[ Code Emit ]]
+        
     }
 }

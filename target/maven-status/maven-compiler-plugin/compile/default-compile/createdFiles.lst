@@ -1,4 +1,3 @@
-com/vuxiii/compiler/Parser/Terms.class
 com/vuxiii/compiler/Lexer/Tokens/Leaf/LexIdent.class
 com/vuxiii/compiler/Parser/Parser.class
 com/vuxiii/compiler/App.class

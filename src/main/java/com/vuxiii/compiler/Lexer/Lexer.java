@@ -42,6 +42,7 @@ public class Lexer {
         reg.addRegex( "print", in -> new LexPrint() );
         reg.addRegex( "\\(", in -> new LexLParen() );
         reg.addRegex( "\\)", in -> new LexRParen() );
+        // reg.addRegex( "[:alpha:]([:alpha:]|[:digit:])*", in -> new LexIdent( in ) );
         reg.addRegex( "[:alpha:]([:alpha:]|[:digit:])*", in -> new LexIdent( in ), 99999999 );
 
         reg.compile();
