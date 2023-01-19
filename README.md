@@ -1,14 +1,33 @@
 # Bachelor Compiler
 
+- [Bachelor Compiler](#bachelor-compiler)
+  - [Short intro and Why](#short-intro-and-why)
+  - [Dependencies](#dependencies)
+  - [Goals for this Project](#goals-for-this-project)
+  - [How to compile \& run](#how-to-compile--run)
+  - [Naming ideas - breh](#naming-ideas---breh)
+- [Configuring the Compiler](#configuring-the-compiler)
+  - [Adding another Token to the Lexer/Parser](#adding-another-token-to-the-lexerparser)
+  - [Visitor Pattern](#visitor-pattern)
+  - [Debugging](#debugging)
+
+---
+
+
 ## Short intro and Why
 Welcome to my Bachelors Repo.
 This Compiler Project uses two of my own tools, `Parsley` & `Regex`, which are used instead of the traditional tools: `Bison` & `Flex`.
 Now why did I make my own tools instead of using freely-available tools?
 Because this is a Project designed to teach myself as much about compilers as possible. This involves doing every step from scratch.
 
+---
+
+
 ## Dependencies
-Parsley and Regex were made in the fall of 2022 as a side project (I was bored), and I decided it would be fun to actually use the tools i had created for something.
+Parsley and Regex were made in the fall of 2022 as a side project (I was bored), and I decided it would be fun to actually use the tools I had created for something.
 Naturally this pointed me in the direction of Compilers.
+
+---
 
 ## Goals for this Project
 The Compiler will be written as a part of my Bachelors Project in the Spring of 2023.
@@ -22,6 +41,8 @@ Other than the above, my aim is to have as much fun as possible while developing
 To be able to compile and run this compiler yourself (or for myself in the future when I have forgotten how to do it :S), you need to download the dependencies listed above (Parsley and Regex), and install them on your local machine with maven: `mvn clean install compile package`. 
 For this project I am using `Java 17`
 
+---
+
 ## Naming ideas - breh
 * Juhl
 * Juhllang $\rightarrow$ .jl
@@ -29,6 +50,16 @@ For this project I am using `Java 17`
 * Fischer Uldall Juhl
 * FUJ
 * JUF
+
+So far I think I will go with JuhlLang with extension $\rightarrow$ `.jl`
+
+---
+
+# Configuring the Compiler
+
+This section will try to explain how to add functionality to the compiler / language. This section is also a reference for myself to limit the amount of time wasted trying to remember every little detail. The goal is to be able to look up anything that is remotely difficult or complicated.
+
+---
 
 ## Adding another Token to the Lexer/Parser
 This section will explain how one can add another token/node to the language.
@@ -49,7 +80,7 @@ This section will explain how one can add another token/node to the language.
     3. Now we can add the CFG for the new node. Goto *Parser.Parser.java* and add the rule. The rule can be added by called the method `addRuleWithReduceFunction` on the `Grammar` object currently called `g`. The first parameter is the left side of the CFG. The second parameter is a `List` of Tokens, can be either *Non-Terminals* or *Terminals*. The order in which they appear in the list matters. It goes from left to right.
  3. **Important**: The term in the created node/leaf **MUST** be the one created in the Java-Class *Parser.Symbol.java*. This term is used to ensure that the parser can correctly identify what term it is looking at. 
  
-    
+---
 
 ## Visitor Pattern
 Each ASTToken in the AST utilizes the visitor pattern. Each Node will accept a visitor in the following order:
@@ -109,3 +140,14 @@ The following will explain how the visitor is passed to children:
         visitor.postVisit( this );
     }
     ```
+
+---
+
+## Debugging 
+
+Currently the project has the following debug utilities:
+
+* Enable/Disable printing of the Parsing Steps during parsing. `Settings.showParsingSteps = false|true`
+* Enable/Disable printing the Grammar. `Settings.showGrammar = false|true`
+* Enable/Disable printing the Parsing Table. `Settings.showParsingTable = false|true`
+* Print the AST with the `ASTPrinter.java` class. Simply pass any node an object of type `ASTPrinter` and it will print the node and it's children.
