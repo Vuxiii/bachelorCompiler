@@ -28,3 +28,62 @@ For this project I am using `Java 17`
 * Fischer Uldall Juhl
 * FUJ
 * JUF
+
+## Visitor Pattern
+Each ASTToken in the AST utilizes the visitor pattern. Each Node will accept a visitor in the following order:
+1. visitor.visit( this );
+2. visitor.preVisit( this );
+3. visitor.midVisit( this );
+4. visitor.postVisit( this );
+
+The following will explain how the visitor is passed to children:
+* 0 children:
+    ```Java
+    @Override
+    public void accept(VisitorBase visitor) {
+        visitor.visit( this );
+
+        visitor.preVisit( this );
+        visitor.midVisit( this );
+        visitor.postVisit( this );
+    }
+    ```
+* 1 child:
+    ```Java
+    @Override
+    public void accept(VisitorBase visitor) {
+        visitor.visit( this );
+
+        visitor.preVisit( this );
+        child1.accept( visitor );
+        visitor.midVisit( this );
+        visitor.postVisit( this );
+    }
+    ```
+* 2 children:
+    ```Java
+    @Override
+    public void accept(VisitorBase visitor) {
+        visitor.visit( this );
+
+        visitor.preVisit( this );
+        child1.accept( visitor );
+        visitor.midVisit( this );
+        child2.accept( visitor );
+        visitor.postVisit( this );
+    }
+    ```
+* 3 children:
+    ```Java
+    @Override
+    public void accept(VisitorBase visitor) {
+        visitor.visit( this );
+
+        visitor.preVisit( this );
+        child1.accept( visitor );
+        visitor.midVisit( this );
+        child2.accept( visitor );
+        child3.accept( visitor );
+        visitor.postVisit( this );
+    }
+    ```

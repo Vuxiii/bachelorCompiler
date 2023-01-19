@@ -5,14 +5,16 @@
 /home/william/Desktop/sdu/6sem/bachelor/juhl/src/main/java/com/vuxiii/compiler/Lexer/Tokens/Leaf/LexPrint.java
 /home/william/Desktop/sdu/6sem/bachelor/juhl/src/main/java/com/vuxiii/compiler/Lexer/Lexer.java
 /home/william/Desktop/sdu/6sem/bachelor/juhl/src/main/java/com/vuxiii/compiler/Parser/Nodes/Expression.java
+/home/william/Desktop/sdu/6sem/bachelor/juhl/src/main/java/com/vuxiii/compiler/Lexer/Tokens/TokenConstructor.java
 /home/william/Desktop/sdu/6sem/bachelor/juhl/src/main/java/com/vuxiii/compiler/Parser/Nodes/Assignment.java
 /home/william/Desktop/sdu/6sem/bachelor/juhl/src/main/java/com/vuxiii/compiler/App.java
 /home/william/Desktop/sdu/6sem/bachelor/juhl/src/main/java/com/vuxiii/compiler/Lexer/Tokens/Leaf/LexSemicolon.java
-/home/william/Desktop/sdu/6sem/bachelor/juhl/src/main/java/com/vuxiii/compiler/Lexer/Tokens/Leaf/TokenType.java
 /home/william/Desktop/sdu/6sem/bachelor/juhl/src/main/java/com/vuxiii/compiler/Lexer/Tokens/Leaf/LexRParen.java
+/home/william/Desktop/sdu/6sem/bachelor/juhl/src/main/java/com/vuxiii/compiler/Lexer/Tokens/TokenType.java
 /home/william/Desktop/sdu/6sem/bachelor/juhl/src/main/java/com/vuxiii/compiler/Parser/Nodes/BinaryOperationKind.java
 /home/william/Desktop/sdu/6sem/bachelor/juhl/src/main/java/com/vuxiii/compiler/Lexer/Tokens/Leaf/LexEqual.java
 /home/william/Desktop/sdu/6sem/bachelor/juhl/src/main/java/com/vuxiii/compiler/Lexer/Tokens/Leaf/LexLParen.java
+/home/william/Desktop/sdu/6sem/bachelor/juhl/src/main/java/com/vuxiii/compiler/Lexer/Tokens/ConcreteType.java
 /home/william/Desktop/sdu/6sem/bachelor/juhl/src/main/java/com/vuxiii/compiler/Lexer/Tokens/Leaf/LexType.java
 /home/william/Desktop/sdu/6sem/bachelor/juhl/src/main/java/com/vuxiii/compiler/Parser/Nodes/Statement.java
 /home/william/Desktop/sdu/6sem/bachelor/juhl/src/main/java/com/vuxiii/compiler/Parser/Parser.java

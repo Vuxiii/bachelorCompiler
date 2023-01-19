@@ -15,15 +15,17 @@ import com.vuxiii.compiler.Parser.Nodes.Assignment;
 import com.vuxiii.compiler.Parser.Nodes.BinaryOperation;
 import com.vuxiii.compiler.Parser.Nodes.BinaryOperationKind;
 import com.vuxiii.compiler.Parser.Nodes.Expression;
+import com.vuxiii.compiler.Parser.Nodes.Print;
 import com.vuxiii.compiler.Parser.Nodes.Statement;
 import com.vuxiii.compiler.Parser.Nodes.StatementKind;
+import com.vuxiii.compiler.Visitors.ASTNode;
 
 
 public class Parser {
     
     private static Grammar g = null;
 
-    public static ASTToken getAST( List<ASTToken> tokens ) {
+    public static ASTNode getAST( List<ASTToken> tokens ) {
         if ( g == null )
             init();
 
@@ -32,7 +34,7 @@ public class Parser {
         
         System.out.println( tokens );
 
-        ASTToken ast = LRParser.getAST( table, tokens );
+        ASTNode ast = (ASTNode)LRParser.getAST( table, tokens );
         // return AST;
         return ast;
     }
@@ -56,30 +58,34 @@ public class Parser {
         });
 
         g.addRuleWithReduceFunction( Symbol.n_Statement, List.of( Symbol.n_Assignment ), t -> {
-            return new Statement( Symbol.n_Statement, t.get(0), StatementKind.ASSIGNMENT );
+            return new Statement( Symbol.n_Statement, (ASTNode)t.get(0), StatementKind.ASSIGNMENT );
         });
 
-        g.addRuleWithReduceFunction( Symbol.n_Statement, List.of( Symbol.t_Print, Symbol.t_LParen, Symbol.n_Expression, Symbol.t_RParen ), t -> {
-            return new Statement( Symbol.n_Statement, t.get(2), StatementKind.PRINT );
+        g.addRuleWithReduceFunction( Symbol.n_Statement, List.of( Symbol.n_Print ), t -> {
+            return new Statement( Symbol.n_Statement, (ASTNode)t.get(0), StatementKind.PRINT );
         });
+
 
         g.addRuleWithReduceFunction( Symbol.n_Expression, List.of( Symbol.n_Expression, Symbol.t_Plus, Symbol.n_Expression ), t -> {
-            return new BinaryOperation( Symbol.n_Expression, t.get(0), t.get(2), BinaryOperationKind.PLUS );
+            return new BinaryOperation( Symbol.n_Expression, (ASTNode)t.get(0), (ASTNode)t.get(2), (ASTNode)t.get(1), BinaryOperationKind.PLUS );
         });
 
         g.addRuleWithReduceFunction( Symbol.n_Expression, List.of( Symbol.t_Integer), t -> {
-            return new Expression( Symbol.n_Expression, t.get(0) );
+            return new Expression( Symbol.n_Expression, (ASTNode)t.get(0) );
         });
 
 
         g.addRuleWithReduceFunction( Symbol.n_Expression, List.of( Symbol.t_Identifier), t -> {
-            return new Expression( Symbol.n_Expression, t.get(0) );
+            return new Expression( Symbol.n_Expression, (ASTNode)t.get(0) );
         });
 
         g.addRuleWithReduceFunction( Symbol.n_Assignment, List.of( Symbol.t_Identifier, Symbol.t_Equals, Symbol.n_Expression ), t -> {
-            return new Assignment( Symbol.n_Assignment, (LexIdent)t.get(0), t.get(2)  );
+            return new Assignment( Symbol.n_Assignment, (LexIdent)t.get(0), (ASTNode)t.get(2)  );
         });
 
+        g.addRuleWithReduceFunction( Symbol.n_Print, List.of( Symbol.t_Print, Symbol.t_LParen, Symbol.n_Expression, Symbol.t_RParen ), t -> {
+            return new Print( Symbol.n_Print, (ASTNode)t.get(2) );
+        });
         // g.addRuleWithReduceFunction( Term.n_Expression, List.of( Term.t_Integer ), tokens -> {
         //     return null;
         // });

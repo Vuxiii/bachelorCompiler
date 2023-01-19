@@ -11,6 +11,7 @@ public class Symbol {
     public static final NonTerminal n_Statement = new NonTerminal( "STATEMENT" );
     public static final NonTerminal n_StatementList = new NonTerminal( "STATEMENT_LIST" );
     public static final NonTerminal n_Assignment = new NonTerminal( "ASSIGNMENT" );
+    public static final NonTerminal n_Print = new NonTerminal( "PRINT" );
 
 
     public static final Terminal t_Plus = new Terminal( "+" );

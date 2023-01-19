@@ -9,15 +9,13 @@ import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexIdent;
 import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexInt;
 import com.vuxiii.compiler.Visitors.ASTNode;
 
-public class Assignment extends ASTNode {
+public class Print extends ASTNode {
 
-    public final LexIdent id;
     public final ASTNode value;
 
     public final Term term;
 
-    public Assignment( Term term, LexIdent id, ASTNode value ) {
-        this.id = id;
+    public Print( Term term, ASTNode value ) {
         this.value = value;
 
         this.term = term;
@@ -25,12 +23,11 @@ public class Assignment extends ASTNode {
 
     @Override
     public void accept( VisitorBase visitor ) {
-        accept2Child(visitor);
+        accept1Child(visitor);
     }
 
     @Override
     public Term getTerm() {
-        // TODO Auto-generated method stub
         return term;
     }
 
@@ -41,21 +38,21 @@ public class Assignment extends ASTNode {
     
     @Override
     public int getChildrenCount() {
-        return 2;
+        return 1;
     }
 
     public String toString() {
-        return id.name + " = " + value.toString();
+        return value.toString();
     }
 
     @Override
     protected Optional<ASTNode> getChild1() {
-        return Optional.of(id);
+        return Optional.of(value);
     }
 
     @Override
     protected Optional<ASTNode> getChild2() {
-        return Optional.of(value);
+        return Optional.empty();
     }
 
     @Override
@@ -70,7 +67,7 @@ public class Assignment extends ASTNode {
 
     @Override
     public String getPrintableName() {
-        return "Assignment";
+        return "Print";
     }
     
 }

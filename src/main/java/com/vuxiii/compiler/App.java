@@ -3,6 +3,7 @@ package com.vuxiii.compiler;
 import com.vuxiii.Regex.Regex;
 import com.vuxiii.compiler.Lexer.Lexer;
 import com.vuxiii.compiler.Parser.Parser;
+import com.vuxiii.compiler.Visitors.ASTPrinter;
 
 import java.util.List;
 
@@ -29,6 +30,15 @@ public final class App {
             b=a+5;
             print(2);
         """;
+        // input = """
+        //     a = 3;
+        //     a = a + 4;
+        //     print(a);
+        // """;
+        // input = """
+        //     a = 3;
+        //     b = 5;
+        // """;
         // String input = "a = 2;\nb= a + 3;\ny = b+a;print(a);";
         // String input = "a1 = 2;\nb= a2v + 3;\ny = b+a;print; a;";
 
@@ -41,10 +51,17 @@ public final class App {
         }
 
         // [[ Parser ]]
+        
         ASTToken ast = Parser.getAST( tokens );
 
         System.out.println( ast );
 
+        // Debug...
+
+        ASTPrinter printer = new ASTPrinter();
+        System.out.println( "============".repeat(3));
+        ast.accept(printer);
+        System.out.println( "============".repeat(3));
 
         // [[ Symbol Collecting ]]
 

@@ -5,10 +5,11 @@ import java.util.Optional;
 import com.vuxiii.LR.Records.ASTToken;
 import com.vuxiii.LR.Records.Term;
 import com.vuxiii.Visitor.VisitorBase;
+import com.vuxiii.compiler.Visitors.ASTNode;
 
-public class Statement implements ASTToken {
+public class Statement extends ASTNode {
 
-    public final ASTToken node;
+    public final ASTNode node;
 
     public final Optional<Statement> next;
 
@@ -16,14 +17,14 @@ public class Statement implements ASTToken {
 
     public final StatementKind kind;
 
-    public Statement( Term term, ASTToken node, StatementKind kind ) {
+    public Statement( Term term, ASTNode node, StatementKind kind ) {
         this.term = term;
         this.node = node;
         next = Optional.empty();
         this.kind = kind;
     }
 
-    public Statement( Term term, ASTToken node, Statement next, StatementKind kind ) {
+    public Statement( Term term, ASTNode node, Statement next, StatementKind kind ) {
         this.term = term;
         this.node = node;
         this.next = Optional.of(next);
@@ -32,6 +33,8 @@ public class Statement implements ASTToken {
 
     @Override
     public void accept(VisitorBase visitor) {
+        visitor.visit( this );
+        
         visitor.preVisit( this );
         node.accept(visitor);
         visitor.midVisit( this );
@@ -46,10 +49,52 @@ public class Statement implements ASTToken {
         return term;
     }
 
+    @Override
+    public boolean isLeaf() {
+        return false;
+    }
+    
+    @Override
+    public int getChildrenCount() {
+        return next.isEmpty() ? 1 : 2;
+    }
+
     public String toString() {
         if ( next.isEmpty() )
             return "(" + kind + " " + node.toString() + ")";
         return "(" + kind + " " + node.toString() + "); " + next.get().toString();
+    }
+
+    @Override
+    protected Optional<ASTNode> getChild1() {
+        // TODO Auto-generated method stub
+        return Optional.of(node);
+    }
+
+    @Override
+    protected Optional<ASTNode> getChild2() {
+        if ( next.isPresent() )
+            return Optional.of( next.get() );
+
+        return Optional.empty();
+    }
+
+    @Override
+    protected Optional<ASTNode> getChild3() {
+        // TODO Auto-generated method stub
+        return Optional.empty();
+    }
+
+    @Override
+    protected Optional<ASTNode> getChild4() {
+        // TODO Auto-generated method stub
+        return Optional.empty();
+    }
+
+    @Override
+    public String getPrintableName() {
+        return (next.isEmpty()  ? "Statement" 
+                                : "Statement_List");
     }
     
 }
