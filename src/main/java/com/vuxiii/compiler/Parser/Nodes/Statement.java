@@ -2,7 +2,6 @@ package com.vuxiii.compiler.Parser.Nodes;
 
 import java.util.Optional;
 
-import com.vuxiii.LR.Records.ASTToken;
 import com.vuxiii.LR.Records.Term;
 import com.vuxiii.Visitor.VisitorBase;
 import com.vuxiii.compiler.Visitors.ASTNode;
@@ -45,7 +44,6 @@ public class Statement extends ASTNode {
 
     @Override
     public Term getTerm() {
-        // TODO Auto-generated method stub
         return term;
     }
 
@@ -67,7 +65,6 @@ public class Statement extends ASTNode {
 
     @Override
     protected Optional<ASTNode> getChild1() {
-        // TODO Auto-generated method stub
         return Optional.of(node);
     }
 
@@ -81,13 +78,11 @@ public class Statement extends ASTNode {
 
     @Override
     protected Optional<ASTNode> getChild3() {
-        // TODO Auto-generated method stub
         return Optional.empty();
     }
 
     @Override
     protected Optional<ASTNode> getChild4() {
-        // TODO Auto-generated method stub
         return Optional.empty();
     }
 

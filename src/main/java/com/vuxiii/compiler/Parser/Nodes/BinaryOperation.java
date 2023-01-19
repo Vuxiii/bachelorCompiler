@@ -2,7 +2,6 @@ package com.vuxiii.compiler.Parser.Nodes;
 
 import java.util.Optional;
 
-import com.vuxiii.LR.Records.ASTToken;
 import com.vuxiii.LR.Records.Term;
 import com.vuxiii.Visitor.VisitorBase;
 import com.vuxiii.compiler.Visitors.ASTNode;

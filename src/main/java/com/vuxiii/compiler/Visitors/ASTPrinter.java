@@ -1,10 +1,7 @@
 package com.vuxiii.compiler.Visitors;
 
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Stack;
 
-import com.vuxiii.LR.Records.ASTToken;
 import com.vuxiii.Visitor.VisitorBase;
 
 public class ASTPrinter extends VisitorBase {

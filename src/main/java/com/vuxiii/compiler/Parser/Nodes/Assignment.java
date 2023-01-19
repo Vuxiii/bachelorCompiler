@@ -2,11 +2,9 @@ package com.vuxiii.compiler.Parser.Nodes;
 
 import java.util.Optional;
 
-import com.vuxiii.LR.Records.ASTToken;
 import com.vuxiii.LR.Records.Term;
 import com.vuxiii.Visitor.VisitorBase;
 import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexIdent;
-import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexInt;
 import com.vuxiii.compiler.Visitors.ASTNode;
 
 public class Assignment extends ASTNode {

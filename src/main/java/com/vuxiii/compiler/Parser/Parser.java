@@ -1,16 +1,12 @@
 package com.vuxiii.compiler.Parser;
 
-import java.util.LinkedList;
 import java.util.List;
 
 import com.vuxiii.LR.Grammar;
 import com.vuxiii.LR.LRParser;
 import com.vuxiii.LR.ParseTable;
-import com.vuxiii.LR.ParsingStep;
 import com.vuxiii.LR.Records.ASTToken;
-import com.vuxiii.LR.Records.ParserState;
 import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexIdent;
-import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexInt;
 import com.vuxiii.compiler.Parser.Nodes.Assignment;
 import com.vuxiii.compiler.Parser.Nodes.BinaryOperation;
 import com.vuxiii.compiler.Parser.Nodes.BinaryOperationKind;
