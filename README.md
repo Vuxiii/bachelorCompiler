@@ -24,10 +24,32 @@ For this project I am using `Java 17`
 
 ## Naming ideas - breh
 * Juhl
+* Juhllang $\rightarrow$ .jl
 * Fischer Juhl
 * Fischer Uldall Juhl
 * FUJ
 * JUF
+
+## Adding another Token to the Lexer/Parser
+This section will explain how one can add another token/node to the language.
+1. Goto Parser.Symbol.java and add the desired Token
+   * It can be a **Terminal**, prefixed with a *t_*. The name is typically uppercased.
+   * It can be a **Non-Terminal**, prefixed with a *n_*. The name is typically lowercased.
+2. Depending on whether the added token is a *Terminal* or a *Non-Terminal* go to step *2a* and *2b* respectivly.
+    **2a.** 
+    1. Goto *Lexer.Tokens.Leaf* and add a new Java-Class representing this token. This Class will be instantiated by the Lexer in step 4. The new Java-Class should extend *Visitors.ASTNode.java* to enable the Visitor Pattern. Since the Token is a leaf, remember that the method `isLeaf()` should return `true` and the method `getChildrenCount()` should return `0`. The method `accept(VisitorBase visitor)` can simply call the super method `acceptNoChild(visitor);`. These settings are the default configuration for a leaf token. It ensures that the visitor functions correctly. 
+    2. After this, Goto *Lexer.Tokens.TokenType.java* and add the token to the enum-list. 
+    3. Goto *Lexer.Tokens.TokenConstructor.java* and add the enum identifier to the switch-statement. This Java-Class contains the rules for how each node should be created once the Lexer recognizes a specific Token.
+    4. Now we can tell the Lexer how to recognize our newly created token. Goto *Lexer.Lexer.java* and add the regular expression to identify the Token. If you are experiencing difficulty in getting the Lexer to return the correct Leaf, ensure that the regular expression for the Token is unique. If this doesn't solve the problem, try adding a priority to it, the lower the number the bigger the chance for that constructor to be called. (This is a bug in my regex-compiler that I currently as of writing *(20.01.2023)* haven't found a solution to yet. The problem surfaces when combining multiple NFA-states into a single DFA-state. If the created DFA-state contains two or more NFA-states that are accept-states, then the constructor function that will be called is *currently* **undefined**... Hehe)
+
+    **2b.**
+        
+    1. Goto *Parser.Nodes* and add a Java-Class representing the inner-node that you have defined. This Class should extend *Visitors.ASTNode.java* to enable the Visitor Pattern. Remember the method `isLeaf()` should return false, since it is not a leaf-node, and the method `getChildrenCount()` should return the amount of children this node contains. For example: The Print-Node contains a single child. The methods `getChild1()` upto `getChild4()` should return the child in the desired order. For example: The Assignment-Node returns first the Identifier to which the second child should be assigned to. 
+    2. If this node contains **more** than 4 children, update the Java-Class *Visitors.ASTNode.java* to encompass this *big* node. The method `accept(VisitorBase)` can call the super method that corresponds to the amount of children this inner-node contains. If the node has 2 children, you can call the super method `accept2Child(visitor);`
+    3. Now we can add the CFG for the new node. Goto *Parser.Parser.java* and add the rule. The rule can be added by called the method `addRuleWithReduceFunction` on the `Grammar` object currently called `g`. The first parameter is the left side of the CFG. The second parameter is a `List` of Tokens, can be either *Non-Terminals* or *Terminals*. The order in which they appear in the list matters. It goes from left to right.
+ 3. **Important**: The term in the created node/leaf **MUST** be the one created in the Java-Class *Parser.Symbol.java*. This term is used to ensure that the parser can correctly identify what term it is looking at. 
+ 
+    
 
 ## Visitor Pattern
 Each ASTToken in the AST utilizes the visitor pattern. Each Node will accept a visitor in the following order:

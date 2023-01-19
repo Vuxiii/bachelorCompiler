@@ -9,6 +9,7 @@ import java.util.List;
 
 import com.vuxiii.LR.Grammar;
 import com.vuxiii.LR.Records.ASTToken;
+import com.vuxiii.LR.Settings;
 
 /**
  * Hello world!
@@ -22,8 +23,9 @@ public final class App {
      * @param args The arguments of the program.
      */
     public static void main(String[] args) {
-        
-
+        Settings.showParsingSteps = false;
+        Settings.showGrammar = false;
+        Settings.showParsingTable = false;
         String input = """
             a = 3;
             print(a);
@@ -39,17 +41,13 @@ public final class App {
         //     a = 3;
         //     b = 5;
         // """;
-        // String input = "a = 2;\nb= a + 3;\ny = b+a;print(a);";
-        // String input = "a1 = 2;\nb= a2v + 3;\ny = b+a;print; a;";
-
+        
         // [[ Tokenizer ]]
         List<ASTToken> tokens = Lexer.lex( input );
 
-        for ( ASTToken tok : tokens ) {
-            System.out.print( tok );
-            System.out.println( "\t" + tok.getTerm() );
-        }
 
+        Settings.showGrammar = true;
+        Settings.showParsingTable = true;
         // [[ Parser ]]
         
         ASTToken ast = Parser.getAST( tokens );

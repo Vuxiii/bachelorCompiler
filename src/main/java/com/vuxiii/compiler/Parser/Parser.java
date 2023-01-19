@@ -32,7 +32,7 @@ public class Parser {
         
         ParseTable table = LRParser.parse( g, Symbol.n_Start );
         
-        System.out.println( tokens );
+        // System.out.println( tokens );
 
         ASTNode ast = (ASTNode)LRParser.getAST( table, tokens );
         // return AST;

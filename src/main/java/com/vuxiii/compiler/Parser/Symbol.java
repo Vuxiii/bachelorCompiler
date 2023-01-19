@@ -15,6 +15,7 @@ public class Symbol {
 
 
     public static final Terminal t_Plus = new Terminal( "+" );
+    public static final Terminal t_Minus = new Terminal( "-" );
     public static final Terminal t_Equals = new Terminal( "=" );
     public static final Terminal t_Identifier = new Terminal( "id" );
     public static final Terminal t_Integer = new Terminal( "integer" );
