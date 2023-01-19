@@ -1,6 +1,5 @@
 package com.vuxiii.compiler.Lexer;
 
-import java.util.LinkedList;
 import java.util.List;
 
 import com.vuxiii.LR.Records.ASTToken;
@@ -8,15 +7,6 @@ import com.vuxiii.Regex.Regex;
 import com.vuxiii.Regex.Token.TokenEOP;
 import com.vuxiii.compiler.Lexer.Tokens.TokenConstructor;
 import com.vuxiii.compiler.Lexer.Tokens.TokenType;
-import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexEqual;
-import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexIdent;
-import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexInt;
-import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexLParen;
-import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexPlus;
-import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexPrint;
-import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexRParen;
-import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexSemicolon;
-import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexType;
 import com.vuxiii.compiler.Parser.Symbol;
 
 public class Lexer {
