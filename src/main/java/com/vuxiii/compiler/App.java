@@ -2,7 +2,8 @@ package com.vuxiii.compiler;
 
 import com.vuxiii.compiler.Lexer.Lexer;
 import com.vuxiii.compiler.Parser.Parser;
-import com.vuxiii.compiler.Visitors.ASTPrinter;
+import com.vuxiii.compiler.VisitorPattern.Visitors.ASTPrinter;
+import com.vuxiii.compiler.VisitorPattern.Visitors.SimplePrinter;
 
 import java.util.List;
 
@@ -28,7 +29,7 @@ public final class App {
             a = 3;
             print(a);
             b=a+5;
-            print(2);
+            print(a);
         """;
         // input = """
         //     a = 3;
@@ -53,10 +54,13 @@ public final class App {
 
         // Debug...
 
+        // SimplePrinter printer = new SimplePrinter();
+        // ast.accept(printer);
+
         ASTPrinter printer = new ASTPrinter();
         ast.accept(printer);
 
-        System.out.println( printer.get_AST() );
+        System.out.println( printer.get_ascii() );
 
         // [[ Symbol Collecting ]]
 

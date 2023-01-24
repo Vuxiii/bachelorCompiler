@@ -1,10 +1,12 @@
-package com.vuxiii.compiler.Visitors;
+package com.vuxiii.compiler.VisitorPattern.Visitors;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
 import com.vuxiii.Visitor.VisitorBase;
+import com.vuxiii.compiler.VisitorPattern.VisitOrder;
+import com.vuxiii.compiler.VisitorPattern.Annotations.VisitorPattern;
 
 public class ASTPrinter extends VisitorBase {
 
@@ -24,7 +26,7 @@ public class ASTPrinter extends VisitorBase {
      * This method returns the textual representation of the given AST.
      * @return A textual representation of the AST or the empty String if it hasn't been given to a node yet.
      */
-    public String get_AST() {
+    public String get_ascii() {
         return ast_string;
     }
 
@@ -36,7 +38,8 @@ public class ASTPrinter extends VisitorBase {
      * 3: The prefix for any direct children of this node 
      * @param token The current node in the AST
      */
-    public void visit_setup_node( ASTNode token ) {        
+    @VisitorPattern( when = VisitOrder.ENTER_NODE, order = 1 )
+    public void setup_node( ASTNode token ) {        
         Optional<ASTNode> maybeParent = get_parent(token);
         if ( maybeParent.isPresent() ) {
             ASTNode parent = maybeParent.get();
@@ -53,7 +56,8 @@ public class ASTPrinter extends VisitorBase {
      * It prints the prefix and the current Node to stdout
      * @param token
      */
-    public void preVisit_print( ASTNode token ) {
+    @VisitorPattern( when = VisitOrder.ENTER_NODE, order = 2  )
+    public void print_node( ASTNode token ) {
 
         Optional<ASTNode> maybeParent = get_parent(token);
         // This is for printing the root. It should not be indented

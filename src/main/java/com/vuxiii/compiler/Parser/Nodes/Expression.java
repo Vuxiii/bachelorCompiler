@@ -4,40 +4,18 @@ import java.util.Optional;
 
 import com.vuxiii.LR.Records.Term;
 import com.vuxiii.Visitor.VisitorBase;
-import com.vuxiii.compiler.Visitors.ASTNode;
+import com.vuxiii.compiler.VisitorPattern.Annotations.VisitNumber;
+import com.vuxiii.compiler.VisitorPattern.Visitors.ASTNode;
 
 public class Expression extends ASTNode {
 
-    public final ASTNode node;
-
-    public final Term term;
+    @VisitNumber( number = 1 ) public final ASTNode node;
 
     public Expression( Term term, ASTNode node ) {
-        this.term = term;
+        super( term ); 
         this.node = node;
+        super.setup_ASTNodeQueue();
     }
-
-    @Override
-    public void accept(VisitorBase visitor) {
-        accept1Child(visitor);
-    }
-
-    @Override
-    public Term getTerm() {
-        // TODO Auto-generated method stub
-        return term;
-    }
-
-    @Override
-    public boolean isLeaf() {
-        return false;
-    }
-    
-    @Override
-    public int getChildrenCount() {
-        return 1;
-    }
-
     public String toString() {
         return "(EXP " + node.toString() + ")";
     }

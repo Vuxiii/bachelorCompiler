@@ -4,57 +4,31 @@ import java.util.Optional;
 
 import com.vuxiii.LR.Records.Term;
 import com.vuxiii.Visitor.VisitorBase;
-import com.vuxiii.compiler.Visitors.ASTNode;
+import com.vuxiii.compiler.VisitorPattern.Annotations.VisitNumber;
+import com.vuxiii.compiler.VisitorPattern.Visitors.ASTNode;
 
 public class Statement extends ASTNode {
 
-    public final ASTNode node;
+    @VisitNumber( number = 1 ) public final ASTNode node;
 
-    public final Optional<Statement> next;
-
-    public final Term term;
+    @VisitNumber( number = 2 ) public final Optional<Statement> next;
 
     public final StatementKind kind;
 
     public Statement( Term term, ASTNode node, StatementKind kind ) {
-        this.term = term;
+        super( term ); 
         this.node = node;
         next = Optional.empty();
         this.kind = kind;
+        super.setup_ASTNodeQueue();
     }
 
     public Statement( Term term, ASTNode node, Statement next, StatementKind kind ) {
-        this.term = term;
+        super( term ); 
         this.node = node;
         this.next = Optional.of(next);
         this.kind = kind;
-    }
-
-    @Override
-    public void accept(VisitorBase visitor) {
-        visitor.visit( this );
-        
-        visitor.preVisit( this );
-        node.accept(visitor);
-        visitor.midVisit( this );
-        if ( next.isPresent() )
-            next.get().accept(visitor);
-        visitor.postVisit( this );
-    }
-
-    @Override
-    public Term getTerm() {
-        return term;
-    }
-
-    @Override
-    public boolean isLeaf() {
-        return false;
-    }
-    
-    @Override
-    public int getChildrenCount() {
-        return next.isEmpty() ? 1 : 2;
+        super.setup_ASTNodeQueue();
     }
 
     public String toString() {

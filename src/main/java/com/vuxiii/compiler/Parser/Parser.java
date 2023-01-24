@@ -14,7 +14,7 @@ import com.vuxiii.compiler.Parser.Nodes.Expression;
 import com.vuxiii.compiler.Parser.Nodes.Print;
 import com.vuxiii.compiler.Parser.Nodes.Statement;
 import com.vuxiii.compiler.Parser.Nodes.StatementKind;
-import com.vuxiii.compiler.Visitors.ASTNode;
+import com.vuxiii.compiler.VisitorPattern.Visitors.ASTNode;
 
 
 public class Parser {

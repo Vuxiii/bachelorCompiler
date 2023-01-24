@@ -7,26 +7,18 @@ import com.vuxiii.LR.Records.ASTToken;
 import com.vuxiii.LR.Records.Term;
 import com.vuxiii.Visitor.VisitorBase;
 import com.vuxiii.compiler.Parser.Symbol;
-import com.vuxiii.compiler.Visitors.ASTNode;
+import com.vuxiii.compiler.VisitorPattern.Annotations.VisitLeaf;
+import com.vuxiii.compiler.VisitorPattern.Visitors.ASTNode;
 
+@VisitLeaf
 public class LexRParen extends ASTNode {
 
     public final MatchInfo matchInfo;
 
     public LexRParen( MatchInfo matchInfo ) {
+        super( Symbol.t_RParen );
         this.matchInfo = matchInfo;
-    }
-
-    
-    @Override
-    public void accept(VisitorBase visitor) {
-        acceptNoChild(visitor);      
-    }
-
-    @Override
-    public Term getTerm() {
-        // TODO Auto-generated method stub
-        return Symbol.t_RParen;
+        super.setup_ASTNodeQueue();
     }
 
     public String toString() {
@@ -36,39 +28,25 @@ public class LexRParen extends ASTNode {
 
     @Override
     protected Optional<ASTNode> getChild1() {
-        // TODO Auto-generated method stub
         return Optional.empty();
     }
 
 
     @Override
     protected Optional<ASTNode> getChild2() {
-        // TODO Auto-generated method stub
         return Optional.empty();
     }
 
 
     @Override
     protected Optional<ASTNode> getChild3() {
-        // TODO Auto-generated method stub
         return Optional.empty();
     }
 
 
     @Override
     protected Optional<ASTNode> getChild4() {
-        // TODO Auto-generated method stub
         return Optional.empty();
-    }
-
-    @Override
-    public boolean isLeaf() {
-        return true;
-    }
-
-    @Override
-    public int getChildrenCount() {
-        return 0;
     }
 
     @Override

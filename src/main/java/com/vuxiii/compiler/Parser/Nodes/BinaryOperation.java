@@ -4,47 +4,25 @@ import java.util.Optional;
 
 import com.vuxiii.LR.Records.Term;
 import com.vuxiii.Visitor.VisitorBase;
-import com.vuxiii.compiler.Visitors.ASTNode;
+import com.vuxiii.compiler.VisitorPattern.Annotations.VisitNumber;
+import com.vuxiii.compiler.VisitorPattern.Visitors.ASTNode;
 
 public class BinaryOperation extends ASTNode {
 
-    public final ASTNode left;
-    public final ASTNode right;
-    public final ASTNode operator;
+    @VisitNumber( number = 2 ) public final ASTNode left;
+    @VisitNumber( number = 3 ) public final ASTNode right;
+    @VisitNumber( number = 1 ) public final ASTNode operator;
 
     public final BinaryOperationKind kind;
 
-    public final Term term;
-
     public BinaryOperation( Term term, ASTNode left, ASTNode right, ASTNode operator, BinaryOperationKind kind ) {
+        super( term ); 
         this.left = left;
         this.right = right;
         this.kind = kind;
         this.operator = operator;
+        super.setup_ASTNodeQueue();
 
-        this.term = term;
-    }
-
-    @Override
-    public void accept(VisitorBase visitor) {
-        accept3Child(visitor);
-        
-    }
-
-    @Override
-    public Term getTerm() {
-        // TODO Auto-generated method stub
-        return term;
-    }
-
-    @Override
-    public boolean isLeaf() {
-        return false;
-    }
-    
-    @Override
-    public int getChildrenCount() {
-        return 3;
     }
 
     public String toString() {

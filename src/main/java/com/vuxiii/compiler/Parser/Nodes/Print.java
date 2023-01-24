@@ -4,38 +4,18 @@ import java.util.Optional;
 
 import com.vuxiii.LR.Records.Term;
 import com.vuxiii.Visitor.VisitorBase;
-import com.vuxiii.compiler.Visitors.ASTNode;
+import com.vuxiii.compiler.VisitorPattern.Annotations.VisitNumber;
+import com.vuxiii.compiler.VisitorPattern.Visitors.ASTNode;
 
 public class Print extends ASTNode {
 
-    public final ASTNode value;
-
-    public final Term term;
+    @VisitNumber( number = 1 ) public final ASTNode value;
 
     public Print( Term term, ASTNode value ) {
+        super( term ); 
         this.value = value;
 
-        this.term = term;
-    }
-
-    @Override
-    public void accept( VisitorBase visitor ) {
-        accept1Child(visitor);
-    }
-
-    @Override
-    public Term getTerm() {
-        return term;
-    }
-
-    @Override
-    public boolean isLeaf() {
-        return false;
-    }
-    
-    @Override
-    public int getChildrenCount() {
-        return 1;
+        super.setup_ASTNodeQueue();
     }
 
     public String toString() {
