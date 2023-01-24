@@ -38,7 +38,10 @@ The main goal is to provide different scoping techniques (Static Scoping and Dyn
 Other than the above, my aim is to have as much fun as possible while developing this compiler.
 
 ## How to compile & run
-To be able to compile and run this compiler yourself (or for myself in the future when I have forgotten how to do it :S), you need to download the dependencies listed above (Parsley and Regex), and install them on your local machine with maven: `mvn clean install compile package`. 
+~~To be able to compile and run this compiler yourself (or for myself in the future when I have forgotten how to do it :S), you need to download the dependencies listed above (Parsley and Regex), and install them on your local machine with maven: `mvn clean install compile package`.~~
+
+The above should no longer be needed. I think I have successfully published the dependencies as a package to github's maven repo. I might be wrong. Try cloning this repo, and run `mvn install`. It should work.
+
 For this project I am using `Java 17`
 
 ---

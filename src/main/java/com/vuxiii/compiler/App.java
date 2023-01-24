@@ -1,13 +1,11 @@
 package com.vuxiii.compiler;
 
-import com.vuxiii.Regex.Regex;
 import com.vuxiii.compiler.Lexer.Lexer;
 import com.vuxiii.compiler.Parser.Parser;
 import com.vuxiii.compiler.Visitors.ASTPrinter;
 
 import java.util.List;
 
-import com.vuxiii.LR.Grammar;
 import com.vuxiii.LR.Records.ASTToken;
 import com.vuxiii.LR.Settings;
 
@@ -38,8 +36,7 @@ public final class App {
         //     print(a);
         // """;
         // input = """
-        //     a = 3;
-        //     b = 5;
+        //     print(2+4);
         // """;
         
         // [[ Tokenizer ]]
@@ -57,9 +54,9 @@ public final class App {
         // Debug...
 
         ASTPrinter printer = new ASTPrinter();
-        System.out.println( "============".repeat(3));
         ast.accept(printer);
-        System.out.println( "============".repeat(3));
+
+        System.out.println( printer.get_AST() );
 
         // [[ Symbol Collecting ]]
 
