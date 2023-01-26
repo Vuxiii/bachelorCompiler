@@ -31,6 +31,9 @@ public class Lexer {
         reg.addRegex( ";",                      matchInfo -> TokenConstructor.construct( matchInfo, TokenType.SEMICOLON ) );
         reg.addRegex( "=",                      matchInfo -> TokenConstructor.construct( matchInfo, TokenType.EQUAL ) );
         reg.addRegex( "+",                      matchInfo -> TokenConstructor.construct( matchInfo, TokenType.PLUS ) );
+        reg.addRegex( "\\-",                      matchInfo -> TokenConstructor.construct( matchInfo, TokenType.MINUS ) );
+        reg.addRegex( "\\*",                    matchInfo -> TokenConstructor.construct( matchInfo, TokenType.TIMES ) );
+        reg.addRegex( "/",                      matchInfo -> TokenConstructor.construct( matchInfo, TokenType.DIVISION ) );
         reg.addRegex( "print",                  matchInfo -> TokenConstructor.construct( matchInfo, TokenType.PRINT ) );
         reg.addRegex( "\\(",                    matchInfo -> TokenConstructor.construct( matchInfo, TokenType.LEFT_PARENTHESIS ) );
         reg.addRegex( "\\)",                    matchInfo -> TokenConstructor.construct( matchInfo, TokenType.RIGHT_PARENTHESIS ) );

@@ -11,7 +11,7 @@ import com.vuxiii.compiler.VisitorPattern.Visitors.ASTNode;
 public class Assignment extends ASTNode {
 
     @VisitNumber( number = 1 ) public final LexIdent id;
-    @VisitNumber( number = 2 ) public final ASTNode value;
+    @VisitNumber( number = 2 ) public ASTNode value;
 
     public Assignment( Term term, LexIdent id, ASTNode value ) {
         super( term ); 
@@ -25,22 +25,22 @@ public class Assignment extends ASTNode {
     }
 
     @Override
-    protected Optional<ASTNode> getChild1() {
+    public Optional<ASTNode> getChild1() {
         return Optional.of(id);
     }
 
     @Override
-    protected Optional<ASTNode> getChild2() {
+    public Optional<ASTNode> getChild2() {
         return Optional.of(value);
     }
 
     @Override
-    protected Optional<ASTNode> getChild3() {
+    public Optional<ASTNode> getChild3() {
         return Optional.empty();
     }
 
     @Override
-    protected Optional<ASTNode> getChild4() {
+    public Optional<ASTNode> getChild4() {
         return Optional.empty();
     }
 

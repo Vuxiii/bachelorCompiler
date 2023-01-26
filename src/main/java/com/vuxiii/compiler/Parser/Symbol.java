@@ -12,10 +12,18 @@ public class Symbol {
     public static final NonTerminal n_StatementList = new NonTerminal( "STATEMENT_LIST" );
     public static final NonTerminal n_Assignment = new NonTerminal( "ASSIGNMENT" );
     public static final NonTerminal n_Print = new NonTerminal( "PRINT" );
+    public static final NonTerminal n_Expression_Arithmetic = new NonTerminal( "ARITHMETIC_EXPRESSION" );
+
+    // Arithmetic
+    public static final NonTerminal n_Term = new NonTerminal( "TERM" );
+    public static final NonTerminal n_Value = new NonTerminal( "VALUE" );
+    public static final NonTerminal n_Factor = new NonTerminal( "FACTOR" );
 
 
     public static final Terminal t_Plus = new Terminal( "+" );
     public static final Terminal t_Minus = new Terminal( "-" );
+    public static final Terminal t_Times = new Terminal( "*" );
+    public static final Terminal t_Division = new Terminal( "/" );
     public static final Terminal t_Equals = new Terminal( "=" );
     public static final Terminal t_Identifier = new Terminal( "id" );
     public static final Terminal t_Integer = new Terminal( "integer" );

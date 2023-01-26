@@ -3,6 +3,7 @@ package com.vuxiii.compiler.VisitorPattern.Visitors;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 import java.util.Comparator;
 import java.util.Optional;
 import java.util.PriorityQueue;
@@ -94,26 +95,44 @@ public abstract class ASTNode implements ASTToken {
      * This method returns the first child of this node.
      * @return The first child contained in this node
      */
-    protected abstract Optional<ASTNode> getChild1();
+    public Optional<ASTNode> getChild1() { 
+        return Optional.empty(); 
+    }
 
     /**
      * This method returns the second child of this node.
      * @return The second child contained in this node
      */
-    protected abstract Optional<ASTNode> getChild2();
+    public Optional<ASTNode> getChild2() { 
+        return Optional.empty(); 
+    }
 
     /**
      * This method returns the third child of this node.
      * @return The third child contained in this node
      */
-    protected abstract Optional<ASTNode> getChild3();
+    public Optional<ASTNode> getChild3() { 
+        return Optional.empty(); 
+    }
 
     /**
      * This method returns the fourth child of this node.
      * @return The fourth child contained in this node
      */
-    protected abstract Optional<ASTNode> getChild4();
+    public Optional<ASTNode> getChild4() { 
+        return Optional.empty(); 
+    }
 
+    /**
+     * This method checks if this object has the correct type to be passed to the given method.
+     * @param method Method to the first parameter for correct type.
+     * @return True if this object can be passed as the method's first argument. 
+     */
+    private boolean hasCorrectParameterType( Method method ) {
+        Class<?>[] param_type = method.getParameterTypes();
+        if ( param_type.length != 1 ) return false;
+        return param_type[0].isAssignableFrom( this.getClass() );
+    }
     
     @Override
     public void accept( VisitorBase visitor ) {
@@ -132,6 +151,8 @@ public abstract class ASTNode implements ASTToken {
         for ( Method method : methods ) {
             VisitorPattern visitorPattern = method.getAnnotation( VisitorPattern.class );
             if ( visitorPattern == null ) continue;
+            // Ensure correct type.
+            if ( !hasCorrectParameterType( method ) ) continue;
 
             switch (visitorPattern.when()) {
                 case AFTER_CHILD: {
@@ -176,6 +197,7 @@ public abstract class ASTNode implements ASTToken {
                 // Run all methods that are annotated to be run before visiting a child
                 for ( Method method : beforeMethodQueue ) {
                     // System.out.println( "Before: Invoking '" + method.getName() + "' on visitor '" + visitor.getClass().getSimpleName() + "' with node-parameter '" + this.getPrintableName() + "'" );
+                    
                     methodFailure = method;
                     method.invoke( visitor, this );
                 }
@@ -184,7 +206,8 @@ public abstract class ASTNode implements ASTToken {
                 
 
                 // Run all methods that are annotated to be run after visiting a child
-                for ( Method method : afterMethodQueue ) {
+                for ( Method method : afterMethodQueue ) {     
+                    
                     // System.out.println( "After: Invoking '" + method.getName() + "' on visitor '" + visitor.getClass().getSimpleName() + "' with node-parameter '" + this.getPrintableName() + "'" );
                     methodFailure = method;
                     method.invoke( visitor, this );
@@ -193,16 +216,19 @@ public abstract class ASTNode implements ASTToken {
 
             // Run all methods that are annotated to be run when exiting a node.
             for ( Method method : exitMethodQueue ){
+                
                 // System.out.println( "Exit: Invoking '" + method.getName() + "' on visitor '" + visitor.getClass().getSimpleName() + "' with node-parameter '" + this.getPrintableName() + "'" );
                 methodFailure = method;
                 method.invoke( visitor, this );
             }
 
         } catch (IllegalArgumentException | IllegalAccessException e ) {
-            System.out.println( "--[[ Visitor Error! ]]--\nTried to pass the visitor '" + visitor.getClass().getSimpleName() + "' to node '" + fieldFailure.getName() + "' in class '" + this.getClass().getSimpleName() + "', but failed for some reason.\nExiting!" );
+            System.out.println( "--[[ Visitor Error! ]]--\nTried to pass the visitor '" + visitor.getClass().getSimpleName() + "' to node '" + (fieldFailure == null ? "fieldFailure is not assigned" : fieldFailure.getName()) + "' in class '" + this.getClass().getSimpleName() + "', but failed for some reason.\nExiting!" );
+            e.printStackTrace();
             System.exit(-1);
         } catch (InvocationTargetException e) {
             System.out.println( "--[[ Visitor Error! ]]--\nTried to invoke the method '" + methodFailure.getName() + "' on visitor '" + visitor.getClass().getName() + "' in class '" + this.getClass().getSimpleName() + "', but failed for some reason.\nExiting!" );
+            e.printStackTrace();
             System.exit(-1);
         }
     }

@@ -3,15 +3,14 @@ package com.vuxiii.compiler.Parser.Nodes;
 import java.util.Optional;
 
 import com.vuxiii.LR.Records.Term;
-import com.vuxiii.Visitor.VisitorBase;
 import com.vuxiii.compiler.VisitorPattern.Annotations.VisitNumber;
 import com.vuxiii.compiler.VisitorPattern.Visitors.ASTNode;
 
 public class BinaryOperation extends ASTNode {
 
-    @VisitNumber( number = 2 ) public final ASTNode left;
-    @VisitNumber( number = 3 ) public final ASTNode right;
-    @VisitNumber( number = 1 ) public final ASTNode operator;
+    @VisitNumber( number = 1 ) public ASTNode left;
+    @VisitNumber( number = 3 ) public ASTNode right;
+    @VisitNumber( number = 0 ) public final ASTNode operator;
 
     public final BinaryOperationKind kind;
 
@@ -22,7 +21,7 @@ public class BinaryOperation extends ASTNode {
         this.kind = kind;
         this.operator = operator;
         super.setup_ASTNodeQueue();
-
+        
     }
 
     public String toString() {
@@ -30,22 +29,22 @@ public class BinaryOperation extends ASTNode {
     }
 
     @Override
-    protected Optional<ASTNode> getChild1() {
+    public Optional<ASTNode> getChild1() {
         return Optional.of(operator);
     }
 
     @Override
-    protected Optional<ASTNode> getChild2() {
+    public Optional<ASTNode> getChild2() {
         return Optional.of(left);
     }
 
     @Override
-    protected Optional<ASTNode> getChild3() {
+    public Optional<ASTNode> getChild3() {
         return Optional.of(right);
     }
 
     @Override
-    protected Optional<ASTNode> getChild4() {
+    public Optional<ASTNode> getChild4() {
         return Optional.empty();
     }
 

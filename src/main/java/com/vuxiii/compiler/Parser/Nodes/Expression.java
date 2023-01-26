@@ -9,7 +9,7 @@ import com.vuxiii.compiler.VisitorPattern.Visitors.ASTNode;
 
 public class Expression extends ASTNode {
 
-    @VisitNumber( number = 1 ) public final ASTNode node;
+    @VisitNumber( number = 1 ) public ASTNode node;
 
     public Expression( Term term, ASTNode node ) {
         super( term ); 
@@ -21,22 +21,22 @@ public class Expression extends ASTNode {
     }
 
     @Override
-    protected Optional<ASTNode> getChild1() {
+    public Optional<ASTNode> getChild1() {
         return Optional.of(node);
     }
 
     @Override
-    protected Optional<ASTNode> getChild2() {
+    public Optional<ASTNode> getChild2() {
         return Optional.empty();
     }
 
     @Override
-    protected Optional<ASTNode> getChild3() {
+    public Optional<ASTNode> getChild3() {
         return Optional.empty();
     }
 
     @Override
-    protected Optional<ASTNode> getChild4() {
+    public Optional<ASTNode> getChild4() {
         return Optional.empty();
     }
 

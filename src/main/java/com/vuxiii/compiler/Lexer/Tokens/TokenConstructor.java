@@ -6,11 +6,12 @@ import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexEqual;
 import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexIdent;
 import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexInt;
 import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexLParen;
-import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexPlus;
+import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexOperator;
 import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexPrint;
 import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexRParen;
 import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexSemicolon;
 import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexType;
+import com.vuxiii.compiler.Parser.Symbol;
 
 public class TokenConstructor {
     public static ASTToken construct( MatchInfo matchInfo, TokenType type ) {
@@ -33,9 +34,17 @@ public class TokenConstructor {
             case RIGHT_PARENTHESIS: {
                 return new LexRParen( matchInfo );
             }
-            case PLUS: {
-                return new LexPlus( matchInfo );
-
+            case PLUS:  {
+                return new LexOperator( matchInfo, Symbol.t_Plus, type );
+            }
+            case MINUS: {
+                return new LexOperator( matchInfo, Symbol.t_Minus, type );
+            }
+            case DIVISION:  {
+                return new LexOperator( matchInfo, Symbol.t_Division, type );
+            }
+            case TIMES: {
+                return new LexOperator( matchInfo, Symbol.t_Times, type );
             }
             case PRINT: {
                 return new LexPrint( matchInfo );

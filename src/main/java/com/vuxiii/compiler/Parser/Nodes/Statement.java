@@ -38,12 +38,12 @@ public class Statement extends ASTNode {
     }
 
     @Override
-    protected Optional<ASTNode> getChild1() {
+    public Optional<ASTNode> getChild1() {
         return Optional.of(node);
     }
 
     @Override
-    protected Optional<ASTNode> getChild2() {
+    public Optional<ASTNode> getChild2() {
         if ( next.isPresent() )
             return Optional.of( next.get() );
 
@@ -51,12 +51,12 @@ public class Statement extends ASTNode {
     }
 
     @Override
-    protected Optional<ASTNode> getChild3() {
+    public Optional<ASTNode> getChild3() {
         return Optional.empty();
     }
 
     @Override
-    protected Optional<ASTNode> getChild4() {
+    public Optional<ASTNode> getChild4() {
         return Optional.empty();
     }
 

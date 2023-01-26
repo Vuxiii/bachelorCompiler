@@ -29,26 +29,6 @@ public class LexType extends ASTNode {
     }
 
     @Override
-    protected Optional<ASTNode> getChild1() {
-        return Optional.empty();
-    }
-
-    @Override
-    protected Optional<ASTNode> getChild2() {
-        return Optional.empty();
-    }
-
-    @Override
-    protected Optional<ASTNode> getChild3() {
-        return Optional.empty();
-    }
-
-    @Override
-    protected Optional<ASTNode> getChild4() {
-        return Optional.empty();
-    }
-
-    @Override
     public String getPrintableName() {
         return "Type: " + type;
     }

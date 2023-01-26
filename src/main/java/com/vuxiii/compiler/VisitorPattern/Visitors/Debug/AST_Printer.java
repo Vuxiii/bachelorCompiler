@@ -1,4 +1,4 @@
-package com.vuxiii.compiler.VisitorPattern.Visitors;
+package com.vuxiii.compiler.VisitorPattern.Visitors.Debug;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -7,8 +7,9 @@ import java.util.Optional;
 import com.vuxiii.Visitor.VisitorBase;
 import com.vuxiii.compiler.VisitorPattern.VisitOrder;
 import com.vuxiii.compiler.VisitorPattern.Annotations.VisitorPattern;
+import com.vuxiii.compiler.VisitorPattern.Visitors.ASTNode;
 
-public class ASTPrinter extends VisitorBase {
+public class AST_Printer extends VisitorBase {
 
     private final String bar_with_child   = "├";
     private final String bar_end          = "└";
@@ -39,7 +40,7 @@ public class ASTPrinter extends VisitorBase {
      * @param token The current node in the AST
      */
     @VisitorPattern( when = VisitOrder.ENTER_NODE, order = 1 )
-    public void setup_node( ASTNode token ) {        
+    public void setup_node( ASTNode token ) {
         Optional<ASTNode> maybeParent = get_parent(token);
         if ( maybeParent.isPresent() ) {
             ASTNode parent = maybeParent.get();

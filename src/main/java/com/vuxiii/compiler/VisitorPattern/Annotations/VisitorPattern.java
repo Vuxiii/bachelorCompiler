@@ -13,7 +13,7 @@ import com.vuxiii.compiler.VisitorPattern.VisitOrder;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
-public @interface VisitorPattern {
+public @interface  VisitorPattern {
     // Maybe add some sort of pre and post for children?
     /**
      * This attribute indicates when the method will be called in the Visitor Pattern sequence.

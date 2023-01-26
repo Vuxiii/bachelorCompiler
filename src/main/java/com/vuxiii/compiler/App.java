@@ -2,8 +2,9 @@ package com.vuxiii.compiler;
 
 import com.vuxiii.compiler.Lexer.Lexer;
 import com.vuxiii.compiler.Parser.Parser;
-import com.vuxiii.compiler.VisitorPattern.Visitors.ASTPrinter;
-import com.vuxiii.compiler.VisitorPattern.Visitors.SimplePrinter;
+import com.vuxiii.compiler.VisitorPattern.Visitors.Debug.AST_Printer;
+import com.vuxiii.compiler.VisitorPattern.Visitors.Debug.AST_SimplePrinter;
+import com.vuxiii.compiler.VisitorPattern.Visitors.TreeCollaps.AST_Shrinker;
 
 import java.util.List;
 
@@ -31,14 +32,23 @@ public final class App {
             b=a+5;
             print(a);
         """;
-        // input = """
-        //     a = 3;
-        //     a = a + 4;
-        //     print(a);
-        // """;
-        // input = """
-        //     print(2+4);
-        // """;
+        input = """
+            a = 3;
+            a = a + 4;
+            a = 5 - a;
+            print(a);
+        """;
+        
+        input = """
+            a = 1 + 2 + 3;
+        """;
+        input = """
+            a = ((3 + b) * 2) / 5;
+        """;
+        input = """
+            a = 3 + b * 2 / 5;
+            b = 10;
+        """;
         
         // [[ Tokenizer ]]
         List<ASTToken> tokens = Lexer.lex( input );
@@ -57,12 +67,27 @@ public final class App {
         // SimplePrinter printer = new SimplePrinter();
         // ast.accept(printer);
 
-        ASTPrinter printer = new ASTPrinter();
+        AST_Printer printer = new AST_Printer();
         ast.accept(printer);
 
         System.out.println( printer.get_ascii() );
 
+        // --[[ Cleanup some of the boilerplate from the language ]]--
+
+        AST_Shrinker cleaner = new AST_Shrinker();
+        System.out.println( ast );
+        ast.accept( cleaner );
+        // ast.accept(printer);
+        
+        printer = new AST_Printer();
+        ast.accept( printer );
+        System.out.println( printer.get_ascii() );
+
+
+        System.out.println( ast );
+
         // [[ Symbol Collecting ]]
+
 
 
         // [[ Type Checking ]]
