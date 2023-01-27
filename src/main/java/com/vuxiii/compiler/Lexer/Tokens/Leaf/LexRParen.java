@@ -27,7 +27,7 @@ public class LexRParen extends ASTNode {
 
     @Override
     public String getPrintableName() {
-        return "right_paren: ')'";
+        return "right_paren: ')'" + " ~ Line " + matchInfo.lineNumber();
     }
     
 }

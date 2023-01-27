@@ -29,6 +29,6 @@ public class LexSemicolon extends ASTNode {
 
     @Override
     public String getPrintableName() {
-        return "Semicolon";
+        return "Semicolon" + " ~ Line " + matchInfo.lineNumber();
     }
 }

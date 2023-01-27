@@ -27,7 +27,7 @@ public class LexEqual extends ASTNode {
     }
     @Override
     public String getPrintableName() {
-        return "Equals";
+        return "Equals" + " ~ Line " + matchInfo.lineNumber();
     }
     
 }

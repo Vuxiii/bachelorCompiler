@@ -1,4 +1,4 @@
-package com.vuxiii.compiler.VisitorPattern;
+package com.vuxiii.compiler.VisitorPattern.Annotations;
 
 public enum VisitOrder {
     /**

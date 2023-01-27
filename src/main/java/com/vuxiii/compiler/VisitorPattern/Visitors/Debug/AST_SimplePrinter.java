@@ -1,7 +1,7 @@
 package com.vuxiii.compiler.VisitorPattern.Visitors.Debug;
 
 import com.vuxiii.Visitor.VisitorBase;
-import com.vuxiii.compiler.VisitorPattern.VisitOrder;
+import com.vuxiii.compiler.VisitorPattern.Annotations.VisitOrder;
 import com.vuxiii.compiler.VisitorPattern.Annotations.VisitorPattern;
 import com.vuxiii.compiler.VisitorPattern.Visitors.ASTNode;
 

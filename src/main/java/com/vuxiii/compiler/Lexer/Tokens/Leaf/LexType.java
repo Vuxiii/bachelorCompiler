@@ -30,6 +30,6 @@ public class LexType extends ASTNode {
 
     @Override
     public String getPrintableName() {
-        return "Type: " + type;
+        return "Type: " + type + " ~ Line " + matchInfo.lineNumber();
     }
 }

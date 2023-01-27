@@ -8,9 +8,16 @@ import com.vuxiii.compiler.VisitorPattern.Visitors.ASTNode;
 
 public class BinaryOperation extends ASTNode {
 
-    @VisitNumber( number = 1 ) public ASTNode left;
-    @VisitNumber( number = 3 ) public ASTNode right;
-    @VisitNumber( number = 0 ) public final ASTNode operator;
+
+    @VisitNumber( number = 2 ) 
+    public ASTNode left;
+    
+    @VisitNumber( number = 3 ) 
+    public ASTNode right;
+    
+    @VisitNumber( number = 1 )
+    public final ASTNode operator;
+    
 
     public final BinaryOperationKind kind;
 

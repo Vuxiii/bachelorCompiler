@@ -28,6 +28,6 @@ public class LexIdent extends ASTNode {
 
     @Override
     public String getPrintableName() {
-        return "id: " + name;
+        return "id: " + name + " ~ Line " + matchInfo.lineNumber();
     }
 }

@@ -5,11 +5,12 @@ import java.util.Map;
 import java.util.Optional;
 
 import com.vuxiii.Visitor.VisitorBase;
-import com.vuxiii.compiler.VisitorPattern.VisitOrder;
+import com.vuxiii.compiler.VisitorPattern.Visitor;
+import com.vuxiii.compiler.VisitorPattern.Annotations.VisitOrder;
 import com.vuxiii.compiler.VisitorPattern.Annotations.VisitorPattern;
 import com.vuxiii.compiler.VisitorPattern.Visitors.ASTNode;
 
-public class AST_Printer extends VisitorBase {
+public class AST_Printer extends Visitor {
 
     private final String bar_with_child   = "├";
     private final String bar_end          = "└";
@@ -22,6 +23,9 @@ public class AST_Printer extends VisitorBase {
     private final Map<ASTNode, Integer> parents_remaining_children = new HashMap<>();
 
     private String ast_string = "";
+
+    private final String cyanCode = "\u001B[35m";
+    private final String reset = "\u001B[0m";
 
     /**
      * This method returns the textual representation of the given AST.
@@ -75,7 +79,11 @@ public class AST_Printer extends VisitorBase {
         else
             prefix += bar_with_child;
 
-        ast_string += prefix + child_indicator + token.getPrintableName() + "\n";
+        
+        if ( token.isLeaf() )
+            ast_string += prefix + child_indicator + cyanCode + token.getPrintableName() + reset + "\n";
+        else 
+            ast_string += prefix + child_indicator + token.getPrintableName() + "\n";
     }
 
     /**

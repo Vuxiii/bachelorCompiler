@@ -6,7 +6,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.Comparator;
 import java.util.Optional;
-import java.util.PriorityQueue;
+import java.util.TreeSet;
 
 import com.vuxiii.LR.Records.ASTToken;
 import com.vuxiii.LR.Records.Term;
@@ -19,7 +19,7 @@ public abstract class ASTNode implements ASTToken {
     
     public final Term term;
 
-    private final PriorityQueue<Field> ASTNodeQueue = new PriorityQueue<>( Comparator.comparing( field -> field.getAnnotation( VisitNumber.class ).number() ) );
+    private final TreeSet<Field> ASTNodeQueue = new TreeSet<>( Comparator.comparing( field -> field.getAnnotation( VisitNumber.class ).number(), Comparator.naturalOrder() ) );
     
     private int children_count;
 
@@ -59,8 +59,12 @@ public abstract class ASTNode implements ASTToken {
 
             // System.out.println( field.getName() + ": " + visitNumber.number() );
             ASTNodeQueue.add( field );
+            
         }
         children_count = ASTNodeQueue.size();
+        // System.out.print( "[ " );
+        // ASTNodeQueue.forEach( node -> System.out.print( node.getName() + " " ) );
+        // System.out.println( "]" );
     }
 
     /**
@@ -131,17 +135,20 @@ public abstract class ASTNode implements ASTToken {
     private boolean hasCorrectParameterType( Method method ) {
         Class<?>[] param_type = method.getParameterTypes();
         if ( param_type.length != 1 ) return false;
-        return param_type[0].isAssignableFrom( this.getClass() );
+        
+        // System.out.println( this.getClass() + " == " + param_type[0] + " is ofcourse " + param_type[0].isAssignableFrom( this.getClass() ) );
+        return param_type[0].isAssignableFrom( this.getClass() ) || param_type[0].equals( this.getClass() );
     }
     
     @Override
     public void accept( VisitorBase visitor ) {
+        Comparator<Method> comparator = Comparator.comparing(method -> method.getAnnotation( VisitorPattern.class ).order(), Comparator.naturalOrder() );
         
         // Probably allocate once, and after each new visitor just clear them...
-        PriorityQueue<Method> enterMethodQueue = new PriorityQueue<>( Comparator.comparing( method -> method.getAnnotation( VisitorPattern.class ).order() ) );
-        PriorityQueue<Method> exitMethodQueue = new PriorityQueue<>( Comparator.comparing( method -> method.getAnnotation( VisitorPattern.class ).order() ) );
-        PriorityQueue<Method> beforeMethodQueue = new PriorityQueue<>( Comparator.comparing( method -> method.getAnnotation( VisitorPattern.class ).order() ) );
-        PriorityQueue<Method> afterMethodQueue = new PriorityQueue<>( Comparator.comparing( method -> method.getAnnotation( VisitorPattern.class ).order() ) );
+        TreeSet<Method> enterMethodQueue = new TreeSet<>( comparator );
+        TreeSet<Method> exitMethodQueue = new TreeSet<>( comparator );
+        TreeSet<Method> beforeMethodQueue = new TreeSet<>( comparator );
+        TreeSet<Method> afterMethodQueue = new TreeSet<>( comparator );
 
         // Collect all the methods from the visitor that are marked with the Visitor Pattern
         
@@ -152,7 +159,11 @@ public abstract class ASTNode implements ASTToken {
             VisitorPattern visitorPattern = method.getAnnotation( VisitorPattern.class );
             if ( visitorPattern == null ) continue;
             // Ensure correct type.
-            if ( !hasCorrectParameterType( method ) ) continue;
+            if ( hasCorrectParameterType( method ) == false ){
+                continue;  
+            } else {
+                // System.out.println( this.getPrintableName() + " is applicable to function " + method.getName() + "(" + method.getParameterTypes()[0].getSimpleName() + ")" );
+            }
 
             switch (visitorPattern.when()) {
                 case AFTER_CHILD: {
@@ -201,6 +212,7 @@ public abstract class ASTNode implements ASTToken {
                     methodFailure = method;
                     method.invoke( visitor, this );
                 }
+                
 
                 child.accept( visitor );
                 

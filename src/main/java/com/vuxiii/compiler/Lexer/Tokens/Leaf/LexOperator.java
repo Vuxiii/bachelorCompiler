@@ -31,7 +31,7 @@ public class LexOperator extends ASTNode {
     }
     @Override
     public String getPrintableName() {
-        return operator.name();
+        return operator.name() + " ~ Line " + matchInfo.lineNumber();
     }
     
 }

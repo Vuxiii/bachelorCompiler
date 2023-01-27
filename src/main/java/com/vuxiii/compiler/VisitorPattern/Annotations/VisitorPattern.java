@@ -5,8 +5,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import com.vuxiii.compiler.VisitorPattern.VisitOrder;
-
 /**
  * This Annotation is used to indicate that the following method is 
  * called by the visitor pattern!

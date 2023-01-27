@@ -27,6 +27,6 @@ public class LexPrint extends ASTNode {
 
     @Override
     public String getPrintableName() {
-        return "Print";
+        return "Print" + " ~ Line " + matchInfo.lineNumber();
     }
 }
