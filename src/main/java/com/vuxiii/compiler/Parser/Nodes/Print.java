@@ -9,7 +9,7 @@ import com.vuxiii.compiler.VisitorPattern.Visitors.ASTNode;
 
 public class Print extends ASTNode {
 
-    @VisitNumber( number = 1 ) public final ASTNode value;
+    @VisitNumber( number = 1 ) public ASTNode value;
 
     public Print( Term term, ASTNode value ) {
         super( term ); 

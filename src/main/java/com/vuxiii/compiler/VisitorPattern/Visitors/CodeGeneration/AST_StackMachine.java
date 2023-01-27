@@ -4,8 +4,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Stack;
 
+import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexIdent;
 import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexInt;
+import com.vuxiii.compiler.Parser.Nodes.Assignment;
 import com.vuxiii.compiler.Parser.Nodes.BinaryOperation;
+import com.vuxiii.compiler.Parser.Nodes.Print;
 import com.vuxiii.compiler.VisitorPattern.Visitor;
 import com.vuxiii.compiler.VisitorPattern.Annotations.VisitOrder;
 import com.vuxiii.compiler.VisitorPattern.Annotations.VisitorPattern;
@@ -19,40 +22,51 @@ public class AST_StackMachine extends Visitor {
     @VisitorPattern( when = VisitOrder.ENTER_NODE )
     public void literal_int( LexInt leaf_int ) {
         System.out.println( "Entering leaf: " + leaf_int );
-        code.add( new Instruction( Opcode.PUSH, new OpcodeArgument( leaf_int ), new Comment( "Pushing value " + leaf_int.val ) ) );
+        push( new Instruction( Opcode.PUSH, new Arguments( leaf_int ), new Comment( "Pushing value " + leaf_int.val ) ) );
     }
+
+    // @VisitorPattern( when = VisitOrder.ENTER_NODE )
+    // public void literal_variable( LexIdent leaf_ident ) {
+    //     System.out.println( "Entering leaf: " + leaf_ident );
+    //     push( new Instruction( Opcode.PUSH, new OpcodeArgument( leaf_ident ), new Comment( "Pushing value of " + leaf_ident.name ) ) );
+    // }
 
     @VisitorPattern( when = VisitOrder.EXIT_NODE )
     public void binop_expression( BinaryOperation binop ) {
         System.out.println( binop );
         
+        if ( binop.right.isLeaf() && binop.right instanceof LexIdent )
+            push( new Instruction( Opcode.LOAD_VARIABLE, new Arguments( ((LexIdent)binop.right).name, Register.RCX ), new Comment( "Load variable " + ((LexIdent)binop.right).name ) ) );
+        else
+            push( new Instruction( Opcode.POP, new Arguments( Register.RCX ), new Comment( "Retrieving second argument" ) ) );
+        
+        if ( binop.left.isLeaf() && binop.left instanceof LexIdent )
+            push( new Instruction( Opcode.LOAD_VARIABLE, new Arguments( ((LexIdent)binop.left).name, Register.RBX ), new Comment( "Load variable " + ((LexIdent)binop.left).name ) ) );
+        else
+            push( new Instruction( Opcode.POP, new Arguments( Register.RBX ), new Comment( "Retrieving first argument" ) ) );
+        
+        
+        Opcode opcode = null;
+        Register r1 = Register.RBX; 
+        Register r2 = Register.RCX; 
+        Register target = Register.RAX;
         switch (binop.kind) {
             case PLUS: {
-                code.add( new Instruction( Opcode.POP, new OpcodeArgument( Register.RBX ) ) );
-                code.add( new Instruction( Opcode.POP, new OpcodeArgument( Register.RCX ) ) );
-                code.add( new Instruction( Opcode.ADD, new OpcodeArgument( Register.RBX, Register.RCX, Register.RAX ), new Comment( "RAX" + " = " + binop  ) ) );
-                code.add( new Instruction( Opcode.PUSH, new OpcodeArgument( Register.RAX ) ) );
+                opcode = Opcode.ADD;
             } break;
-            
             case MINUS: {
-                code.add( new Instruction( Opcode.POP, new OpcodeArgument( Register.RBX ) ) );
-                code.add( new Instruction( Opcode.POP, new OpcodeArgument( Register.RCX ) ) );
-                code.add( new Instruction( Opcode.MINUS, new OpcodeArgument( Register.RBX, Register.RCX, Register.RAX ), new Comment( "RAX" + " = " + binop ) ) );
-                code.add( new Instruction( Opcode.PUSH, new OpcodeArgument( Register.RAX ) ) );
+                opcode = Opcode.MINUS;
             } break;
             
             case TIMES: {
-                // code.add( new CodeSection( Operation. ) );
-
+                opcode = Opcode.MULT;
             } break;
             
             case DIVISION: {
-                // code.add( new CodeSection( Operation.DIVISION ) );
-
+                opcode = Opcode.DIV_INTEGER;
             } break;
             
             case MODULO: {
-                // code.add( new CodeSection( Operation.MODULO ) );
 
             } break;
         
@@ -62,5 +76,34 @@ public class AST_StackMachine extends Visitor {
             }break;
         }
 
+        push( new Instruction( opcode, new Arguments( r1, r2, target ), new Comment( target + " = " + binop  ) ) );
+        push( new Instruction( Opcode.PUSH, new Arguments( target ), new Comment( "Storing computed value" ) ) );
     }
+
+
+    @VisitorPattern( when = VisitOrder.EXIT_NODE )
+    public void assign_value_to_var( Assignment assignment_node ) {
+        push( new Instruction( Opcode.POP, new Arguments( Register.RAX ), new Comment( "Fetching value" ) ) );
+        push( new Instruction( Opcode.STORE_VARIABLE, new Arguments( Register.RAX, assignment_node.id.name ), new Comment( "Store in variable " + assignment_node.id.name ) ) );
+
+    }
+
+    @VisitorPattern( when = VisitOrder.EXIT_NODE )
+    public void print( Print print_node ) {
+
+        if ( print_node.value instanceof LexIdent )
+            push( new Instruction( Opcode.LOAD_VARIABLE, new Arguments( ((LexIdent)print_node.value).name, Register.RAX ), new Comment( "Loading value of " + print_node.value ) ) );
+        else 
+            push( new Instruction( Opcode.POP, new Arguments( Register.RAX ), new Comment( "Fetching value " + print_node.value ) ) );
+                
+        push( new Instruction( Opcode.PRINT, new Arguments( Register.RAX ), new Comment( "Printing value of " + print_node.value ) ) );
+
+    }
+
+    private void push( Instruction instruction ) {
+        code.add( instruction );
+    }
+
+
+
 }

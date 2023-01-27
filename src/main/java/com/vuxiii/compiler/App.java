@@ -1,5 +1,6 @@
 package com.vuxiii.compiler;
 
+import com.vuxiii.compiler.InternalInterpreter.Interpreter;
 import com.vuxiii.compiler.Lexer.Lexer;
 import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexIdent;
 import com.vuxiii.compiler.Parser.Parser;
@@ -50,19 +51,18 @@ public final class App {
             a = ((3 + b) * 2) / 5;
         """;
         input = """
+            b = 1;
             a = 3 + b * 2 / 5;
-            b = 10;
+            b = 10 + a;
+            print( a );
+            print( b );
+            print( 45 );
         """;
         
         input = """
-            a = 7 + 13 + 9;
+            a = 7 + 13 + 9 * 2 / 2;
+            print( a );
         """;
-        // Above should give the following assembly code
-
-        // move 1 rbx
-        // move 2 rcx
-        // add rbx rcx -> a
-
         
         // [[ Tokenizer ]]
         List<ASTToken> tokens = Lexer.lex( input );
@@ -120,6 +120,9 @@ public final class App {
             System.out.println( instruction );
         }
 
+        Interpreter interpreter = new Interpreter( generator.code );
+
+        interpreter.run();
 
         // [[ Code Optimization ]]
 

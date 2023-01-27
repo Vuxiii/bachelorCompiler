@@ -4,6 +4,7 @@ import com.vuxiii.Visitor.VisitorBase;
 import com.vuxiii.compiler.Parser.Nodes.Assignment;
 import com.vuxiii.compiler.Parser.Nodes.BinaryOperation;
 import com.vuxiii.compiler.Parser.Nodes.Expression;
+import com.vuxiii.compiler.Parser.Nodes.Print;
 import com.vuxiii.compiler.VisitorPattern.Annotations.VisitOrder;
 import com.vuxiii.compiler.VisitorPattern.Annotations.VisitorPattern;
 import com.vuxiii.compiler.VisitorPattern.Visitors.ASTNode;
@@ -40,5 +41,10 @@ public class AST_Shrinker extends VisitorBase {
     @VisitorPattern( when = VisitOrder.EXIT_NODE, order = 2 )
     public void cleanup_assignment( Assignment assignment ) {
         assignment.value = assignment.value.getChild1().get();
+    }
+
+    @VisitorPattern( when = VisitOrder.EXIT_NODE, order = 2 )
+    public void cleanup_print( Print print_node ) {
+        print_node.value = print_node.value.getChild1().get();
     }
 }

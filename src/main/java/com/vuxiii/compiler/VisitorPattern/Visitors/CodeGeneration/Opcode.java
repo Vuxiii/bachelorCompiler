@@ -18,4 +18,9 @@ public enum Opcode {
     JUMP_GREATER,
     JUMP_GREATER_EQUAL,
     JUMP_EQUAL,
+
+    LOAD_VARIABLE,
+    STORE_VARIABLE,
+
+    PRINT,
 }
