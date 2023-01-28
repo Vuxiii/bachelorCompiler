@@ -9,6 +9,7 @@ import com.vuxiii.compiler.VisitorPattern.Visitors.CodeGeneration.AST_StackMachi
 import com.vuxiii.compiler.VisitorPattern.Visitors.CodeGeneration.Instruction;
 import com.vuxiii.compiler.VisitorPattern.Visitors.Debug.AST_Printer;
 import com.vuxiii.compiler.VisitorPattern.Visitors.Debug.AST_SimplePrinter;
+import com.vuxiii.compiler.VisitorPattern.Visitors.Optimizers.ConstantPropagation;
 import com.vuxiii.compiler.VisitorPattern.Visitors.SymbolCollection.AST_SymbolCollector;
 import com.vuxiii.compiler.VisitorPattern.Visitors.TreeCollaps.AST_Shrinker;
 
@@ -52,12 +53,20 @@ public final class App {
         """;
         input = """
             b = 1;
-            a = 3 + b * (2 / 5);
+            a = 3 + b * (10 / 5);
             b = 10 + a;
             print( a );
             print( b );
             print( 45 );
         """;
+        // input = """
+        //     b = 1;
+        //     a = 3 + 5 * (10 / 5);
+        //     b = 10 + a;
+        //     print( a );
+        //     print( b );
+        //     print( 45 );
+        // """;
         
         // input = """
         //     a = 7 + 13 + 9 * 2 / 2;
@@ -69,7 +78,7 @@ public final class App {
 
 
         Settings.showGrammar = true;
-        Settings.showParsingTable = true;
+        Settings.showParsingTable = false;
         // [[ Parser ]]
         
         ASTToken ast = Parser.getAST( tokens );
@@ -99,6 +108,16 @@ public final class App {
 
         line_break();
 
+        ConstantPropagation cp = new ConstantPropagation();
+        do {
+            cp.run_again = false;
+            ast.accept( cp );
+        } while ( cp.run_again );
+
+        printer = new AST_Printer();
+        ast.accept( printer );
+        System.out.println( printer.get_ascii() );
+
         // [[ Symbol Collecting ]]
         AST_SymbolCollector symbolCollector = new AST_SymbolCollector();
         ast.accept( symbolCollector );
@@ -121,7 +140,9 @@ public final class App {
         AST_StackMachine generator = new AST_StackMachine();
         ast.accept(generator);
 
-        System.out.println();
+        System.out.println( "Internal Low-Level Representation");
+
+
 
         line_break();
         for ( Instruction instruction : generator.code ) {
