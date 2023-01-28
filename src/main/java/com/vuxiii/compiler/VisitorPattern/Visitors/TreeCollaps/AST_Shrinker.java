@@ -29,6 +29,8 @@ public class AST_Shrinker extends VisitorBase {
         if ( binop.right instanceof Expression )
             binop.right = binop.right.getChild1().get();
 
+        current = binop;
+
     }
 
     @VisitorPattern( when = VisitOrder.EXIT_NODE, order = 4 )

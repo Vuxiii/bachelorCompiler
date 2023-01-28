@@ -24,8 +24,8 @@ public class AST_Printer extends Visitor {
 
     private String ast_string = "";
 
-    private final String cyanCode = "\u001B[35m";
-    private final String reset = "\u001B[0m";
+    private static final String cyanCode = "\u001B[35m";
+    private static final String reset = "\u001B[0m";
 
     /**
      * This method returns the textual representation of the given AST.

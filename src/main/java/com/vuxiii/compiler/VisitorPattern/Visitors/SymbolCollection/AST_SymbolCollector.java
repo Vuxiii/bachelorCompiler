@@ -8,7 +8,6 @@ import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexIdent;
 import com.vuxiii.compiler.Parser.Nodes.Assignment;
 import com.vuxiii.compiler.VisitorPattern.Annotations.VisitOrder;
 import com.vuxiii.compiler.VisitorPattern.Annotations.VisitorPattern;
-import com.vuxiii.compiler.VisitorPattern.Visitors.ASTNode;
 
 public class AST_SymbolCollector extends VisitorBase {
     
@@ -19,7 +18,6 @@ public class AST_SymbolCollector extends VisitorBase {
     public void collect_variable( Assignment assignment_node ) {
 
         variables.add( assignment_node.id );
-        
 
     }
 

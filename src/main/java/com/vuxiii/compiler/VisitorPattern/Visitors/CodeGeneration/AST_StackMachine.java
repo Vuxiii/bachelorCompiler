@@ -21,19 +21,13 @@ public class AST_StackMachine extends Visitor {
 
     @VisitorPattern( when = VisitOrder.ENTER_NODE )
     public void literal_int( LexInt leaf_int ) {
-        System.out.println( "Entering leaf: " + leaf_int );
         push( new Instruction( Opcode.PUSH, new Arguments( leaf_int ), new Comment( "Pushing value " + leaf_int.val ) ) );
     }
 
-    // @VisitorPattern( when = VisitOrder.ENTER_NODE )
-    // public void literal_variable( LexIdent leaf_ident ) {
-    //     System.out.println( "Entering leaf: " + leaf_ident );
-    //     push( new Instruction( Opcode.PUSH, new OpcodeArgument( leaf_ident ), new Comment( "Pushing value of " + leaf_ident.name ) ) );
-    // }
 
     @VisitorPattern( when = VisitOrder.EXIT_NODE )
     public void binop_expression( BinaryOperation binop ) {
-        System.out.println( binop );
+        // System.out.println( binop );
         
         if ( binop.right.isLeaf() && binop.right instanceof LexIdent )
             push( new Instruction( Opcode.LOAD_VARIABLE, new Arguments( ((LexIdent)binop.right).name, Register.RCX ), new Comment( "Load variable " + ((LexIdent)binop.right).name ) ) );

@@ -35,28 +35,28 @@ public class Interpreter {
             
             switch (instruction.opcode) {
                 case ADD: {
-                    register[instruction.arguments.target.i] = register[instruction.arguments.left.i] + register[instruction.arguments.right.i];
+                    register[instruction.arguments.target.i] = register[instruction.arguments.operand_1.i] + register[instruction.arguments.operand_2.i];
                 } break;
                 case MINUS: {
-                    register[instruction.arguments.target.i] = register[instruction.arguments.left.i] - register[instruction.arguments.right.i];
+                    register[instruction.arguments.target.i] = register[instruction.arguments.operand_1.i] - register[instruction.arguments.operand_2.i];
                     
                 } break;
                 case MULT: {
-                    register[instruction.arguments.target.i] = register[instruction.arguments.left.i] * register[instruction.arguments.right.i];
+                    register[instruction.arguments.target.i] = register[instruction.arguments.operand_1.i] * register[instruction.arguments.operand_2.i];
                     
                 } break;
                 case DIV_INTEGER: {
-                    register[instruction.arguments.target.i] = register[instruction.arguments.left.i] / register[instruction.arguments.right.i];
+                    register[instruction.arguments.target.i] = register[instruction.arguments.operand_1.i] / register[instruction.arguments.operand_2.i];
                     
                 } break;
 
 
                 case LOAD_VARIABLE: {
-                    register[instruction.arguments.register.i] = memory.get( instruction.arguments.variable );
+                    register[instruction.arguments.target.i] = memory.get( instruction.arguments.variable );
                 } break;
 
                 case STORE_VARIABLE: {
-                    memory.put( instruction.arguments.variable, register[instruction.arguments.register.i] );
+                    memory.put( instruction.arguments.variable, register[instruction.arguments.operand_1.i] );
                 } break;
                 
                 
@@ -68,15 +68,15 @@ public class Interpreter {
                     if ( instruction.arguments.kind == 2 )
                         stack.push( ((LexInt)instruction.arguments.value).val );
                     else
-                        stack.push( register[instruction.arguments.register.i] );
+                        stack.push( register[instruction.arguments.operand_1.i] );
                 } break;
                 
                 case POP: {
-                    register[instruction.arguments.register.i] = stack.pop();
+                    register[instruction.arguments.operand_1.i] = stack.pop();
                 } break;
                 
                 case PRINT: {
-                    System.out.println( register[instruction.arguments.register.i] );
+                    System.out.println( "\u001B[35m" + register[instruction.arguments.operand_1.i] + "\u001B[0m" );
                 } break;
                 default: {
                     System.out.println( "--[[ Interpreter Error ]]--\nMissing implementation for opcode " + instruction.opcode + "\nExiting!");

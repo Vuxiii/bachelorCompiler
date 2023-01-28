@@ -47,22 +47,22 @@ public final class App {
             a = 5 - a;
             print(a);
         """;
-        input = """
-            a = ((3 + b) * 2) / 5;
+        input = """   
+            a = (3 + 1);
         """;
         input = """
             b = 1;
-            a = 3 + b * 2 / 5;
+            a = 3 + b * (2 / 5);
             b = 10 + a;
             print( a );
             print( b );
             print( 45 );
         """;
         
-        input = """
-            a = 7 + 13 + 9 * 2 / 2;
-            print( a );
-        """;
+        // input = """
+        //     a = 7 + 13 + 9 * 2 / 2;
+        //     print( a );
+        // """;
         
         // [[ Tokenizer ]]
         List<ASTToken> tokens = Lexer.lex( input );
@@ -75,18 +75,21 @@ public final class App {
         ASTToken ast = Parser.getAST( tokens );
 
         System.out.println( ast );
-
+        
+        line_break();
 
         AST_Printer printer = new AST_Printer();
         ast.accept(printer);
         System.out.println( printer.get_ascii() );
 
+        line_break();
         // --[[ Cleanup some of the boilerplate from the language ]]--
 
         AST_Shrinker cleaner = new AST_Shrinker();
         System.out.println( ast );
         ast.accept( cleaner );
         
+        line_break();
         
         printer = new AST_Printer();
         ast.accept( printer );
@@ -94,16 +97,20 @@ public final class App {
     
         System.out.println( ast );
 
+        line_break();
+
         // [[ Symbol Collecting ]]
         AST_SymbolCollector symbolCollector = new AST_SymbolCollector();
         ast.accept( symbolCollector );
 
         List<LexIdent> variables = symbolCollector.get_variables();
 
+        line_break();
+
         System.out.println( "Variables in program:" );
         variables.forEach( System.out::println );
 
-        
+        line_break();
 
         // [[ Type Checking ]]
 
@@ -116,17 +123,27 @@ public final class App {
 
         System.out.println();
 
+        line_break();
         for ( Instruction instruction : generator.code ) {
             System.out.println( instruction );
         }
+
+        line_break();
+        System.out.println( "Running interpreter on the above code" );
 
         Interpreter interpreter = new Interpreter( generator.code );
 
         interpreter.run();
 
+        line_break();
+
         // [[ Code Optimization ]]
 
         // [[ Code Emit ]]
         
+    }
+
+    private static void line_break() {
+        System.out.println( "=".repeat(79) );
     }
 }
