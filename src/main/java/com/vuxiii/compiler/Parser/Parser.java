@@ -7,7 +7,6 @@ import com.vuxiii.LR.Grammar;
 import com.vuxiii.LR.LRParser;
 import com.vuxiii.LR.ParseTable;
 import com.vuxiii.LR.Records.ASTToken;
-import com.vuxiii.compiler.Lexer.Tokens.ConcreteType;
 import com.vuxiii.compiler.Lexer.Tokens.TokenType;
 import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexIdent;
 import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexLiteral;

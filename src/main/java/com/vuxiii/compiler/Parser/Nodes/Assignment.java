@@ -3,7 +3,6 @@ package com.vuxiii.compiler.Parser.Nodes;
 import java.util.Optional;
 
 import com.vuxiii.LR.Records.Term;
-import com.vuxiii.Visitor.VisitorBase;
 import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexIdent;
 import com.vuxiii.compiler.VisitorPattern.Annotations.VisitNumber;
 import com.vuxiii.compiler.VisitorPattern.Visitors.ASTNode;

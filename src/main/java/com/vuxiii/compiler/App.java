@@ -1,23 +1,15 @@
 package com.vuxiii.compiler;
 
-import com.vuxiii.compiler.InternalInterpreter.Interpreter;
 import com.vuxiii.compiler.Lexer.Lexer;
-import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexIdent;
 import com.vuxiii.compiler.Parser.Parser;
-// import com.vuxiii.compiler.VisitorPattern.Visitors.CodeGeneration.AST_CodeGenerator;
 import com.vuxiii.compiler.VisitorPattern.Visitors.CodeGeneration.AST_StackMachine;
 import com.vuxiii.compiler.VisitorPattern.Visitors.CodeGeneration.Instruction;
 import com.vuxiii.compiler.VisitorPattern.Visitors.Debug.AST_Printer;
-import com.vuxiii.compiler.VisitorPattern.Visitors.Debug.AST_SimplePrinter;
-import com.vuxiii.compiler.VisitorPattern.Visitors.Optimizers.ConstantPropagation;
 import com.vuxiii.compiler.VisitorPattern.Visitors.SymbolCollection.AST_SymbolCollector;
 import com.vuxiii.compiler.VisitorPattern.Visitors.SymbolCollection.Scope;
 import com.vuxiii.compiler.VisitorPattern.Visitors.TreeCollaps.AST_Shrinker;
 
-import java.util.Iterator;
 import java.util.List;
-import java.util.PriorityQueue;
-import java.util.TreeSet;
 
 import com.vuxiii.LR.Records.ASTToken;
 import com.vuxiii.LR.Settings;

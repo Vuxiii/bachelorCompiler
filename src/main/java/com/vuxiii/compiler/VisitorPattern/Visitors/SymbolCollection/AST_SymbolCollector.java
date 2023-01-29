@@ -2,13 +2,11 @@ package com.vuxiii.compiler.VisitorPattern.Visitors.SymbolCollection;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Stack;
 
 import com.vuxiii.Visitor.VisitorBase;
 import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexIdent;
 import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexLiteral;
 import com.vuxiii.compiler.Parser.Nodes.Argument;
-import com.vuxiii.compiler.Parser.Nodes.Assignment;
 import com.vuxiii.compiler.Parser.Nodes.Capture;
 import com.vuxiii.compiler.Parser.Nodes.Declaration;
 import com.vuxiii.compiler.Parser.Nodes.ScopeNode;

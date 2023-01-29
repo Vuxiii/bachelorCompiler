@@ -5,7 +5,6 @@ import java.util.Optional;
 import com.vuxiii.LR.Records.Term;
 import com.vuxiii.compiler.VisitorPattern.Annotations.VisitNumber;
 import com.vuxiii.compiler.VisitorPattern.Visitors.ASTNode;
-import com.vuxiii.compiler.VisitorPattern.Visitors.SymbolCollection.Scope;
 
 public class ScopeNode extends ASTNode {
 

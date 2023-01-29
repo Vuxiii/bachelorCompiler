@@ -1,8 +1,6 @@
 package com.vuxiii.compiler.VisitorPattern.Visitors.CodeGeneration;
 
 import java.util.LinkedList;
-import java.util.List;
-import java.util.Stack;
 
 import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexIdent;
 import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexLiteral;
@@ -12,7 +10,6 @@ import com.vuxiii.compiler.Parser.Nodes.Print;
 import com.vuxiii.compiler.VisitorPattern.Visitor;
 import com.vuxiii.compiler.VisitorPattern.Annotations.VisitOrder;
 import com.vuxiii.compiler.VisitorPattern.Annotations.VisitorPattern;
-import com.vuxiii.compiler.VisitorPattern.Visitors.ASTNode;
 
 public class AST_StackMachine extends Visitor {
     
