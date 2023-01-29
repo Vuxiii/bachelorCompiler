@@ -38,6 +38,12 @@ public class Lexer {
         reg.addRegex( "print",                            matchInfo -> TokenConstructor.construct( matchInfo, TokenType.PRINT ) );
         reg.addRegex( "\\(",                              matchInfo -> TokenConstructor.construct( matchInfo, TokenType.LEFT_PARENTHESIS ) );
         reg.addRegex( "\\)",                              matchInfo -> TokenConstructor.construct( matchInfo, TokenType.RIGHT_PARENTHESIS ) );
+        reg.addRegex( "\\[",                              matchInfo -> TokenConstructor.construct( matchInfo, TokenType.LEFT_BRACKET ) );
+        reg.addRegex( "\\]",                              matchInfo -> TokenConstructor.construct( matchInfo, TokenType.RIGHT_BRACKET ) );
+        reg.addRegex( "\\{",                              matchInfo -> TokenConstructor.construct( matchInfo, TokenType.LEFT_CURLY ) );
+        reg.addRegex( "\\}",                              matchInfo -> TokenConstructor.construct( matchInfo, TokenType.RIGHT_CURLY ) );
+        reg.addRegex( "\\.",                              matchInfo -> TokenConstructor.construct( matchInfo, TokenType.DOT ) );
+        reg.addRegex( "\\,",                              matchInfo -> TokenConstructor.construct( matchInfo, TokenType.COMMA ) );
         // reg.addRegex( "[:alpha:]([:alpha:]|[:digit:])*", in -> new LexIdent( in ) );
         reg.addRegex( "[:alpha:]([:alpha:]|[:digit:])*", 
                                                           matchInfo -> TokenConstructor.construct( matchInfo, TokenType.IDENTIFIER ), 99999999 );

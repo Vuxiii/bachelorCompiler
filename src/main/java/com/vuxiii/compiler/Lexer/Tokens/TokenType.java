@@ -13,12 +13,18 @@ public enum TokenType {
     IDENTIFIER( Symbol.t_Identifier ),
     LEFT_PARENTHESIS( Symbol.t_LParen ),
     RIGHT_PARENTHESIS( Symbol.t_RParen ),
+    LEFT_BRACKET( Symbol.t_LBracket ),
+    RIGHT_BRACKET( Symbol.t_RBracket ),
+    LEFT_CURLY( Symbol.t_LCurly ),
+    RIGHT_CURLY( Symbol.t_RCurly ),
     PLUS( Symbol.t_Plus ),
     MINUS( Symbol.t_Minus ),
     TIMES( Symbol.t_Times ),
     DIVISION( Symbol.t_Division ),
     PRINT( Symbol.t_Print ),
     SEMICOLON( Symbol.t_Semicolon ),
+    COMMA( Symbol.t_Comma ),
+    DOT( Symbol.t_Dot ),
 
 
     INT( Symbol.t_Integer, ConcreteType.INT ),
@@ -33,7 +39,7 @@ public enum TokenType {
     TokenType( Term term ) {
         this.symbol = term;
     }
-    
+
     TokenType( Term term, ConcreteType type ) {
         this.symbol = term;
         this.literal_type = type;

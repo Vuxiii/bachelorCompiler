@@ -50,16 +50,27 @@ public final class App {
         """;
         input = """   
             a = (3 + 1);
+            [..]{
+                b = 3;
+                print(b);
+            };
+            [ a ] {
+                print(a);
+            };
+            [ a, b ] {
+                print(a);
+            };
+            print(a);
         """;
-        input = """
-            b = 1.0;
-            c = 5.;
-            a = 3 + b * (10 / 5);
-            b = 10 + a;
-            print( a );
-            print( b );
-            print( 45 );
-        """;
+        // input = """
+        //     b = 1.0;
+        //     c = 5.;
+        //     a = 3 + b * (10 / 5);
+        //     b = 10 + a;
+        //     print( a );
+        //     print( b );
+        //     print( 45 );
+        // """;
         // input = """
         //     b = 1;
         //     a = 3 + 5 * (10 / 5);
@@ -77,6 +88,12 @@ public final class App {
         // [[ Tokenizer ]]
         List<ASTToken> tokens = Lexer.lex( input );
 
+        
+        System.out.println( "Tokens:" );
+        
+        tokens.forEach( System.out::println );
+
+        line_break();
 
         Settings.showGrammar = true;
         Settings.showParsingTable = true;

@@ -12,11 +12,15 @@ import com.vuxiii.compiler.Lexer.Tokens.TokenType;
 import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexIdent;
 import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexLiteral;
 import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexOperator;
+import com.vuxiii.compiler.Parser.Nodes.Argument;
+import com.vuxiii.compiler.Parser.Nodes.ArgumentKind;
 import com.vuxiii.compiler.Parser.Nodes.Assignment;
 import com.vuxiii.compiler.Parser.Nodes.BinaryOperation;
 import com.vuxiii.compiler.Parser.Nodes.BinaryOperationKind;
+import com.vuxiii.compiler.Parser.Nodes.Capture;
 import com.vuxiii.compiler.Parser.Nodes.Expression;
 import com.vuxiii.compiler.Parser.Nodes.Print;
+import com.vuxiii.compiler.Parser.Nodes.Scope;
 import com.vuxiii.compiler.Parser.Nodes.Statement;
 import com.vuxiii.compiler.Parser.Nodes.StatementKind;
 import com.vuxiii.compiler.VisitorPattern.Visitors.ASTNode;
@@ -70,6 +74,74 @@ public class Parser {
         // n_Statement -> n_Print
         g.addRuleWithReduceFunction( Symbol.n_Statement, List.of( Symbol.n_Print ), t -> {
             return new Statement( Symbol.n_Statement, (ASTNode)t.get(0), StatementKind.PRINT );
+        });
+
+
+        // --[[ Scopes ]]--
+
+        // n_Statement -> n_Scope
+        g.addRuleWithReduceFunction( Symbol.n_Statement, List.of( Symbol.n_Scope ), t -> {
+            return new Statement( Symbol.n_Statement, (ASTNode)t.get(0), StatementKind.SCOPE );
+        });
+
+        // n_Scope -> n_Capture n_Scope_Block
+        g.addRuleWithReduceFunction( Symbol.n_Scope, List.of( Symbol.n_Capture, Symbol.n_Scope_Block ), t -> {
+            return new Scope( Symbol.n_Scope, (Statement)t.get(1), (Capture)t.get(0) );
+        });
+
+        // n_Scope -> n_Scope_Block
+        g.addRuleWithReduceFunction( Symbol.n_Scope, List.of( Symbol.n_Scope_Block ), t -> {
+            return new Scope( Symbol.n_Scope, (Statement)t.get(0) );
+        });
+
+        // n_Scope_Block -> t_LCurly n_StatementList t_RCurly
+        g.addRuleWithReduceFunction( Symbol.n_Scope_Block, List.of( Symbol.t_LCurly, Symbol.n_StatementList, Symbol.t_RCurly ), t -> {
+            Statement stm = (Statement)t.get(1);
+            if ( stm.next.isPresent() )
+                return new Statement( Symbol.n_Scope_Block, stm.node, stm.next.get(), stm.kind );
+            else
+                return new Statement( Symbol.n_Scope_Block, stm.node, stm.kind );
+
+        });
+
+
+        // n_Capture -> t_LBracket n_Arg_List t_RBracket
+        g.addRuleWithReduceFunction( Symbol.n_Capture, List.of( Symbol.t_LBracket, Symbol.n_Arg_List, Symbol.t_RBracket ), t -> {
+            return new Capture( Symbol.n_Capture, (Argument)t.get(1) );
+        });
+
+        // n_Capture -> t_LBracket t_Dot t_Dot t_RBracket
+        g.addRuleWithReduceFunction( Symbol.n_Capture, List.of( Symbol.t_LBracket, Symbol.t_Dot, Symbol.t_Dot, Symbol.t_RBracket ), t -> {
+            return new Capture( Symbol.n_Capture );
+        });
+
+
+
+
+
+
+        // --[[ Functions ]]--
+        
+        // n_Arg_List -> n_Arg t_Comma n_Arg_List
+        g.addRuleWithReduceFunction( Symbol.n_Arg_List, List.of( Symbol.n_Arg, Symbol.t_Comma, Symbol.n_Arg_List ), t -> {
+            Argument arg = (Argument)t.get(0);
+            return new Argument( Symbol.n_Arg_List, arg.node, (Argument)t.get(2), arg.kind );
+        });
+
+        // n_Arg_List -> n_Arg
+        g.addRuleWithReduceFunction( Symbol.n_Arg_List, List.of( Symbol.n_Arg ), t -> {
+            Argument arg = (Argument)t.get(0);
+            return new Argument( Symbol.n_Arg_List, arg.node, arg.kind );
+        });
+
+        // n_Arg -> t_Identifier
+        g.addRuleWithReduceFunction( Symbol.n_Arg, List.of( Symbol.t_Identifier ), t -> {
+            return new Argument( Symbol.n_Arg, (ASTNode)t.get(0), ArgumentKind.IDENTIFIER );
+        });
+
+        // n_Arg -> t_Literal
+        g.addRuleWithReduceFunction( Symbol.n_Arg, List.of( Symbol.n_Literal ), t -> {
+            return new Argument( Symbol.n_Arg, (ASTNode)t.get(0), ArgumentKind.LITERAL );
         });
 
 
