@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Stack;
 
 import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexIdent;
-import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexInt;
+import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexLiteral;
 import com.vuxiii.compiler.Parser.Nodes.Assignment;
 import com.vuxiii.compiler.Parser.Nodes.BinaryOperation;
 import com.vuxiii.compiler.Parser.Nodes.Print;
@@ -20,7 +20,7 @@ public class AST_StackMachine extends Visitor {
     public LinkedList<Instruction> code = new LinkedList<>();
 
     @VisitorPattern( when = VisitOrder.ENTER_NODE )
-    public void literal_int( LexInt leaf_int ) {
+    public void literal_int( LexLiteral leaf_int ) {
         push( new Instruction( Opcode.PUSH, new Arguments( leaf_int ), new Comment( "Pushing value " + leaf_int.val ) ) );
     }
 
@@ -61,7 +61,7 @@ public class AST_StackMachine extends Visitor {
             } break;
             
             case MODULO: {
-
+                opcode = Opcode.MODULO;
             } break;
         
             default: {
@@ -70,15 +70,23 @@ public class AST_StackMachine extends Visitor {
             }break;
         }
 
-        push( new Instruction( opcode, new Arguments( r1, r2, target ), new Comment( target + " = " + binop  ) ) );
-        push( new Instruction( Opcode.PUSH, new Arguments( target ), new Comment( "Storing computed value" ) ) );
+        push( new Instruction( opcode, 
+                                    new Arguments( r1, r2, target ), 
+                                    new Comment( target + " = " + binop  ) ) );
+        push( new Instruction( Opcode.PUSH, 
+                                    new Arguments( target ), 
+                                    new Comment( "Storing computed value" ) ) );
     }
 
 
     @VisitorPattern( when = VisitOrder.EXIT_NODE )
     public void assign_value_to_var( Assignment assignment_node ) {
-        push( new Instruction( Opcode.POP, new Arguments( Register.RAX ), new Comment( "Fetching value" ) ) );
-        push( new Instruction( Opcode.STORE_VARIABLE, new Arguments( Register.RAX, assignment_node.id.name ), new Comment( "Store in variable " + assignment_node.id.name ) ) );
+        push( new Instruction( Opcode.POP, 
+                                new Arguments( Register.RAX ), 
+                                new Comment( "Fetching value" ) ) );
+        push( new Instruction( Opcode.STORE_VARIABLE, 
+                                new Arguments( Register.RAX, assignment_node.id.name ), 
+                                new Comment( "Store in variable " + assignment_node.id.name ) ) );
 
     }
 
@@ -86,11 +94,17 @@ public class AST_StackMachine extends Visitor {
     public void print( Print print_node ) {
 
         if ( print_node.value instanceof LexIdent )
-            push( new Instruction( Opcode.LOAD_VARIABLE, new Arguments( ((LexIdent)print_node.value).name, Register.RAX ), new Comment( "Loading value of " + print_node.value ) ) );
+            push( new Instruction( Opcode.LOAD_VARIABLE, 
+                                    new Arguments( ((LexIdent)print_node.value).name, Register.RAX ), 
+                                    new Comment( "Loading value of " + print_node.value ) ) );
         else 
-            push( new Instruction( Opcode.POP, new Arguments( Register.RAX ), new Comment( "Fetching value " + print_node.value ) ) );
+            push( new Instruction( Opcode.POP, 
+                                    new Arguments( Register.RAX ), 
+                                    new Comment( "Fetching value " + print_node.value ) ) );
                 
-        push( new Instruction( Opcode.PRINT, new Arguments( Register.RAX ), new Comment( "Printing value of " + print_node.value ) ) );
+        push( new Instruction( Opcode.PRINT, 
+                                new Arguments( Register.RAX ), 
+                                new Comment( "Printing value of " + print_node.value ) ) );
 
     }
 

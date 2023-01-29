@@ -1,30 +1,34 @@
 package com.vuxiii.compiler.Lexer.Tokens.Leaf;
 
-
 import com.vuxiii.DFANFA.MatchInfo;
+import com.vuxiii.compiler.Lexer.Tokens.ConcreteType;
 import com.vuxiii.compiler.Lexer.Tokens.TokenType;
 import com.vuxiii.compiler.VisitorPattern.Annotations.VisitLeaf;
 import com.vuxiii.compiler.VisitorPattern.Visitors.ASTNode;
 
 @VisitLeaf
-public class LexSemicolon extends ASTNode {
-
+public class LexLiteral extends ASTNode {
+    
+    public final String val;
     public final MatchInfo matchInfo;
 
-    public LexSemicolon( MatchInfo matchInfo, TokenType type ) {
+    public final ConcreteType literal_type;
+
+    public LexLiteral( MatchInfo matchInfo, TokenType type ) {
         super( type.symbol );
+        this.val =  matchInfo.str();
+        this.literal_type = type.literal_type;
         this.matchInfo = matchInfo;
+
         super.setup_ASTNodeQueue();
     }
-    
+
     public String toString() {
-        return "ASTTokenSemicolon: ;";
+        return "Literal: " + val + " :: " + literal_type;
     }
-
-
 
     @Override
     public String getPrintableName() {
-        return "Semicolon" + " ~ Line " + matchInfo.lineNumber();
+        return "Literal: " + val + " :: " + literal_type;
     }
 }

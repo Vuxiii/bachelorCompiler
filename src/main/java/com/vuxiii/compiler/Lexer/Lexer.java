@@ -24,22 +24,23 @@ public class Lexer {
         if ( reg != null )
             return reg;
 
-        reg = new Regex<>("int", matchInfo -> TokenConstructor.construct( matchInfo, TokenType.TYPE_INT ) );
+        reg = new Regex<>("int",                          matchInfo -> TokenConstructor.construct( matchInfo, TokenType.TYPE_INT ) );
 
         // reg.addRegex( "int", in -> new LexType( in ) );
-        reg.addRegex( "[:digit:][:digit:]*",    matchInfo -> TokenConstructor.construct( matchInfo, TokenType.INT ) );
-        reg.addRegex( ";",                      matchInfo -> TokenConstructor.construct( matchInfo, TokenType.SEMICOLON ) );
-        reg.addRegex( "=",                      matchInfo -> TokenConstructor.construct( matchInfo, TokenType.EQUAL ) );
-        reg.addRegex( "+",                      matchInfo -> TokenConstructor.construct( matchInfo, TokenType.PLUS ) );
-        reg.addRegex( "\\-",                      matchInfo -> TokenConstructor.construct( matchInfo, TokenType.MINUS ) );
-        reg.addRegex( "\\*",                    matchInfo -> TokenConstructor.construct( matchInfo, TokenType.TIMES ) );
-        reg.addRegex( "/",                      matchInfo -> TokenConstructor.construct( matchInfo, TokenType.DIVISION ) );
-        reg.addRegex( "print",                  matchInfo -> TokenConstructor.construct( matchInfo, TokenType.PRINT ) );
-        reg.addRegex( "\\(",                    matchInfo -> TokenConstructor.construct( matchInfo, TokenType.LEFT_PARENTHESIS ) );
-        reg.addRegex( "\\)",                    matchInfo -> TokenConstructor.construct( matchInfo, TokenType.RIGHT_PARENTHESIS ) );
+        reg.addRegex( "[:digit:][:digit:]*",              matchInfo -> TokenConstructor.construct( matchInfo, TokenType.INT ) );
+        reg.addRegex( "[:digit:][:digit:]*\\.[:digit:]*", matchInfo -> TokenConstructor.construct( matchInfo, TokenType.DOUBLE ) );
+        reg.addRegex( ";",                                matchInfo -> TokenConstructor.construct( matchInfo, TokenType.SEMICOLON ) );
+        reg.addRegex( "=",                                matchInfo -> TokenConstructor.construct( matchInfo, TokenType.EQUAL ) );
+        reg.addRegex( "+",                                matchInfo -> TokenConstructor.construct( matchInfo, TokenType.PLUS ) );
+        reg.addRegex( "\\-",                              matchInfo -> TokenConstructor.construct( matchInfo, TokenType.MINUS ) );
+        reg.addRegex( "\\*",                              matchInfo -> TokenConstructor.construct( matchInfo, TokenType.TIMES ) );
+        reg.addRegex( "/",                                matchInfo -> TokenConstructor.construct( matchInfo, TokenType.DIVISION ) );
+        reg.addRegex( "print",                            matchInfo -> TokenConstructor.construct( matchInfo, TokenType.PRINT ) );
+        reg.addRegex( "\\(",                              matchInfo -> TokenConstructor.construct( matchInfo, TokenType.LEFT_PARENTHESIS ) );
+        reg.addRegex( "\\)",                              matchInfo -> TokenConstructor.construct( matchInfo, TokenType.RIGHT_PARENTHESIS ) );
         // reg.addRegex( "[:alpha:]([:alpha:]|[:digit:])*", in -> new LexIdent( in ) );
         reg.addRegex( "[:alpha:]([:alpha:]|[:digit:])*", 
-                                                matchInfo -> TokenConstructor.construct( matchInfo, TokenType.IDENTIFIER ), 99999999 );
+                                                          matchInfo -> TokenConstructor.construct( matchInfo, TokenType.IDENTIFIER ), 99999999 );
 
         reg.compile();
         return reg;

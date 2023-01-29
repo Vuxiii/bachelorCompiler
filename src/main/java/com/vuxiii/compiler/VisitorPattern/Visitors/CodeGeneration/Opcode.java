@@ -6,6 +6,7 @@ public enum Opcode {
     MULT,
     DIV,
     DIV_INTEGER,
+    MODULO,
     PUSH,
     POP,
     RETURN,

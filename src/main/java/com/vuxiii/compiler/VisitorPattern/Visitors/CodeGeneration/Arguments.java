@@ -4,8 +4,8 @@ import com.vuxiii.compiler.VisitorPattern.Visitors.ASTNode;
 
 public class Arguments {
     
-    public final Register operand_1;
-    public final Register operand_2;
+    public final Register src_1;
+    public final Register src_2;
     public final Register target;
 
     public final ASTNode value;
@@ -14,55 +14,55 @@ public class Arguments {
 
     public final int kind;
 
-    public Arguments(Register left, Register right, Register target) {
-        this.operand_1 = left;
-        this.operand_2 = right;
+    public Arguments( Register src_1, Register src_2, Register target ) {
+        this.src_1 = src_1;
+        this.src_2 = src_2;
         this.target = target;
         this.value = null;
         this.variable = null;
         kind = 0;
     }
-    public Arguments(Register left, Register target) {
-        this.operand_1 = left;
-        this.operand_2 = null;
+    public Arguments( Register src_1, Register target ) {
+        this.src_1 = src_1;
+        this.src_2 = null;
         this.target = target;
         this.value = null;
         this.variable = null;
         kind = 1;
     }
 
-    public Arguments( ASTNode value ) {
-        this.value = value;
-        this.operand_1 = null;
-        this.operand_2 = null;
+    public Arguments( ASTNode src ) {
+        this.value = src;
+        this.src_1 = null;
+        this.src_2 = null;
         this.target = null;
         this.variable = null;
         kind = 2;
     }
 
-    public Arguments( Register operand_1 ) {
+    public Arguments( Register src_1 ) {
         this.value = null;
-        this.operand_1 = operand_1;
-        this.operand_2 = null;
+        this.src_1 = src_1;
+        this.src_2 = null;
         this.target = null;
         this.variable = null;
         kind = 3;
     }
     
-    public Arguments(Register operand_1, String variable ) {
-        this.operand_1 = operand_1;
-        this.operand_2 = null;
+    public Arguments( Register src_1, String target ) {
+        this.src_1 = src_1;
+        this.src_2 = null;
         this.target = null;
-        this.variable = variable;
+        this.variable = target;
         this.value = null;
         kind = 4;
     }
 
-    public Arguments( String variable, Register target ) {
-        this.operand_1 = null;
-        this.operand_2 = null;
+    public Arguments( String src_1, Register target ) {
+        this.src_1 = null;
+        this.src_2 = null;
         this.target = target;
-        this.variable = variable;
+        this.variable = src_1;
         this.value = null;
         kind = 5;
     }
@@ -71,15 +71,15 @@ public class Arguments {
         if ( kind == 2 ) {
             return value.toString();
         } else if ( kind == 0 ) {
-            return operand_1 + ", " + operand_2 + " -> " + target;
+            return src_1 + ", " + src_2 + " -> " + target;
         } else if (kind == 3 ) {
-            return operand_1.toString();
+            return src_1.toString();
         } else if ( kind == 4 ) {
-            return operand_1  + " -> " + variable;
+            return src_1  + " -> " + variable;
         } else if ( kind == 5 ) {
             return variable + " -> " + target;
         } else {
-            return operand_1 + " -> " + target;
+            return src_1 + " -> " + target;
         }
     }
 }

@@ -52,7 +52,8 @@ public final class App {
             a = (3 + 1);
         """;
         input = """
-            b = 1;
+            b = 1.0;
+            c = 5.;
             a = 3 + b * (10 / 5);
             b = 10 + a;
             print( a );
@@ -78,7 +79,7 @@ public final class App {
 
 
         Settings.showGrammar = true;
-        Settings.showParsingTable = false;
+        Settings.showParsingTable = true;
         // [[ Parser ]]
         
         ASTToken ast = Parser.getAST( tokens );
@@ -108,11 +109,11 @@ public final class App {
 
         line_break();
 
-        ConstantPropagation cp = new ConstantPropagation();
-        do {
-            cp.run_again = false;
-            ast.accept( cp );
-        } while ( cp.run_again );
+        // ConstantPropagation cp = new ConstantPropagation();
+        // do {
+        //     cp.run_again = false;
+        //     ast.accept( cp );
+        // } while ( cp.run_again );
 
         printer = new AST_Printer();
         ast.accept( printer );
@@ -150,13 +151,13 @@ public final class App {
         }
 
         line_break();
-        System.out.println( "Running interpreter on the above code" );
+        // System.out.println( "Running interpreter on the above code" );
 
-        Interpreter interpreter = new Interpreter( generator.code );
+        // Interpreter interpreter = new Interpreter( generator.code );
 
-        interpreter.run();
+        // interpreter.run();
 
-        line_break();
+        // line_break();
 
         // [[ Code Optimization ]]
 

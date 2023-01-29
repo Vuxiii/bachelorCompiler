@@ -5,6 +5,7 @@ import com.vuxiii.LR.Records.Terminal;
 
 public class Symbol {
     
+    // Used under parsing.
     public static final NonTerminal n_Start = new NonTerminal( "START", true );
     public static final NonTerminal n_Expression = new NonTerminal( "EXPRESSION" );
     public static final NonTerminal n_ExpressionList = new NonTerminal( "EXPRESSION_LIST" );
@@ -19,7 +20,10 @@ public class Symbol {
     public static final NonTerminal n_Value = new NonTerminal( "VALUE" );
     public static final NonTerminal n_Factor = new NonTerminal( "FACTOR" );
 
+    public static final NonTerminal n_Literal = new NonTerminal( "LITERAL" );
 
+
+    // Used under lexical analysis. Tokenization.
     public static final Terminal t_Plus = new Terminal( "+" );
     public static final Terminal t_Minus = new Terminal( "-" );
     public static final Terminal t_Times = new Terminal( "*" );
@@ -27,7 +31,9 @@ public class Symbol {
     public static final Terminal t_Equals = new Terminal( "=" );
     public static final Terminal t_Identifier = new Terminal( "id" );
     public static final Terminal t_Integer = new Terminal( "integer" );
-    public static final Terminal t_TypeInt = new Terminal( "type int" );
+    public static final Terminal t_Double = new Terminal( "double" );
+    public static final Terminal t_Type_Int = new Terminal( "type int" );
+    public static final Terminal t_Type_Double = new Terminal( "type double" );
     public static final Terminal t_Semicolon = new Terminal( ";" );
     public static final Terminal t_Dollar = new Terminal( "$", true );
     public static final Terminal t_Print = new Terminal( "print" );

@@ -24,7 +24,7 @@ public class AST_Printer extends Visitor {
 
     private String ast_string = "";
 
-    private static final String cyanCode = "\u001B[35m";
+    private static final String pinkCode = "\u001B[35m";
     private static final String reset = "\u001B[0m";
 
     /**
@@ -81,7 +81,7 @@ public class AST_Printer extends Visitor {
 
         
         if ( token.isLeaf() )
-            ast_string += prefix + child_indicator + cyanCode + token.getPrintableName() + reset + "\n";
+            ast_string += prefix + child_indicator + pinkCode + token.getPrintableName() + reset + "\n";
         else 
             ast_string += prefix + child_indicator + token.getPrintableName() + "\n";
     }
