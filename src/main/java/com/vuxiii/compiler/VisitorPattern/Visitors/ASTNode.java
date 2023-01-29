@@ -52,7 +52,7 @@ public abstract class ASTNode implements ASTToken {
                     if ( opt.isEmpty() ) continue; // The optional is empty, we don't need to add it...
 
                 } catch (IllegalArgumentException | IllegalAccessException e) {
-                    System.out.println( "--[[ Visitor Pattern Error! ]]--\nTried to unwrap '" + field.getName() + "', but failed!\nExiting!");
+                    System.out.println( "\u001B[41m\u001B[37m--[[ Visitor Pattern Error! ]]--\u001B[0m\nTried to unwrap '" + field.getName() + "', but failed!\nExiting!");
                     System.exit(-1);
                 }
             }
@@ -179,7 +179,7 @@ public abstract class ASTNode implements ASTToken {
                     exitMethodQueue.add( method );
                 } break;            
                 default: {
-                    System.out.println( "--[[ Visitor Pattern Error! ]]--\nEnum of type '" + visitorPattern.getClass().getSimpleName() + "' has not been added to the switch statement!\nExiting!" );
+                    System.out.println( "\u001B[41m\u001B[37m--[[ Visitor Pattern Error! ]]--\u001B[0m\nEnum of type '" + visitorPattern.getClass().getSimpleName() + "' has not been added to the switch statement!\nExiting!" );
                     System.exit(-1);
                 } break;
             }
@@ -235,11 +235,11 @@ public abstract class ASTNode implements ASTToken {
             }
 
         } catch (IllegalArgumentException | IllegalAccessException e ) {
-            System.out.println( "--[[ Visitor Error! ]]--\nTried to pass the visitor '" + visitor.getClass().getSimpleName() + "' to node '" + (fieldFailure == null ? "fieldFailure is not assigned" : fieldFailure.getName()) + "' in class '" + this.getClass().getSimpleName() + "', but failed for some reason.\nExiting!" );
+            System.out.println( "\u001B[41m\u001B[37m--[[ Visitor Error! ]]--\u001B[0m\nTried to pass the visitor '" + visitor.getClass().getSimpleName() + "' to node '" + (fieldFailure == null ? "fieldFailure is not assigned" : fieldFailure.getName()) + "' in class '" + this.getClass().getSimpleName() + "', but failed for some reason.\nExiting!" );
             e.printStackTrace();
             System.exit(-1);
         } catch (InvocationTargetException e) {
-            System.out.println( "--[[ Visitor Error! ]]--\nTried to invoke the method '" + methodFailure.getName() + "' on visitor '" + visitor.getClass().getName() + "' in class '" + this.getClass().getSimpleName() + "', but failed for some reason.\nExiting!" );
+            System.out.println( "\u001B[41m\u001B[37m--[[ Visitor Error! ]]--\u001B[0m\nTried to invoke the method '" + methodFailure.getName() + "' on visitor '" + visitor.getClass().getName() + "' in class '" + this.getClass().getSimpleName() + "', but failed for some reason.\nExiting!" );
             e.printStackTrace();
             System.exit(-1);
         }

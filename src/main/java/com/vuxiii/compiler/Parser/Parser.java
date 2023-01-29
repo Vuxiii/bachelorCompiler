@@ -12,15 +12,17 @@ import com.vuxiii.compiler.Lexer.Tokens.TokenType;
 import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexIdent;
 import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexLiteral;
 import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexOperator;
+import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexType;
 import com.vuxiii.compiler.Parser.Nodes.Argument;
 import com.vuxiii.compiler.Parser.Nodes.ArgumentKind;
 import com.vuxiii.compiler.Parser.Nodes.Assignment;
 import com.vuxiii.compiler.Parser.Nodes.BinaryOperation;
 import com.vuxiii.compiler.Parser.Nodes.BinaryOperationKind;
 import com.vuxiii.compiler.Parser.Nodes.Capture;
+import com.vuxiii.compiler.Parser.Nodes.Declaration;
 import com.vuxiii.compiler.Parser.Nodes.Expression;
 import com.vuxiii.compiler.Parser.Nodes.Print;
-import com.vuxiii.compiler.Parser.Nodes.Scope;
+import com.vuxiii.compiler.Parser.Nodes.ScopeNode;
 import com.vuxiii.compiler.Parser.Nodes.Statement;
 import com.vuxiii.compiler.Parser.Nodes.StatementKind;
 import com.vuxiii.compiler.VisitorPattern.Visitors.ASTNode;
@@ -53,26 +55,31 @@ public class Parser {
         });
         
 
-        // n_StatementList -> n_Statement t_Semicolon n_StatementList
-        g.addRuleWithReduceFunction( Symbol.n_StatementList, List.of( Symbol.n_Statement, Symbol.t_Semicolon, Symbol.n_StatementList ), t -> {
+        // n_StatementList -> n_StatementList n_Statement
+        g.addRuleWithReduceFunction( Symbol.n_StatementList, List.of( Symbol.n_Statement, Symbol.n_StatementList ), t -> {
             Statement stm1 = (Statement)t.get(0);
-            Statement stm2 = (Statement)t.get(2);
+            Statement stm2 = (Statement)t.get(1);
             return new Statement( Symbol.n_StatementList, stm1.node, stm2, stm1.kind );
         });
 
-        // n_StatementList -> n_Statement t_Semicolon
-        g.addRuleWithReduceFunction( Symbol.n_StatementList, List.of( Symbol.n_Statement, Symbol.t_Semicolon ), t -> {
+        // n_StatementList -> n_Statement
+        g.addRuleWithReduceFunction( Symbol.n_StatementList, List.of( Symbol.n_Statement ), t -> {
             Statement stm1 = (Statement)t.get(0);
             return new Statement( Symbol.n_StatementList, stm1.node, stm1.kind );
         });
 
-        // n_Statement -> n_Assignment
-        g.addRuleWithReduceFunction( Symbol.n_Statement, List.of( Symbol.n_Assignment ), t -> {
+        // n_Statement -> n_Declaration t_Semicolon
+        g.addRuleWithReduceFunction( Symbol.n_Statement, List.of( Symbol.n_Declaration, Symbol.t_Semicolon ), t -> {
+            return new Statement( Symbol.n_Statement, (ASTNode)t.get(0), StatementKind.DECLARATION );
+        });
+
+        // n_Statement -> n_Assignment t_Semicolon
+        g.addRuleWithReduceFunction( Symbol.n_Statement, List.of( Symbol.n_Assignment, Symbol.t_Semicolon ), t -> {
             return new Statement( Symbol.n_Statement, (ASTNode)t.get(0), StatementKind.ASSIGNMENT );
         });
 
-        // n_Statement -> n_Print
-        g.addRuleWithReduceFunction( Symbol.n_Statement, List.of( Symbol.n_Print ), t -> {
+        // n_Statement -> n_Print t_Semicolon
+        g.addRuleWithReduceFunction( Symbol.n_Statement, List.of( Symbol.n_Print, Symbol.t_Semicolon ), t -> {
             return new Statement( Symbol.n_Statement, (ASTNode)t.get(0), StatementKind.PRINT );
         });
 
@@ -81,17 +88,19 @@ public class Parser {
 
         // n_Statement -> n_Scope
         g.addRuleWithReduceFunction( Symbol.n_Statement, List.of( Symbol.n_Scope ), t -> {
+            // System.out.println( "yay");
+            // System.exit(-1);
             return new Statement( Symbol.n_Statement, (ASTNode)t.get(0), StatementKind.SCOPE );
         });
 
         // n_Scope -> n_Capture n_Scope_Block
         g.addRuleWithReduceFunction( Symbol.n_Scope, List.of( Symbol.n_Capture, Symbol.n_Scope_Block ), t -> {
-            return new Scope( Symbol.n_Scope, (Statement)t.get(1), (Capture)t.get(0) );
+            return new ScopeNode( Symbol.n_Scope, (Statement)t.get(1), (Capture)t.get(0) );
         });
 
         // n_Scope -> n_Scope_Block
         g.addRuleWithReduceFunction( Symbol.n_Scope, List.of( Symbol.n_Scope_Block ), t -> {
-            return new Scope( Symbol.n_Scope, (Statement)t.get(0) );
+            return new ScopeNode( Symbol.n_Scope, (Statement)t.get(0) );
         });
 
         // n_Scope_Block -> t_LCurly n_StatementList t_RCurly
@@ -227,6 +236,21 @@ public class Parser {
         } );
 
 
+
+        // n_Declaration -> t_Let t_Identifier t_Colon n_Type
+        g.addRuleWithReduceFunction( Symbol.n_Declaration, List.of( Symbol.t_Let, Symbol.t_Identifier, Symbol.t_Colon, Symbol.n_Type ), t -> {
+            return new Declaration( Symbol.n_Declaration, (LexIdent)t.get(1), (LexType) ((Expression)t.get(3)).node );
+        });
+
+        
+        // n_Type -> t_Type_Int
+        g.addRuleWithReduceFunction( Symbol.n_Type, List.of( Symbol.t_Type_Int ), t -> {
+            return new Expression( Symbol.n_Type, (LexType)t.get(0)  );
+        });
+        // n_Type -> t_Type_Double
+        g.addRuleWithReduceFunction( Symbol.n_Type, List.of( Symbol.t_Type_Double ), t -> {
+            return new Expression( Symbol.n_Type, (LexType)t.get(0)  );
+        });
 
         // n_Assignment -> t_Identifier t_Equals n_Expression
         g.addRuleWithReduceFunction( Symbol.n_Assignment, List.of( Symbol.t_Identifier, Symbol.t_Equals, Symbol.n_Expression ), t -> {

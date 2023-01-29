@@ -79,7 +79,7 @@ public class Interpreter {
                     System.out.println( "\u001B[35m" + register[instruction.args.src_1.i] + "\u001B[0m" );
                 } break;
                 default: {
-                    System.out.println( "--[[ Interpreter Error ]]--\nMissing implementation for opcode " + instruction.opcode + "\nExiting!");
+                    System.out.println( "\u001B[41m\u001B[37m--[[ Interpreter Error ]]--\u001B[0m\nMissing implementation for opcode " + instruction.opcode + "\nExiting!");
                     System.exit(-1);
                 } break;
             }

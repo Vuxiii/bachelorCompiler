@@ -23,14 +23,16 @@ public enum TokenType {
     DIVISION( Symbol.t_Division ),
     PRINT( Symbol.t_Print ),
     SEMICOLON( Symbol.t_Semicolon ),
+    COLON( Symbol.t_Colon ),
     COMMA( Symbol.t_Comma ),
     DOT( Symbol.t_Dot ),
 
+    LET( Symbol.t_Let ),
 
     INT( Symbol.t_Integer, ConcreteType.INT ),
     DOUBLE( Symbol.t_Double, ConcreteType.DOUBLE ),
     TYPE_INT( Symbol.t_Type_Int, ConcreteType.INT ),
-    TYPE_DOYBLE( Symbol.t_Type_Double, ConcreteType.DOUBLE );
+    TYPE_DOUBLE( Symbol.t_Type_Double, ConcreteType.DOUBLE );
 
 
     public Term symbol;

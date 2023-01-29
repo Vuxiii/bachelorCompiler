@@ -9,7 +9,7 @@ import com.vuxiii.compiler.VisitorPattern.Visitors.ASTNode;
 public class Capture extends ASTNode {
 
     @VisitNumber( number = 1 )
-    public Optional<Argument> accesses;
+    public Optional<Argument> accesses; // Empty indicates it can access everything.
 
     public Capture( Term term, Argument accesses ) {
         super(term);

@@ -7,11 +7,16 @@ public class Symbol {
     
     // Used under parsing.
     public static final NonTerminal n_Start = new NonTerminal( "START", true );
+    
     public static final NonTerminal n_Expression = new NonTerminal( "EXPRESSION" );
     public static final NonTerminal n_ExpressionList = new NonTerminal( "EXPRESSION_LIST" );
+    
     public static final NonTerminal n_Statement = new NonTerminal( "STATEMENT" );
     public static final NonTerminal n_StatementList = new NonTerminal( "STATEMENT_LIST" );
+    
+    public static final NonTerminal n_Declaration = new NonTerminal( "DECLARATION" );
     public static final NonTerminal n_Assignment = new NonTerminal( "ASSIGNMENT" );
+    
     public static final NonTerminal n_Print = new NonTerminal( "PRINT" );
     public static final NonTerminal n_Expression_Arithmetic = new NonTerminal( "ARITHMETIC_EXPRESSION" );
 
@@ -21,6 +26,7 @@ public class Symbol {
     public static final NonTerminal n_Factor = new NonTerminal( "FACTOR" );
 
     public static final NonTerminal n_Literal = new NonTerminal( "LITERAL" );
+    public static final NonTerminal n_Type = new NonTerminal( "TYPE" );
 
 
     // Scopes
@@ -46,6 +52,7 @@ public class Symbol {
     public static final Terminal t_Type_Int = new Terminal( "type int" );
     public static final Terminal t_Type_Double = new Terminal( "type double" );
     public static final Terminal t_Semicolon = new Terminal( "';'" );
+    public static final Terminal t_Colon = new Terminal( "':'" );
     public static final Terminal t_Dollar = new Terminal( "$", true );
     public static final Terminal t_Print = new Terminal( "'print'" );
     public static final Terminal t_LParen = new Terminal( "'('" );
@@ -56,5 +63,7 @@ public class Symbol {
     public static final Terminal t_RCurly = new Terminal( "'}'" );
     public static final Terminal t_Comma = new Terminal( "','" );
     public static final Terminal t_Dot = new Terminal( "'.'" );
+
+    public static final Terminal t_Let = new Terminal( "let" );
 
 }

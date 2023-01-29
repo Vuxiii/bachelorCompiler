@@ -1,6 +1,7 @@
 package com.vuxiii.compiler.VisitorPattern.Visitors.TreeCollaps;
 
 import com.vuxiii.Visitor.VisitorBase;
+import com.vuxiii.compiler.Parser.Nodes.Argument;
 import com.vuxiii.compiler.Parser.Nodes.Assignment;
 import com.vuxiii.compiler.Parser.Nodes.BinaryOperation;
 import com.vuxiii.compiler.Parser.Nodes.Expression;
@@ -43,6 +44,13 @@ public class AST_Shrinker extends VisitorBase {
     @VisitorPattern( when = VisitOrder.EXIT_NODE, order = 2 )
     public void cleanup_assignment( Assignment assignment ) {
         assignment.value = assignment.value.getChild1().get();
+    }
+
+    @VisitorPattern( when = VisitOrder.EXIT_NODE, order = 2 )
+    public void cleanup_argument( Argument argument ) {
+        if ( !(argument.node instanceof Expression) ) return;
+
+        argument.node = ((Expression)argument.node).node;
     }
 
     @VisitorPattern( when = VisitOrder.EXIT_NODE, order = 2 )

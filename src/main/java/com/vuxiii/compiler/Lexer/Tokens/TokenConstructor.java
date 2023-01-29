@@ -2,6 +2,7 @@ package com.vuxiii.compiler.Lexer.Tokens;
 
 import com.vuxiii.DFANFA.MatchInfo;
 import com.vuxiii.LR.Records.ASTToken;
+import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexColon;
 import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexComma;
 import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexDot;
 import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexEqual;
@@ -10,6 +11,7 @@ import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexLBracket;
 import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexLCurly;
 import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexLiteral;
 import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexLParen;
+import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexLet;
 import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexOperator;
 import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexPrint;
 import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexRBracket;
@@ -27,13 +29,10 @@ public class TokenConstructor {
             case IDENTIFIER: {
                 return new LexIdent( matchInfo, type );
             }
-            case INT: {
+            case INT: case DOUBLE: {
                 return new LexLiteral( matchInfo, type );
             }
-            case DOUBLE: {
-                return new LexLiteral( matchInfo, type );
-            }
-            case TYPE_INT: {
+            case TYPE_INT: case TYPE_DOUBLE: {
                 return new LexType( matchInfo, type );
             }
             case LEFT_PARENTHESIS: {
@@ -54,23 +53,20 @@ public class TokenConstructor {
             case RIGHT_CURLY: {
                 return new LexRCurly( matchInfo, type );
             }
-            case PLUS:  {
-                return new LexOperator( matchInfo, type );
-            }
-            case MINUS: {
-                return new LexOperator( matchInfo, type );
-            }
-            case DIVISION:  {
-                return new LexOperator( matchInfo, type );
-            }
-            case TIMES: {
+            case PLUS: case MINUS: case DIVISION: case TIMES: {
                 return new LexOperator( matchInfo, type );
             }
             case PRINT: {
                 return new LexPrint( matchInfo, type );
             }
+            case LET: {
+                return new LexLet( matchInfo, type );
+            }
             case SEMICOLON: {
                 return new LexSemicolon( matchInfo, type );
+            }
+            case COLON: {
+                return new LexColon( matchInfo, type );
             }
             case DOT: {
                 return new LexDot( matchInfo, type );
@@ -80,13 +76,13 @@ public class TokenConstructor {
             }
             default: {
                 // Unkown. Not implemented yet. Throw error
-                System.out.println( "--[[ Tokenization Error ]]--\nFound un-recognized token:\n\n " + matchInfo.toString() + "\nMaybe you forgot to implement this token?\n" );
+                System.out.println( "\u001B[41m\u001B[37m--[[ Tokenization Error ]]--\u001B[0m\nFound un-recognized token:\n\n " + matchInfo.toString() + "\nMaybe you forgot to implement this token?\n" );
 
                 System.exit(-1);
 
             }         
         }
-        System.out.println( "--[[ Tokenization Error ]]--\nShould never reach this... In TokenConstructor" );
+        System.out.println( "\u001B[41m\u001B[37m--[[ Tokenization Error ]]--\u001B[0m\nShould never reach this... In TokenConstructor" );
 
         System.exit(-1);
         return null; // Should never reach here

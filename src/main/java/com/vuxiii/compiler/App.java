@@ -11,6 +11,7 @@ import com.vuxiii.compiler.VisitorPattern.Visitors.Debug.AST_Printer;
 import com.vuxiii.compiler.VisitorPattern.Visitors.Debug.AST_SimplePrinter;
 import com.vuxiii.compiler.VisitorPattern.Visitors.Optimizers.ConstantPropagation;
 import com.vuxiii.compiler.VisitorPattern.Visitors.SymbolCollection.AST_SymbolCollector;
+import com.vuxiii.compiler.VisitorPattern.Visitors.SymbolCollection.Scope;
 import com.vuxiii.compiler.VisitorPattern.Visitors.TreeCollaps.AST_Shrinker;
 
 import java.util.Iterator;
@@ -41,27 +42,31 @@ public final class App {
             print(a);
             b=a+5;
             print(a);
-        """;
+            """;
         input = """
             a = 3;
             a = a + 4;
             a = 5 - a;
             print(a);
-        """;
+            """;
         input = """   
             a = (3 + 1);
+            {
+                c = 43;
+                print( c - 1 );
+            }
             [..]{
                 b = 3;
                 print(b);
-            };
+            }
             [ a ] {
                 print(a);
-            };
+            }
             [ a, b ] {
                 print(a);
-            };
+            }
             print(a);
-        """;
+            """;
         // input = """
         //     b = 1.0;
         //     c = 5.;
@@ -70,7 +75,7 @@ public final class App {
         //     print( a );
         //     print( b );
         //     print( 45 );
-        // """;
+        //     """;
         // input = """
         //     b = 1;
         //     a = 3 + 5 * (10 / 5);
@@ -78,12 +83,27 @@ public final class App {
         //     print( a );
         //     print( b );
         //     print( 45 );
-        // """;
-        
-        // input = """
-        //     a = 7 + 13 + 9 * 2 / 2;
-        //     print( a );
-        // """;
+        //     """;
+        // Capture example.
+        input = """
+            let a: int;
+            a = 3;
+            [ a ] {
+
+                print( a + 2 );
+                let n: int;
+
+                [a, n ] {
+                    let c: int;
+                    print( a + n );
+
+                    [..]{
+                        print( a * n + c );
+                    }
+                }
+            }
+            print( a );
+            """;
         
         // [[ Tokenizer ]]
         List<ASTToken> tokens = Lexer.lex( input );
@@ -135,17 +155,27 @@ public final class App {
         printer = new AST_Printer();
         ast.accept( printer );
         System.out.println( printer.get_ascii() );
-
-        // [[ Symbol Collecting ]]
-        AST_SymbolCollector symbolCollector = new AST_SymbolCollector();
-        ast.accept( symbolCollector );
-
-        List<LexIdent> variables = symbolCollector.get_variables();
-
+        
         line_break();
 
-        System.out.println( "Variables in program:" );
-        variables.forEach( System.out::println );
+        // [[ Symbol Collecting ]]
+        AST_SymbolCollector symbolCollector = new AST_SymbolCollector( new Scope() );
+        ast.accept( symbolCollector );
+
+        List<Scope> scopes = symbolCollector.scopes;
+
+        int i = 0;
+        for ( Scope scope : scopes ) {
+            System.out.println( "Scope [" + (i++) + "]" );
+            System.out.println( "local vars:" );
+            for ( String var : scope.get_variables() )
+                System.out.println( "  " + var );
+            System.out.println( "captured vars:" );
+            for ( String capture : scope.get_captures() )
+                System.out.println( "  " + capture );
+                
+            System.out.println();
+        }
 
         line_break();
 

@@ -54,3 +54,15 @@ Add scoping
     Make scope per file.
         Automaticly insert a scope for each file.
 
+Add declaration
+
+    declaration -> 'let' ident ':' type 
+    
+    // Simple for now. Ignore me
+    declaration -> 'let' ident ':' type '=' Expression
+
+
+# Symbol Collector
+
+
+

@@ -9,7 +9,7 @@ import com.vuxiii.compiler.VisitorPattern.Visitors.ASTNode;
 public class Argument extends ASTNode {
 
 
-    @VisitNumber( number = 1 ) public final ASTNode node;
+    @VisitNumber( number = 1 ) public ASTNode node; // Not ident because this is an actual argument. It could be a literal!
 
     @VisitNumber( number = 2 ) public final Optional<Argument> next;
 
