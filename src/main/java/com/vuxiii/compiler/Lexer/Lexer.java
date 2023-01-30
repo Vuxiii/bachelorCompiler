@@ -39,6 +39,7 @@ public class Lexer {
         reg.addRegex( "/",                                matchInfo -> TokenConstructor.construct( matchInfo, TokenType.DIVISION ) );
         reg.addRegex( "print",                            matchInfo -> TokenConstructor.construct( matchInfo, TokenType.PRINT ) );
         reg.addRegex( "let",                              matchInfo -> TokenConstructor.construct( matchInfo, TokenType.LET ) );
+        reg.addRegex( "type",                             matchInfo -> TokenConstructor.construct( matchInfo, TokenType.TYPE_DECL ) );
         reg.addRegex( "\\(",                              matchInfo -> TokenConstructor.construct( matchInfo, TokenType.LEFT_PARENTHESIS ) );
         reg.addRegex( "\\)",                              matchInfo -> TokenConstructor.construct( matchInfo, TokenType.RIGHT_PARENTHESIS ) );
         reg.addRegex( "\\[",                              matchInfo -> TokenConstructor.construct( matchInfo, TokenType.LEFT_BRACKET ) );

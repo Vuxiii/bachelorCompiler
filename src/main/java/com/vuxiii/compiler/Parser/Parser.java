@@ -19,12 +19,14 @@ import com.vuxiii.compiler.Parser.Nodes.BinaryOperation;
 import com.vuxiii.compiler.Parser.Nodes.BinaryOperationKind;
 import com.vuxiii.compiler.Parser.Nodes.Capture;
 import com.vuxiii.compiler.Parser.Nodes.Declaration;
+import com.vuxiii.compiler.Parser.Nodes.DeclarationKind;
 import com.vuxiii.compiler.Parser.Nodes.Expression;
 import com.vuxiii.compiler.Parser.Nodes.Print;
 import com.vuxiii.compiler.Parser.Nodes.ScopeNode;
 import com.vuxiii.compiler.Parser.Nodes.Statement;
 import com.vuxiii.compiler.Parser.Nodes.StatementKind;
-import com.vuxiii.compiler.VisitorPattern.Visitors.ASTNode;
+import com.vuxiii.compiler.Parser.Nodes.UserType;
+import com.vuxiii.compiler.VisitorPattern.ASTNode;
 
 
 public class Parser {
@@ -69,7 +71,21 @@ public class Parser {
 
         // n_Statement -> n_Declaration t_Semicolon
         g.addRuleWithReduceFunction( Symbol.n_Statement, List.of( Symbol.n_Declaration, Symbol.t_Semicolon ), t -> {
-            return new Statement( Symbol.n_Statement, (ASTNode)t.get(0), StatementKind.DECLARATION );
+            return new Statement( Symbol.n_Statement, (Declaration)t.get(0), StatementKind.DECLARATION );
+        });
+
+        // n_Declaration -> n_Declaration_Variable
+        g.addRuleWithReduceFunction( Symbol.n_Declaration, List.of( Symbol.n_Declaration_Variable ), t -> {
+            Declaration decl = (Declaration)t.get(0);
+            decl.term = Symbol.n_Declaration;
+            return decl;
+        });
+
+        // n_Declaration -> n_Declaration_Type 
+        g.addRuleWithReduceFunction( Symbol.n_Declaration, List.of( Symbol.n_Declaration_Type ), t -> {
+            Declaration decl = (Declaration)t.get(0);
+            decl.term = Symbol.n_Declaration;
+            return decl;
         });
 
         // n_Statement -> n_Assignment t_Semicolon
@@ -236,19 +252,102 @@ public class Parser {
 
 
 
-        // n_Declaration -> t_Let t_Identifier t_Colon n_Type
-        g.addRuleWithReduceFunction( Symbol.n_Declaration, List.of( Symbol.t_Let, Symbol.t_Identifier, Symbol.t_Colon, Symbol.n_Type ), t -> {
-            return new Declaration( Symbol.n_Declaration, (LexIdent)t.get(1), (LexType) ((Expression)t.get(3)).node );
+        // n_Declaration_Variable -> t_Let t_Identifier t_Colon n_Standard_Type
+        g.addRuleWithReduceFunction( Symbol.n_Declaration_Variable, List.of( Symbol.t_Let, Symbol.t_Identifier, Symbol.t_Colon, Symbol.n_Standard_Type ), t -> {
+            LexIdent id = (LexIdent)t.get(1);
+            LexType type = (LexType) ((Expression)t.get(3)).node; 
+            return new Declaration( Symbol.n_Declaration_Variable, id, type, DeclarationKind.VARIABLE );
         });
 
-        
-        // n_Type -> t_Type_Int
-        g.addRuleWithReduceFunction( Symbol.n_Type, List.of( Symbol.t_Type_Int ), t -> {
-            return new Expression( Symbol.n_Type, (LexType)t.get(0)  );
+
+        // n_Declaration_Variable -> t_Let t_Identifier t_Colon n_User_Type
+        g.addRuleWithReduceFunction( Symbol.n_Declaration_Variable, List.of( Symbol.t_Let, Symbol.t_Identifier, Symbol.t_Colon, Symbol.n_User_Type ), t -> {
+            LexIdent id = (LexIdent)t.get(1);
+
+            if ( t.get(3) instanceof UserType ) {
+                UserType type = (UserType)t.get(3);             
+                return new Declaration( Symbol.n_Declaration_Variable, id, type, DeclarationKind.VARIABLE );
+            } else if ( t.get(3) instanceof LexIdent ) {
+                LexIdent type = (LexIdent)t.get(3);             
+                return new Declaration( Symbol.n_Declaration_Variable, id, type, DeclarationKind.VARIABLE );
+            }
+            System.out.println("--[[ Parser Error ]]--\nSomething happend trying to parse a user type. It is not a UserType or an Identifier. So what is it?" );
+            System.out.println( t.get(1) );
+            System.exit(-1);
+            return null; // error!
         });
-        // n_Type -> t_Type_Double
-        g.addRuleWithReduceFunction( Symbol.n_Type, List.of( Symbol.t_Type_Double ), t -> {
-            return new Expression( Symbol.n_Type, (LexType)t.get(0)  );
+
+
+        // Make an 'alias' for a standard type. Like person -> int.
+        // n_Declaration_Type -> n_Declaration_Type_Body n_Standard_Type
+        g.addRuleWithReduceFunction( Symbol.n_Declaration_Type, List.of( Symbol.n_Declaration_Type_Body, Symbol.n_Standard_Type ), t -> {
+            LexIdent id = (LexIdent)t.get(0);
+            LexType type = (LexType) ((Expression)t.get(1)).node; 
+            return new Declaration( Symbol.n_Declaration_Type, id, type, DeclarationKind.ALIAS_TO_STD_TYPE );
+        });
+        
+        // Make a new user type. It can either be a new type.
+        // OR it can be an 'alias' for another user type!
+        // n_Declaration_Type -> n_Declaration_Type_Body n_User_Type
+        g.addRuleWithReduceFunction( Symbol.n_Declaration_Type, List.of( Symbol.n_Declaration_Type_Body, Symbol.n_User_Type ), t -> {
+            LexIdent id = (LexIdent)t.get(0);
+            if ( t.get(1) instanceof UserType ) {
+                UserType type = (UserType)t.get(1);             
+                return new Declaration( Symbol.n_Declaration_Type, id, type, DeclarationKind.USER_TYPE );
+            } else if ( t.get(1) instanceof LexIdent ) {
+                LexIdent type = (LexIdent)t.get(1);             
+                return new Declaration( Symbol.n_Declaration_Type, id, type, DeclarationKind.ALIAS_TO_USER_TYPE );
+            }
+            System.out.println("--[[ Parser Error ]]--\nSomething happend trying to parse a user type. It is not a UserType or an Identifier. So what is it?" );
+            System.out.println( t.get(1) );
+            System.exit(-1);
+            return null; // error!
+        });
+
+        // n_Declaration_Type_Body -> t_Let t_Type_Declare t_Identifer t_Colon
+        g.addRuleWithReduceFunction( Symbol.n_Declaration_Type_Body, List.of( Symbol.t_Let, Symbol.t_Type_Declare, Symbol.t_Identifier, Symbol.t_Colon ), t -> {
+            
+            LexIdent body = (LexIdent)t.get(2);
+            body.term = Symbol.n_Declaration_Type_Body;
+            return body;
+        });
+        
+        // n_User_Type -> t_LCurly n_Field_List t_RCurly
+        g.addRuleWithReduceFunction( Symbol.n_User_Type, List.of( Symbol.t_LCurly, Symbol.n_Field_List, Symbol.t_RCurly ), t -> {
+            return new UserType( Symbol.n_User_Type, (Statement)t.get(1) );
+        });
+        
+        // n_User_Type -> t_LCurly t_RCurly
+        g.addRuleWithReduceFunction( Symbol.n_User_Type, List.of( Symbol.t_LCurly, Symbol.t_RCurly ), t -> {
+            return new UserType( Symbol.n_User_Type );
+        });
+        
+        // n_User_Type -> t_Identifier
+        g.addRuleWithReduceFunction( Symbol.n_User_Type, List.of( Symbol.t_Identifier ), t -> {
+            LexIdent stm = (LexIdent)t.get(0);
+            stm.term = Symbol.n_User_Type;
+            return stm;
+        });
+        
+        // n_Field_List -> n_Declaration_Variable t_Comma n_Field_List
+        g.addRuleWithReduceFunction( Symbol.n_Field_List, List.of( Symbol.n_Declaration_Variable, Symbol.n_Field_List ), t -> {
+            Statement stm = (Statement)t.get(0);
+            return new Statement( Symbol.n_Field_List, (Declaration)stm.node, (Statement)t.get(2), StatementKind.DECLARATION );
+        });
+        
+        // n_Field_List -> n_Declaration_Variable
+        g.addRuleWithReduceFunction( Symbol.n_Field_List, List.of( Symbol.n_Declaration_Variable ), t -> {
+            return new Statement( Symbol.n_Field_List, (Declaration)t.get(0), StatementKind.DECLARATION );
+        });
+        
+        
+        // n_Standard_Type -> t_Type_Int
+        g.addRuleWithReduceFunction( Symbol.n_Standard_Type, List.of( Symbol.t_Type_Int ), t -> {
+            return new Expression( Symbol.n_Standard_Type, (LexType)t.get(0)  );
+        });
+        // n_Standard_Type -> t_Type_Double
+        g.addRuleWithReduceFunction( Symbol.n_Standard_Type, List.of( Symbol.t_Type_Double ), t -> {
+            return new Expression( Symbol.n_Standard_Type, (LexType)t.get(0)  );
         });
 
         // n_Assignment -> t_Identifier t_Equals n_Expression

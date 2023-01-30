@@ -4,6 +4,7 @@ import com.vuxiii.LR.Records.Term;
 import com.vuxiii.compiler.Parser.Symbol;
 
 /**
+ * Inernal types for use in the compiler.
  * Provides identification for the compiler.
  * Concrete types should be used outside after parsing is over.
  * SHOULD ONLY BE USED FOR PARSING
@@ -29,20 +30,21 @@ public enum TokenType {
 
     LET( Symbol.t_Let ),
 
-    INT( Symbol.t_Integer, ConcreteType.INT ),
-    DOUBLE( Symbol.t_Double, ConcreteType.DOUBLE ),
-    TYPE_INT( Symbol.t_Type_Int, ConcreteType.INT ),
-    TYPE_DOUBLE( Symbol.t_Type_Double, ConcreteType.DOUBLE );
+    INT( Symbol.t_Integer, PrimitiveType.INT ),
+    DOUBLE( Symbol.t_Double, PrimitiveType.DOUBLE ),
+    TYPE_DECL( Symbol.t_Type_Declare ),
+    TYPE_INT( Symbol.t_Type_Int, PrimitiveType.INT ),
+    TYPE_DOUBLE( Symbol.t_Type_Double, PrimitiveType.DOUBLE );
 
 
     public Term symbol;
-    public ConcreteType literal_type;
+    public PrimitiveType literal_type;
 
     TokenType( Term term ) {
         this.symbol = term;
     }
 
-    TokenType( Term term, ConcreteType type ) {
+    TokenType( Term term, PrimitiveType type ) {
         this.symbol = term;
         this.literal_type = type;
     }

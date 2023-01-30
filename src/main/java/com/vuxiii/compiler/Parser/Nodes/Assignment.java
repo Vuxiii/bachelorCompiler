@@ -4,8 +4,8 @@ import java.util.Optional;
 
 import com.vuxiii.LR.Records.Term;
 import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexIdent;
+import com.vuxiii.compiler.VisitorPattern.ASTNode;
 import com.vuxiii.compiler.VisitorPattern.Annotations.VisitNumber;
-import com.vuxiii.compiler.VisitorPattern.Visitors.ASTNode;
 
 public class Assignment extends ASTNode {
 

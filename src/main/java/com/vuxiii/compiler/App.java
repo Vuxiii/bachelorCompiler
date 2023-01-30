@@ -96,6 +96,39 @@ public final class App {
             }
             print( a );
             """;
+        input = """
+            let type string: int;
+            let type Person: {
+                name: string,
+                age: int
+            };
+        """;
+        input = """
+            let type string: int;
+        """;
+        input = """
+            let type char: int;
+            let type string: char;
+            let type Person: {
+                let name: string
+                let sure_name: char
+            };
+            let type Dansker: Person;
+            let name: string;
+            let letter: char;
+            let william: Person;
+
+            let age: int;
+            age = 3;
+
+        """;
+        input = """
+            let type Person: {
+                let name: int
+                let surname: int
+            };
+
+        """;
         
         // [[ Tokenizer ]]
         List<ASTToken> tokens = Lexer.lex( input );

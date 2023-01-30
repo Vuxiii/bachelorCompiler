@@ -17,6 +17,14 @@ public class Symbol {
     public static final NonTerminal n_Declaration = new NonTerminal( "DECLARATION" );
     public static final NonTerminal n_Assignment = new NonTerminal( "ASSIGNMENT" );
     
+    public static final NonTerminal n_Declaration_Variable = new NonTerminal( "VARIABLE_DECLARATION" );
+    public static final NonTerminal n_Declaration_Type = new NonTerminal( "TYPE_DECLARATION" );
+    public static final NonTerminal n_Declaration_Type_Body = new NonTerminal( "TYPE_BODY_DECLARATION" );
+
+    public static final NonTerminal n_User_Type = new NonTerminal( "TYPE_USER" );
+    public static final NonTerminal n_Field_List = new NonTerminal( "FIELD_LIST" );
+
+
     public static final NonTerminal n_Print = new NonTerminal( "PRINT" );
     public static final NonTerminal n_Expression_Arithmetic = new NonTerminal( "ARITHMETIC_EXPRESSION" );
 
@@ -26,7 +34,7 @@ public class Symbol {
     public static final NonTerminal n_Factor = new NonTerminal( "FACTOR" );
 
     public static final NonTerminal n_Literal = new NonTerminal( "LITERAL" );
-    public static final NonTerminal n_Type = new NonTerminal( "TYPE" );
+    public static final NonTerminal n_Standard_Type = new NonTerminal( "TYPE_STD" );
 
 
     // Scopes
@@ -49,8 +57,9 @@ public class Symbol {
     public static final Terminal t_Identifier = new Terminal( "id" );
     public static final Terminal t_Integer = new Terminal( "integer" );
     public static final Terminal t_Double = new Terminal( "double" );
-    public static final Terminal t_Type_Int = new Terminal( "type int" );
-    public static final Terminal t_Type_Double = new Terminal( "type double" );
+    public static final Terminal t_Type_Declare = new Terminal( "type_decl" );
+    public static final Terminal t_Type_Int = new Terminal( "type_int" );
+    public static final Terminal t_Type_Double = new Terminal( "type_double" );
     public static final Terminal t_Semicolon = new Terminal( "';'" );
     public static final Terminal t_Colon = new Terminal( "':'" );
     public static final Terminal t_Dollar = new Terminal( "$", true );
@@ -65,5 +74,7 @@ public class Symbol {
     public static final Terminal t_Dot = new Terminal( "'.'" );
 
     public static final Terminal t_Let = new Terminal( "let" );
+
+    public static final NonTerminal t_Field = new NonTerminal( "field" );
 
 }

@@ -2,14 +2,14 @@ package com.vuxiii.compiler.Lexer.Tokens.Leaf;
 
 
 import com.vuxiii.DFANFA.MatchInfo;
-import com.vuxiii.compiler.Lexer.Tokens.ConcreteType;
+import com.vuxiii.compiler.Lexer.Tokens.PrimitiveType;
 import com.vuxiii.compiler.Lexer.Tokens.TokenType;
+import com.vuxiii.compiler.VisitorPattern.ASTNode;
 import com.vuxiii.compiler.VisitorPattern.Annotations.VisitLeaf;
-import com.vuxiii.compiler.VisitorPattern.Visitors.ASTNode;
 
 @VisitLeaf
 public class LexType extends ASTNode {
-    public final ConcreteType type;
+    public final PrimitiveType type;
 
     public final MatchInfo matchInfo;
 

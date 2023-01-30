@@ -19,6 +19,7 @@ import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexRCurly;
 import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexRParen;
 import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexSemicolon;
 import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexType;
+import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexTypeDecl;
 
 public class TokenConstructor {
     public static ASTToken construct( MatchInfo matchInfo, TokenType type ) {
@@ -58,6 +59,9 @@ public class TokenConstructor {
             }
             case PRINT: {
                 return new LexPrint( matchInfo, type );
+            }
+            case TYPE_DECL: {
+                return new LexTypeDecl( matchInfo, type );
             }
             case LET: {
                 return new LexLet( matchInfo, type );

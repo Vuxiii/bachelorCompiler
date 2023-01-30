@@ -1,10 +1,10 @@
 package com.vuxiii.compiler.Lexer.Tokens.Leaf;
 
 import com.vuxiii.DFANFA.MatchInfo;
-import com.vuxiii.compiler.Lexer.Tokens.ConcreteType;
+import com.vuxiii.compiler.Lexer.Tokens.PrimitiveType;
 import com.vuxiii.compiler.Lexer.Tokens.TokenType;
+import com.vuxiii.compiler.VisitorPattern.ASTNode;
 import com.vuxiii.compiler.VisitorPattern.Annotations.VisitLeaf;
-import com.vuxiii.compiler.VisitorPattern.Visitors.ASTNode;
 
 @VisitLeaf
 public class LexLiteral extends ASTNode {
@@ -12,7 +12,7 @@ public class LexLiteral extends ASTNode {
     public final String val;
     public final MatchInfo matchInfo;
 
-    public final ConcreteType literal_type;
+    public final PrimitiveType literal_type;
 
     public LexLiteral( MatchInfo matchInfo, TokenType type ) {
         super( type.symbol );

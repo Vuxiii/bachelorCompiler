@@ -1,4 +1,4 @@
-package com.vuxiii.compiler.VisitorPattern.Visitors;
+package com.vuxiii.compiler.VisitorPattern;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -16,7 +16,7 @@ import com.vuxiii.compiler.VisitorPattern.Annotations.VisitorPattern;
 
 public abstract class ASTNode implements ASTToken {
     
-    public final Term term;
+    public Term term;
 
     private final TreeSet<Field> ASTNodeQueue = new TreeSet<>( Comparator.comparing( field -> field.getAnnotation( VisitNumber.class ).number(), Comparator.naturalOrder() ) );
     

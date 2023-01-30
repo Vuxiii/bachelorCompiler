@@ -1,6 +1,6 @@
 package com.vuxiii.compiler.VisitorPattern.Visitors.CodeGeneration;
 
-import com.vuxiii.compiler.VisitorPattern.Visitors.ASTNode;
+import com.vuxiii.compiler.VisitorPattern.ASTNode;
 
 public class Arguments {
     

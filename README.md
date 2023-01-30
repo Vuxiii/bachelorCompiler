@@ -14,6 +14,7 @@
 ---
 
 
+
 ## Short intro and Why
 Welcome to my Bachelors Repo.
 This Compiler Project uses two of my own tools, `Parsley` & `Regex`, which are used instead of the traditional tools: `Bison` & `Flex`.
@@ -44,15 +45,14 @@ The above should no longer be needed. I think I have successfully published the 
 
 For this project I am using `Java 17`
 
+To run the compiler, I have provided a bash file called `run.sh`, that should be able to execute the program.
+
 ---
 
 ## Naming ideas - breh
 * Juhl
 * Juhllang $\rightarrow$ .jl
-* Fischer Juhl
-* Fischer Uldall Juhl
 * FUJ
-* JUF
 
 So far I think I will go with JuhlLang with extension $\rightarrow$ `.jl`
 
@@ -86,63 +86,8 @@ This section will explain how one can add another token/node to the language.
 ---
 
 ## Visitor Pattern
-Each ASTToken in the AST utilizes the visitor pattern. Each Node will accept a visitor in the following order:
-1. visitor.visit( this );
-2. visitor.preVisit( this );
-3. visitor.midVisit( this );
-4. visitor.postVisit( this );
 
-The following will explain how the visitor is passed to children:
-* 0 children:
-    ```Java
-    @Override
-    public void accept(VisitorBase visitor) {
-        visitor.visit( this );
-
-        visitor.preVisit( this );
-        visitor.midVisit( this );
-        visitor.postVisit( this );
-    }
-    ```
-* 1 child:
-    ```Java
-    @Override
-    public void accept(VisitorBase visitor) {
-        visitor.visit( this );
-
-        visitor.preVisit( this );
-        child1.accept( visitor );
-        visitor.midVisit( this );
-        visitor.postVisit( this );
-    }
-    ```
-* 2 children:
-    ```Java
-    @Override
-    public void accept(VisitorBase visitor) {
-        visitor.visit( this );
-
-        visitor.preVisit( this );
-        child1.accept( visitor );
-        visitor.midVisit( this );
-        child2.accept( visitor );
-        visitor.postVisit( this );
-    }
-    ```
-* 3 children:
-    ```Java
-    @Override
-    public void accept(VisitorBase visitor) {
-        visitor.visit( this );
-
-        visitor.preVisit( this );
-        child1.accept( visitor );
-        visitor.midVisit( this );
-        child2.accept( visitor );
-        child3.accept( visitor );
-        visitor.postVisit( this );
-    }
-    ```
+The visitor pattern have been updated to a more modular interface. To Be Written
 
 ---
 
@@ -154,3 +99,52 @@ Currently the project has the following debug utilities:
 * Enable/Disable printing the Grammar. `Settings.showGrammar = false|true`
 * Enable/Disable printing the Parsing Table. `Settings.showParsingTable = false|true`
 * Print the AST with the `ASTPrinter.java` class. Simply pass any node an object of type `ASTPrinter` and it will print the node and it's children.
+
+### AST_Printer
+
+The `AST_Printer` can be used to print the syntax tree during debugging or if one is just interested in seeing how the internal representation is handled. It should look something like this:
+
+![Image of running the ast_printer][ast_printer]
+
+## Language semantics and Syntax
+
+The following will deine the language semantics and syntax of the language.
+
+### Declarations
+
+`let` defines that we are about to make a declaration. Variable, Function, Type.
+
+To define a new variable start by typing `let` and follow it up with the name for the variable.
+
+`let age`
+
+Says that we are about to create a variable with name `age`. Now we should give it a type. Perhaps `int` sounds reasonable. We do this by following with a colon `:` and the desired type after the name of the variable. Every statement should end with a semicolon `;`.
+
+`let age: int;`
+
+To define a new type, we do almost the same as above. But between the `let` keyword and the name, type `type`, to indicate that we are about to declare a new type.
+
+`let type Person`
+
+Would define that we are about to declare a new type with the type_name of `Person`.
+Now we need to give the type a type, we do this by typing a colon `:` followed by the desired type. What should it be? We could give the type `Person` the type `string`. This means that whenever we type `Person` it is the same type as `string`.
+
+`let type Person: string;`
+
+If we, however, want to make a compound type, a struct, we can do so by typing `{}`. Inside the curly braces we can declare what fields should be inside the struct.
+
+`let type Person: {
+    name: string;
+    age: int;
+}`
+
+We can now declare a new variable of the type `Person`, by doing the following:
+
+`let person: Person;`
+
+Note: The keyword doesn't stop you from using `type` as a variable name. If you want to make a variable called type, do the following:
+
+`let type: int;`
+
+
+[ast_printer]: /assets/ast_printer.png
