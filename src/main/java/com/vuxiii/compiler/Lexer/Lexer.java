@@ -5,6 +5,7 @@ import java.util.List;
 import com.vuxiii.LR.Records.ASTToken;
 import com.vuxiii.Regex.Regex;
 import com.vuxiii.Regex.Token.TokenEOP;
+import com.vuxiii.compiler.Lexer.Tokens.PrimitiveType;
 import com.vuxiii.compiler.Lexer.Tokens.TokenConstructor;
 import com.vuxiii.compiler.Lexer.Tokens.TokenType;
 import com.vuxiii.compiler.Parser.Symbol;
@@ -24,10 +25,10 @@ public class Lexer {
         if ( reg != null )
             return reg;
 
-        reg = new Regex<>("int",                          matchInfo -> TokenConstructor.construct( matchInfo, TokenType.TYPE_INT ) );
+        reg = new Regex<>(PrimitiveType.INT.name,         matchInfo -> TokenConstructor.construct( matchInfo, TokenType.TYPE_INT ) );
 
         // reg.addRegex( "int", in -> new LexType( in ) );
-        reg.addRegex( "double",                           matchInfo -> TokenConstructor.construct( matchInfo, TokenType.TYPE_DOUBLE ) );
+        reg.addRegex( PrimitiveType.DOUBLE.name,          matchInfo -> TokenConstructor.construct( matchInfo, TokenType.TYPE_DOUBLE ) );
         reg.addRegex( "[:digit:][:digit:]*",              matchInfo -> TokenConstructor.construct( matchInfo, TokenType.INT ) );
         reg.addRegex( "[:digit:][:digit:]*\\.[:digit:]*", matchInfo -> TokenConstructor.construct( matchInfo, TokenType.DOUBLE ) );
         reg.addRegex( ";",                                matchInfo -> TokenConstructor.construct( matchInfo, TokenType.SEMICOLON ) );
@@ -49,7 +50,7 @@ public class Lexer {
         reg.addRegex( "\\.",                              matchInfo -> TokenConstructor.construct( matchInfo, TokenType.DOT ) );
         reg.addRegex( "\\,",                              matchInfo -> TokenConstructor.construct( matchInfo, TokenType.COMMA ) );
         
-        reg.addRegex( "[:alpha:]([:alpha:]|[:digit:])*",  matchInfo -> TokenConstructor.construct( matchInfo, TokenType.IDENTIFIER ), 99999999 );
+        reg.addRegex( "[:alpha:]([:alpha:]|[:digit:]|_)*",  matchInfo -> TokenConstructor.construct( matchInfo, TokenType.IDENTIFIER ), 99999999 );
 
         reg.compile();
         return reg;

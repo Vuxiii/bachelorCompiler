@@ -110,8 +110,8 @@ public final class App {
             let type char: int;
             let type string: char;
             let type Person: {
-                let name: string
-                let sure_name: char
+                name: string;
+                sure_name: char;
             };
             let type Dansker: Person;
             let name: string;
@@ -122,13 +122,18 @@ public final class App {
             age = 3;
 
         """;
-        input = """
-            let type Person: {
-                let name: int
-                let surname: int
-            };
+        // input = """
+        //     let type char: int;
+        //     let type string: char;
+        // """;
+        // input = """
+        //     let type Person: {
+        //         name: int;
+        //         sur_name: int;
+        //         father: Person;
+        //     };
 
-        """;
+        // """;
         
         // [[ Tokenizer ]]
         List<ASTToken> tokens = Lexer.lex( input );
@@ -141,7 +146,7 @@ public final class App {
         line_break();
 
         Settings.showGrammar = true;
-        Settings.showParsingTable = true;
+        Settings.showParsingTable = false;
         // [[ Parser ]]
         
         ASTToken ast = Parser.getAST( tokens );

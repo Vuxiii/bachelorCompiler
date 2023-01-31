@@ -4,11 +4,12 @@ package com.vuxiii.compiler.Lexer.Tokens.Leaf;
 import com.vuxiii.DFANFA.MatchInfo;
 import com.vuxiii.compiler.Lexer.Tokens.PrimitiveType;
 import com.vuxiii.compiler.Lexer.Tokens.TokenType;
+import com.vuxiii.compiler.Parser.Nodes.Types.Type;
 import com.vuxiii.compiler.VisitorPattern.ASTNode;
 import com.vuxiii.compiler.VisitorPattern.Annotations.VisitLeaf;
 
 @VisitLeaf
-public class LexType extends ASTNode {
+public class LexType extends Type {
     public final PrimitiveType type;
 
     public final MatchInfo matchInfo;
@@ -26,6 +27,6 @@ public class LexType extends ASTNode {
 
     @Override
     public String getPrintableName() {
-        return "Type: " + type + " ~ Line " + matchInfo.lineNumber();
+        return type + " ~ Line " + matchInfo.lineNumber();
     }
 }
