@@ -1,5 +1,7 @@
 package com.vuxiii.compiler;
 
+import com.vuxiii.compiler.CodeEmit.X86Emitter;
+import com.vuxiii.compiler.InternalInterpreter.Interpreter;
 import com.vuxiii.compiler.Lexer.Lexer;
 import com.vuxiii.compiler.Parser.Parser;
 import com.vuxiii.compiler.VisitorPattern.Visitors.CodeGeneration.AST_StackMachine;
@@ -106,34 +108,47 @@ public final class App {
         input = """
             let type string: int;
         """;
-        input = """
-            let type char: int;
-            let type string: char;
-            let type Person: {
-                name: string;
-                sure_name: char;
-            };
-            let type Dansker: Person;
-            let name: string;
-            let letter: char;
-            let william: Person;
+        // input = """
+        //     let type char: int;
+        //     let type string: char;
+        //     let type Person: {
+        //         name: string;
+        //         sure_name: char;
+        //     };
+        //     let type Dansker: Person;
+        //     let name: string;
+        //     let letter: char;
+        //     let william: Person;
 
-            let age: int;
-            age = 3;
+        //     let age: int;
+        //     age = 3;
 
-        """;
+        // """;
         // input = """
         //     let type char: int;
         //     let type string: char;
         // """;
-        // input = """
-        //     let type Person: {
-        //         name: int;
-        //         sur_name: int;
-        //         father: Person;
-        //     };
-
-        // """;
+        input = """
+            let type Person: {
+                name: int;
+                sur_name: int;
+                father: Person;
+            };
+        """;
+        input = """
+            let type integer: int;
+            let a: integer;
+            a = 4;
+            let b: integer;
+            b = 4 * a;
+            let c: int;
+            c = 42;
+            [a, b] {
+                print(a);
+                b = b + 5;
+            }
+            print( c + b );
+        """;
         
         // [[ Tokenizer ]]
         List<ASTToken> tokens = Lexer.lex( input );
@@ -220,26 +235,39 @@ public final class App {
 
         System.out.println( "Internal Low-Level Representation");
 
-
+        List<Instruction> instructions = generator.code;
 
         line_break();
-        for ( Instruction instruction : generator.code ) {
+        for ( Instruction instruction : instructions ) {
             System.out.println( instruction );
         }
 
         line_break();
-        // System.out.println( "Running interpreter on the above code" );
+        System.out.println( "Running interpreter on the above code" );
 
-        // Interpreter interpreter = new Interpreter( generator.code );
+        Interpreter interpreter = new Interpreter( generator.code );
 
-        // interpreter.run();
+        interpreter.run();
 
-        // line_break();
+        line_break();
+
+        System.out.println( "Passing instruction to CodeEmitter");
+        line_break();
+
+
 
         // [[ Code Optimization ]]
 
         // [[ Code Emit ]]
         
+        line_break();
+
+        System.out.println( "Passing instruction to CodeEmitter");
+        line_break();
+
+        X86Emitter emitter = new X86Emitter( instructions );
+
+
     }
 
     private static void line_break() {

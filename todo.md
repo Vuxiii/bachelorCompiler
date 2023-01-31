@@ -75,16 +75,26 @@ Add declaration
 For at lave en type:
 let type integer: int; 
 
-    let type Person: {
+    let struct Person: {
+    let Person: struct {
         age: int;
         name: string;
         position: Location;
     };
 
+    let type string: [char];
+
+    let enum Instruction: {
+        ADD;
+        SUB;
+    }
+
     let type Location: {
-        x: int;
+        x: struct { x: int; y: int; };
         y: int;
     };
+
+    let person: Person;
 
 
 parser:
@@ -159,6 +169,9 @@ decl:
         return reached_Location;
     }
 
+    let person1: Person;
+
+    person1.walk_to( sdu );
     get_name: ( self: @Person ) -> string {
         return self.name;
     }
