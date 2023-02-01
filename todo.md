@@ -83,6 +83,7 @@ let type integer: int;
     };
 
     let type string: [char];
+    define string: [char];
 
     let enum Instruction: {
         ADD;
@@ -119,6 +120,27 @@ parser:
 
 
 ## Function
+
+Parser:
+
+    n_Declaration -> n_Declaration_Function
+
+    n_Declaration_Function -> n_Function_Type
+
+    n_Function_Type -> n_Function_Signature 
+    n_Function_Type -> n_Function_Signature n_Return_Type
+
+    n_Function_Signature -> t_LParen n_Parameter_List t_RParen
+    n_Function_Signature -> t_LParen t_RParen 
+
+    n_Return_Type -> t_Arrow_Right n_Standard_Type
+    n_Return_Type -> t_Arrow_Right n_User_Type
+
+    n_Parameter_List -> n_Parameter t_Comma n_Parameter_List
+    n_Parameter_List -> n_Parameter
+
+    n_Parameter -> t_Identifer t_Colon n_Standard_Type
+    n_Parameter -> t_Identifer t_Colon n_User_Type
 
 ### Declaration
 
@@ -171,7 +193,7 @@ decl:
 
     let person1: Person;
 
-    person1.walk_to( sdu );
+    person1.walk_to( sdu ); => walk_to( person1, sdu );
     get_name: ( self: @Person ) -> string {
         return self.name;
     }

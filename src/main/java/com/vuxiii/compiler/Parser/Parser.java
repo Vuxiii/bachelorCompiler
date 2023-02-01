@@ -3,13 +3,13 @@ package com.vuxiii.compiler.Parser;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import com.vuxiii.DFANFA.MatchInfo;
 import com.vuxiii.LR.Grammar;
 import com.vuxiii.LR.LRParser;
 import com.vuxiii.LR.ParseTable;
 import com.vuxiii.LR.Records.ASTToken;
-import com.vuxiii.compiler.Lexer.Tokens.PrimitiveType;
 import com.vuxiii.compiler.Lexer.Tokens.TokenType;
 import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexIdent;
 import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexLiteral;
@@ -29,6 +29,7 @@ import com.vuxiii.compiler.Parser.Nodes.ScopeNode;
 import com.vuxiii.compiler.Parser.Nodes.Statement;
 import com.vuxiii.compiler.Parser.Nodes.StatementKind;
 import com.vuxiii.compiler.Parser.Nodes.Types.AliasType;
+import com.vuxiii.compiler.Parser.Nodes.Types.FunctionType;
 import com.vuxiii.compiler.Parser.Nodes.Types.StandardType;
 import com.vuxiii.compiler.Parser.Nodes.Types.Type;
 import com.vuxiii.compiler.Parser.Nodes.Types.UnknownType;
@@ -87,6 +88,14 @@ public class Parser {
             return new Statement( Symbol.n_Statement, (Declaration)t.get(0), StatementKind.DECLARATION );
         });
 
+        // n_Declaration -> n_Declaration_Function 
+        g.addRuleWithReduceFunction( Symbol.n_Declaration, List.of( Symbol.n_Declaration_Function ), t -> {
+            Declaration decl = (Declaration)t.get(0);
+            decl.term = Symbol.n_Declaration;
+            return decl;
+        });
+
+
         // n_Declaration -> n_Declaration_Variable
         g.addRuleWithReduceFunction( Symbol.n_Declaration, List.of( Symbol.n_Declaration_Variable ), t -> {
             Declaration decl = (Declaration)t.get(0);
@@ -101,6 +110,7 @@ public class Parser {
             return decl;
         });
 
+        
         // n_Statement -> n_Assignment t_Semicolon
         g.addRuleWithReduceFunction( Symbol.n_Statement, List.of( Symbol.n_Assignment, Symbol.t_Semicolon ), t -> {
             return new Statement( Symbol.n_Statement, (ASTNode)t.get(0), StatementKind.ASSIGNMENT );
@@ -263,6 +273,92 @@ public class Parser {
             return new Expression( Symbol.n_Literal, (ASTNode)t.get(0) );
         } );
 
+        // --[[ Function ]]--
+
+        // n_Assignment_Function -> n_Function_Signature t_LCurly n_StatementList t_RCurly
+        g.addRuleWithReduceFunction( Symbol.n_Assignment_Function, List.of( Symbol.n_Function_Signature, Symbol.t_LCurly, Symbol.n_StatementList, Symbol.t_RCurly ), t -> {
+            FunctionType func = (FunctionType)t.get(0);
+            Statement body = (Statement)t.get(2);
+
+            return new FunctionType( Symbol.n_Assignment_Function, func.parameters, func.return_type, body );
+        });
+
+
+        // n_Declaration_Function -> t_Let t_Identifier t_Colon n_Function_Signature
+        g.addRuleWithReduceFunction( Symbol.n_Declaration_Function, List.of( Symbol.t_Let, Symbol.t_Identifier, Symbol.t_Colon, Symbol.n_Function_Signature ), t -> {
+            LexIdent name = (LexIdent)t.get(0);
+            FunctionType func = (FunctionType)t.get(3);
+            return new Declaration( Symbol.n_Declaration_Function, name, func, DeclarationKind.FUNCTION );
+        });
+
+        // n_Function_Signature -> n_Function_Param_Signature n_Return_Type
+        g.addRuleWithReduceFunction( Symbol.n_Function_Signature, List.of( Symbol.n_Function_Param_Signature, Symbol.n_Return_Type ), t -> {
+            FunctionType func = (FunctionType)t.get(0);
+            Type return_type = (Type)t.get(1);
+
+            return new FunctionType( Symbol.n_Function_Signature, func.parameters, return_type, null );
+        });
+
+        // Function with implicit return type of 'void'
+        // n_Function_Signature -> n_Function_Param_Signature
+        g.addRuleWithReduceFunction( Symbol.n_Function_Signature, List.of( Symbol.n_Function_Param_Signature ), t -> {
+            FunctionType func = (FunctionType)t.get(0);
+
+            return new FunctionType( Symbol.n_Function_Signature, func.parameters, null, null ); // Do std.void
+        });
+
+        // n_Function_Param_Signature -> t_LParen n_Parameter_List t_RParen
+        g.addRuleWithReduceFunction( Symbol.n_Function_Param_Signature, List.of( Symbol.t_LParen, Symbol.n_Parameter_List, Symbol.t_RParen ), t -> {
+            Statement param_list = (Statement)t.get(1);
+            
+            return new FunctionType( Symbol.n_Function_Param_Signature, Optional.of(param_list), null, null );
+        });
+
+        // n_Function_Param_Signature -> t_LParen t_RParen
+        g.addRuleWithReduceFunction( Symbol.n_Function_Param_Signature, List.of( Symbol.t_LParen, Symbol.t_RParen ), t -> {
+            return new FunctionType( Symbol.n_Function_Param_Signature, Optional.empty(), null, null );
+        });
+
+        // n_Return_Type -> t_Arrow_Right n_Standard_Type
+        g.addRuleWithReduceFunction( Symbol.n_Return_Type, List.of( Symbol.t_Arrow_Right, Symbol.n_Standard_Type ), t -> {
+            StandardType type = (StandardType)t.get(1);
+            type.term = Symbol.n_Return_Type;
+            return type;
+        });
+
+        // n_Return_Type -> t_Arrow_Right n_User_Type
+        g.addRuleWithReduceFunction( Symbol.n_Return_Type, List.of( Symbol.t_Arrow_Right, Symbol.n_User_Type ), t -> {
+            UserType type = (UserType)t.get(1);
+            type.term = Symbol.n_Return_Type;
+            return type;
+        });
+
+        // n_Parameter_List -> n_Parameter t_Comma n_Parameter_List
+        g.addRuleWithReduceFunction( Symbol.n_Parameter_List, List.of( Symbol.n_Parameter, Symbol.t_Comma, Symbol.n_Parameter_List ), t -> {
+            Declaration decl = (Declaration)t.get(0);
+            return new Statement( Symbol.n_Parameter_List, decl, (Statement)t.get(2), StatementKind.DECLARATION );
+        });
+
+        // n_Parameter_List -> n_Parameter
+        g.addRuleWithReduceFunction( Symbol.n_Parameter_List, List.of( Symbol.n_Parameter ), t -> {
+            Declaration decl = (Declaration)t.get(0);
+            return new Statement( Symbol.n_Parameter_List, decl, StatementKind.DECLARATION );
+        });
+
+
+        // n_Parameter -> t_Identifier t_Colon n_Standard_Type
+        g.addRuleWithReduceFunction( Symbol.n_Parameter, List.of( Symbol.n_Function_Signature, Symbol.n_Return_Type ), t -> {
+            LexIdent id = (LexIdent)t.get(0);
+            StandardType type = (StandardType)t.get(2);
+            return new Declaration( Symbol.n_Parameter, id, type, DeclarationKind.PARAMETER );
+        });
+
+        // n_Parameter -> t_Identifier t_Colon n_User_Type
+        g.addRuleWithReduceFunction( Symbol.n_Parameter, List.of( Symbol.t_Identifier, Symbol.t_Colon, Symbol.n_User_Type ), t -> {
+            LexIdent id = (LexIdent)t.get(0);
+            StandardType type = (StandardType)t.get(2);
+            return new Declaration( Symbol.n_Parameter, id, type, DeclarationKind.PARAMETER );
+        });
 
 
         // n_Declaration_Variable -> t_Let t_Identifier t_Colon n_Standard_Type
@@ -444,6 +540,11 @@ public class Parser {
         });
 
         // n_Assignment -> t_Identifier t_Equals n_Expression
+        g.addRuleWithReduceFunction( Symbol.n_Assignment, List.of( Symbol.t_Identifier, Symbol.t_Equals, Symbol.n_Expression ), t -> {
+            return new Assignment( Symbol.n_Assignment, (LexIdent)t.get(0), (ASTNode)t.get(2)  );
+        });
+
+        // n_Assignment -> t_Identifier t_Equals n_
         g.addRuleWithReduceFunction( Symbol.n_Assignment, List.of( Symbol.t_Identifier, Symbol.t_Equals, Symbol.n_Expression ), t -> {
             return new Assignment( Symbol.n_Assignment, (LexIdent)t.get(0), (ASTNode)t.get(2)  );
         });

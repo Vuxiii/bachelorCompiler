@@ -17,9 +17,23 @@ public class Symbol {
     public static final NonTerminal n_Declaration = new NonTerminal( "DECLARATION" );
     public static final NonTerminal n_Assignment = new NonTerminal( "ASSIGNMENT" );
     
+    public static final NonTerminal n_Declaration_Function = new NonTerminal( "DECLARATION_FUNCTION" );
+    public static final NonTerminal n_Assignment_Function = new NonTerminal( "ASSIGNMENT_FUNCTION" );
+
+    public static final NonTerminal n_Function_Signature = new NonTerminal( "FUNCTION_SIGNATURE" );
+
+
+    public static final NonTerminal n_Function_Param_Signature = new NonTerminal( "FUNCTION_PARAM_SIGNATURE" );
+    public static final NonTerminal n_Parameter_List = new NonTerminal( "PARAMETER_LIST" );
+    public static final NonTerminal n_Parameter = new NonTerminal( "PARAMETER" );
+
+
     public static final NonTerminal n_Declaration_Variable = new NonTerminal( "VARIABLE_DECLARATION" );
     public static final NonTerminal n_Declaration_Type = new NonTerminal( "TYPE_DECLARATION" );
     public static final NonTerminal n_Declaration_Type_Body = new NonTerminal( "TYPE_BODY_DECLARATION" );
+
+
+    public static final NonTerminal n_Return_Type = new NonTerminal( "RETURN_TYPE" );
 
     public static final NonTerminal n_User_Type = new NonTerminal( "TYPE_USER" );
     public static final NonTerminal n_Field_List = new NonTerminal( "FIELD_LIST" );
@@ -75,6 +89,16 @@ public class Symbol {
     public static final Terminal t_Dot = new Terminal( "'.'" );
 
     public static final Terminal t_Let = new Terminal( "let" );
+    public static final Terminal t_Arrow_Right = new Terminal( "'->'" );
+
+
+
+
+
+
+
+
+
 
 
 }

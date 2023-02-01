@@ -11,6 +11,8 @@ import com.vuxiii.compiler.VisitorPattern.Visitors.SymbolCollection.AST_SymbolCo
 import com.vuxiii.compiler.VisitorPattern.Visitors.SymbolCollection.Scope;
 import com.vuxiii.compiler.VisitorPattern.Visitors.TreeCollaps.AST_Shrinker;
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.List;
 
 import com.vuxiii.LR.Records.ASTToken;
@@ -22,6 +24,8 @@ import com.vuxiii.LR.Settings;
 public final class App {
     private App() {
     }
+
+    public static String asm_location = "src/main/java/com/vuxiii/compiler/CodeEmit/";
 
     /**
      * Says hello to the world.
@@ -146,9 +150,19 @@ public final class App {
             [a, b] {
                 print(a);
                 b = b + 5;
+                print( b );
             }
             print( c + b );
         """;
+        input = """
+            let a: int;
+            a = 4;
+            print( a );
+            let c: int;
+            c = 2 + 3 * 7;
+            print( c );
+            """;
+        
         
         // [[ Tokenizer ]]
         List<ASTToken> tokens = Lexer.lex( input );
@@ -249,13 +263,6 @@ public final class App {
 
         interpreter.run();
 
-        line_break();
-
-        System.out.println( "Passing instruction to CodeEmitter");
-        line_break();
-
-
-
         // [[ Code Optimization ]]
 
         // [[ Code Emit ]]
@@ -265,12 +272,38 @@ public final class App {
         System.out.println( "Passing instruction to CodeEmitter");
         line_break();
 
-        X86Emitter emitter = new X86Emitter( instructions );
+        X86Emitter emitter = new X86Emitter( instructions, scopes );
 
+        String asm_code = emitter.run();
+        System.out.println( asm_code );
+
+        line_break();
+
+        System.out.println( "Input was:" );
+        line_break();
+
+        System.out.println( input );
+
+        save_to_file( asm_location, "asm.s", asm_code );
 
     }
 
     private static void line_break() {
         System.out.println( "=".repeat(79) );
+    }
+
+    private static void save_to_file( String asm_location, String filename, String body ) {
+        try {
+            FileWriter fw = new FileWriter( asm_location + filename );
+            fw.write( body );
+            fw.close();
+            System.out.println( "To compile and run the generated assembly code, run './comp.sh'\n");
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        
+
     }
 }
