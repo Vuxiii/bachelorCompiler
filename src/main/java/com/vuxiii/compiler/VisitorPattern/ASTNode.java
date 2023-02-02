@@ -48,6 +48,10 @@ public abstract class ASTNode implements ASTToken {
             if ( field.getType().equals( Optional.class ) ) {
                 try {
                     Optional<?> opt = (Optional<?>) field.get( this );
+                    if ( opt == null ) {
+                        System.out.println( this.term );
+                        System.out.println( this );
+                    }
                     if ( opt.isEmpty() ) continue; // The optional is empty, we don't need to add it...
 
                 } catch (IllegalArgumentException | IllegalAccessException e) {

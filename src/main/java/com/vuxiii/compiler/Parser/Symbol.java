@@ -35,6 +35,8 @@ public class Symbol {
 
     public static final NonTerminal n_Return_Type = new NonTerminal( "RETURN_TYPE" );
 
+    public static final NonTerminal n_Any_Type = new NonTerminal( "ANY_TYPE" );
+
     public static final NonTerminal n_User_Type = new NonTerminal( "TYPE_USER" );
     public static final NonTerminal n_Field_List = new NonTerminal( "FIELD_LIST" );
     public static final NonTerminal n_Field = new NonTerminal( "FIELD" );
@@ -90,6 +92,7 @@ public class Symbol {
 
     public static final Terminal t_Let = new Terminal( "let" );
     public static final Terminal t_Arrow_Right = new Terminal( "'->'" );
+
 
 
 

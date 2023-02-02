@@ -2,6 +2,7 @@ package com.vuxiii.compiler.Lexer.Tokens;
 
 import com.vuxiii.DFANFA.MatchInfo;
 import com.vuxiii.LR.Records.ASTToken;
+import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexArrowRight;
 import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexColon;
 import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexComma;
 import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexDot;
@@ -77,6 +78,8 @@ public class TokenConstructor {
             }
             case COMMA: {
                 return new LexComma( matchInfo, type );
+            } case ARROW_RIGHT: {
+                return new LexArrowRight( matchInfo, type );
             }
             default: {
                 // Unkown. Not implemented yet. Throw error

@@ -155,12 +155,14 @@ public final class App {
             print( c + b );
         """;
         input = """
-            let a: int;
-            a = 4;
-            print( a );
-            let c: int;
-            c = 2 + 3 * 7;
-            print( c );
+            let type string: int;
+            let type my_func: ( name: string, age: int );
+            let a: my_func;
+
+            a = ( name: string, age: int ) {
+                print( age );
+            };
+
             """;
         
         

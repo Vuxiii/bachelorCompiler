@@ -10,6 +10,5 @@ public abstract class Type extends ASTNode {
 
     public Type(Term term) {
         super(term);
-        super.setup_ASTNodeQueue();
     }
 }
