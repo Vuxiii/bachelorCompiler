@@ -35,6 +35,7 @@ import com.vuxiii.compiler.Parser.Nodes.Types.Type;
 import com.vuxiii.compiler.Parser.Nodes.Types.UnknownType;
 import com.vuxiii.compiler.Parser.Nodes.Types.UserType;
 import com.vuxiii.compiler.Parser.Nodes.Field;
+import com.vuxiii.compiler.Parser.Nodes.FunctionCall;
 import com.vuxiii.compiler.Parser.Nodes.Parameter;
 import com.vuxiii.compiler.VisitorPattern.ASTNode;
 
@@ -170,6 +171,26 @@ public class Parser {
 
         // --[[ Functions ]]--
         
+        // n_Statement -> t_Identifier t_LParen t_RParen t_Semicolon
+        g.addRuleWithReduceFunction( Symbol.n_Statement, List.of( Symbol.n_Function_Call, Symbol.t_Semicolon ), t -> {
+            FunctionCall function_name = (FunctionCall)t.get(0);
+            return new Statement( Symbol.n_Statement, function_name, StatementKind.EXPRESSION );
+        });
+
+        // n_Function_Call -> t_Identifier t_LParen t_RParen
+        g.addRuleWithReduceFunction( Symbol.n_Function_Call, List.of( Symbol.t_Identifier, Symbol.t_LParen, Symbol.t_RParen ), t -> {
+            LexIdent function_name = (LexIdent)t.get(0);
+            return new FunctionCall( Symbol.n_Function_Call, function_name );
+        });
+
+        // n_Function_Call -> t_Identifier t_LParen n_Arg_List t_RParen
+        g.addRuleWithReduceFunction( Symbol.n_Function_Call, List.of( Symbol.t_Identifier, Symbol.t_LParen, Symbol.n_Arg_List, Symbol.t_RParen ), t -> {
+            LexIdent function_name = (LexIdent)t.get(0);
+            Argument args = (Argument)t.get(2);
+            return new FunctionCall( Symbol.n_Function_Call, function_name, args );
+        });
+        
+
         // n_Arg_List -> n_Arg t_Comma n_Arg_List
         g.addRuleWithReduceFunction( Symbol.n_Arg_List, List.of( Symbol.n_Arg, Symbol.t_Comma, Symbol.n_Arg_List ), t -> {
             Argument arg = (Argument)t.get(0);
@@ -391,31 +412,8 @@ public class Parser {
             return new Declaration( Symbol.n_Parameter, id, type, DeclarationKind.PARAMETER );
         });
 
-        // // n_Parameter -> t_Identifier t_Colon n_User_Type
-        // g.addRuleWithReduceFunction( Symbol.n_Parameter, List.of( Symbol.t_Identifier, Symbol.t_Colon, Symbol.n_User_Type ), t -> {
-        //     LexIdent id = (LexIdent)t.get(0);
-        //     if ( t.get(2) instanceof LexIdent ) {
-        //         LexIdent type = (LexIdent)t.get(2);
-        //         return new Declaration( Symbol.n_Parameter, id, new UnknownType(Symbol.n_Parameter, type), DeclarationKind.PARAMETER );
-        // } else { // Field
-        //         Field type = (Field)t.get(2);
-        //         System.out.println( "--[[ Parser Error ]]--\nTried to declare a new type as a parameter.\n " + type + "\nPlease declare the type beforehand!" );
-        //         System.exit(-1); // Error for now
-        //         return null;
-        //     }
-        // });
-
-
-        // n_Declaration_Variable -> t_Let t_Identifier t_Colon n_Standard_Type
-        g.addRuleWithReduceFunction( Symbol.n_Declaration_Variable, List.of( Symbol.t_Let, Symbol.t_Identifier, Symbol.t_Colon, Symbol.n_Standard_Type ), t -> {
-            LexIdent id = (LexIdent)t.get(1);
-            StandardType type = (StandardType)t.get(3); 
-            return new Declaration( Symbol.n_Declaration_Variable, id, type, DeclarationKind.VARIABLE );
-        });
-
-
         // n_Declaration_Variable -> t_Let t_Identifier t_Colon n_User_Type
-        g.addRuleWithReduceFunction( Symbol.n_Declaration_Variable, List.of( Symbol.t_Let, Symbol.t_Identifier, Symbol.t_Colon, Symbol.n_User_Type ), t -> {
+        g.addRuleWithReduceFunction( Symbol.n_Declaration_Variable, List.of( Symbol.t_Let, Symbol.t_Identifier, Symbol.t_Colon, Symbol.n_Any_Type ), t -> {
             LexIdent id = (LexIdent)t.get(1);
 
             if ( t.get(3) instanceof Field ) {
@@ -425,13 +423,15 @@ public class Parser {
                 stored_user_types.putIfAbsent( id.matchInfo.str(), type );
                 
                 return new Declaration( Symbol.n_Declaration_Variable, id, type, DeclarationKind.VARIABLE );
+            } else if (t.get(3) instanceof StandardType ) { 
+                StandardType type = (StandardType)t.get(3); 
+                return new Declaration( Symbol.n_Declaration_Variable, id, type, DeclarationKind.VARIABLE );
             } else if ( t.get(3) instanceof LexIdent ) {
                 LexIdent ident = (LexIdent)t.get(3);             
                 Type type = stored_user_types.get( ident.name );
                 
                 if ( type == null )
                     return new Declaration( Symbol.n_Declaration_Variable, id, new UnknownType(Symbol.n_Declaration_Variable, ident ), DeclarationKind.VARIABLE );
-
 
                 return new Declaration( Symbol.n_Declaration_Variable, id, type, DeclarationKind.VARIABLE );
             } else if ( t.get(3) instanceof FunctionType ) {
@@ -455,66 +455,18 @@ public class Parser {
 
         // Make an 'alias' for a standard type. Like person -> int.
         // n_Declaration_Type -> n_Declaration_Type_Body n_Standard_Type
-        g.addRuleWithReduceFunction( Symbol.n_Declaration_Type, List.of( Symbol.n_Declaration_Type_Body, Symbol.n_Standard_Type ), t -> {
+        g.addRuleWithReduceFunction( Symbol.n_Declaration_Type, List.of( Symbol.n_Declaration_Type_Body, Symbol.n_Any_Type ), t -> {
             LexIdent id = (LexIdent)t.get(0);
-            AliasType type = new AliasType( Symbol.n_Declaration_Type, id.matchInfo, (StandardType)t.get(1) ); 
-            
-            stored_user_types.putIfAbsent( type.aliasInfo.str(), type );
-            
-            return new Declaration( Symbol.n_Declaration_Type, id, type, DeclarationKind.ALIAS_TO_STD_TYPE );
+            Type type = (Type)t.get(1);
+                        
+            return new Declaration( Symbol.n_Declaration_Type, id, type, DeclarationKind.UNKNOWN );
         });
         
-        // Make a new user type. It can either be a new type.
-        // OR it can be an 'alias' for another user type!
-        // n_Declaration_Type -> n_Declaration_Type_Body n_User_Type
-        g.addRuleWithReduceFunction( Symbol.n_Declaration_Type, List.of( Symbol.n_Declaration_Type_Body, Symbol.n_User_Type ), t -> {
-            LexIdent id = (LexIdent)t.get(0);
-            if ( t.get(1) instanceof Field ) {
-                Field fields = (Field)t.get(1);
-                UserType type = new UserType(Symbol.n_Declaration_Type, id, fields );
-                
-                stored_user_types.putIfAbsent( id.matchInfo.str(), type );
-                
-                return new Declaration( Symbol.n_Declaration_Type, id, type, DeclarationKind.USER_TYPE );
-            } else if ( t.get(1) instanceof LexIdent ) {
-                Type type = stored_user_types.get(((LexIdent)t.get(1)).name);
-                
-                if ( type == null ) {
-                    return new Declaration( Symbol.n_Field, id, new UnknownType(Symbol.n_Field, (LexIdent)t.get(2) ), DeclarationKind.ALIAS_TO_USER_TYPE );
-                }
-
-                stored_user_types.putIfAbsent( id.matchInfo.str(), type );
-                
-                return new Declaration( Symbol.n_Declaration_Type, id, type, DeclarationKind.ALIAS_TO_USER_TYPE );
-            } else if ( t.get(1) instanceof FunctionType ) {
-                FunctionType type = (FunctionType)t.get(1);    
-                stored_user_types.putIfAbsent( id.matchInfo.str(), type );
-                
-                return new Declaration( Symbol.n_Declaration_Variable, id, type, DeclarationKind.FUNCTION );
-            }
-            System.out.println("--[[ Parser Error ]]--\nSomething happend trying to parse a user type. It is not a UserType or an Identifier. So what is it?" );
-            System.out.println( t.get(1) );
-            System.exit(-1);
-            return null; // error!
-        });
         
-        // Make a new user type. It can either be a new type.
-        // OR it can be an 'alias' for another user type!
-        // n_Declaration_Type -> n_Declaration_Type_Body t_Identifier
-        g.addRuleWithReduceFunction( Symbol.n_Declaration_Type, List.of( Symbol.n_Declaration_Type_Body, Symbol.t_Identifier ), t -> {
-            LexIdent id = (LexIdent)t.get(0);
-            AliasType type = (AliasType)t.get(1);
+        // n_Declaration_Type_Body -> t_Type_Declare t_Identifer t_Colon
+        g.addRuleWithReduceFunction( Symbol.n_Declaration_Type_Body, List.of( Symbol.t_Type_Declare, Symbol.t_Identifier, Symbol.t_Colon ), t -> {
             
-            stored_user_types.putIfAbsent( type.aliasInfo.str(), type );
-            
-            return new Declaration( Symbol.n_Declaration_Type, id, type, DeclarationKind.ALIAS_TO_USER_TYPE );
-            
-        });
-
-        // n_Declaration_Type_Body -> t_Let t_Type_Declare t_Identifer t_Colon
-        g.addRuleWithReduceFunction( Symbol.n_Declaration_Type_Body, List.of( Symbol.t_Let, Symbol.t_Type_Declare, Symbol.t_Identifier, Symbol.t_Colon ), t -> {
-            
-            LexIdent body = (LexIdent)t.get(2);
+            LexIdent body = (LexIdent)t.get(1);
             body.term = Symbol.n_Declaration_Type_Body;
             return body;
         });

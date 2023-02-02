@@ -4,6 +4,7 @@ public enum StatementKind {
     PRINT,
     DECLARATION,
     ASSIGNMENT,
-    SCOPE,
+    SCOPE, 
+    EXPRESSION,
 
 }

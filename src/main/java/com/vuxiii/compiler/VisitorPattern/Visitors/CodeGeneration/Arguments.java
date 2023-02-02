@@ -14,12 +14,25 @@ public class Arguments {
 
     public final int kind;
 
+    public final String label_string;
+    
+    public Arguments( String label ) {
+        this.src_1 = null;
+        this.src_2 = null;
+        this.target = null;
+        this.value = null;
+        this.variable = null;
+        label_string = label;
+        kind = 6;
+    }
+
     public Arguments( Register src_1, Register src_2, Register target ) {
         this.src_1 = src_1;
         this.src_2 = src_2;
         this.target = target;
         this.value = null;
         this.variable = null;
+        this.label_string = null;
         kind = 0;
     }
     public Arguments( Register src_1, Register target ) {
@@ -28,6 +41,7 @@ public class Arguments {
         this.target = target;
         this.value = null;
         this.variable = null;
+        this.label_string = null;
         kind = 1;
     }
 
@@ -37,6 +51,7 @@ public class Arguments {
         this.src_2 = null;
         this.target = null;
         this.variable = null;
+        this.label_string = null;
         kind = 2;
     }
 
@@ -46,6 +61,7 @@ public class Arguments {
         this.src_2 = null;
         this.target = null;
         this.variable = null;
+        this.label_string = null;
         kind = 3;
     }
     
@@ -55,6 +71,7 @@ public class Arguments {
         this.target = null;
         this.variable = target;
         this.value = null;
+        this.label_string = null;
         kind = 4;
     }
 
@@ -64,6 +81,7 @@ public class Arguments {
         this.target = target;
         this.variable = src_1;
         this.value = null;
+        this.label_string = null;
         kind = 5;
     }
 
@@ -78,7 +96,9 @@ public class Arguments {
             return src_1  + " -> " + variable;
         } else if ( kind == 5 ) {
             return variable + " -> " + target;
-        } else {
+        } else if ( kind == 6 ) {
+            return label_string + ":";
+        }else {
             return src_1 + " -> " + target;
         }
     }

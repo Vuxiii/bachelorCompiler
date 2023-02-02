@@ -4,7 +4,9 @@ import com.vuxiii.compiler.CodeEmit.X86Emitter;
 import com.vuxiii.compiler.InternalInterpreter.Interpreter;
 import com.vuxiii.compiler.Lexer.Lexer;
 import com.vuxiii.compiler.Parser.Parser;
+import com.vuxiii.compiler.Parser.Nodes.Assignment;
 import com.vuxiii.compiler.VisitorPattern.Visitors.CodeGeneration.AST_StackMachine;
+import com.vuxiii.compiler.VisitorPattern.Visitors.CodeGeneration.FunctionBlock;
 import com.vuxiii.compiler.VisitorPattern.Visitors.CodeGeneration.Instruction;
 import com.vuxiii.compiler.VisitorPattern.Visitors.Debug.AST_Printer;
 import com.vuxiii.compiler.VisitorPattern.Visitors.SymbolCollection.AST_SymbolCollector;
@@ -13,7 +15,9 @@ import com.vuxiii.compiler.VisitorPattern.Visitors.TreeCollaps.AST_Shrinker;
 
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import com.vuxiii.LR.Records.ASTToken;
 import com.vuxiii.LR.Settings;
@@ -25,7 +29,7 @@ public final class App {
     private App() {
     }
 
-    public static String asm_location = "src/main/java/com/vuxiii/compiler/CodeEmit/";
+    public static String asm_location = "src/main/java/com/vuxiii/compiler/CodeEmit/Output/";
 
     /**
      * Says hello to the world.
@@ -155,8 +159,8 @@ public final class App {
             print( c + b );
         """;
         input = """
-            let type string: int;
-            let type my_func: ( name: string, age: int );
+            type string: int;
+            type my_func: ( name: string, age: int );
             let a: my_func;
 
             a = ( name: string, age: int ) {
@@ -164,6 +168,17 @@ public final class App {
             };
 
             """;
+            input = """
+                type my_func: ();
+                let a: my_func;
+    
+                a = () {
+                    print( 2 );
+                };
+    
+                a();
+
+                """;
         
         
         // [[ Tokenizer ]]
@@ -177,7 +192,7 @@ public final class App {
         line_break();
 
         Settings.showGrammar = true;
-        Settings.showParsingTable = false;
+        Settings.showParsingTable = true;
         // [[ Parser ]]
         
         ASTToken ast = Parser.getAST( tokens );
@@ -224,7 +239,7 @@ public final class App {
         ast.accept( symbolCollector );
 
         List<Scope> scopes = symbolCollector.scopes;
-
+        
         int i = 0;
         for ( Scope scope : scopes ) {
             System.out.println( "Scope [" + (i++) + "]" );
@@ -246,14 +261,35 @@ public final class App {
 
         // [[ Code Generation ]]
 
-        AST_StackMachine generator = new AST_StackMachine();
+        // [[ Create Functions ]]
+
+
+
+        
+        AST_StackMachine generator = new AST_StackMachine( symbolCollector.functions );
         ast.accept(generator);
 
         System.out.println( "Internal Low-Level Representation");
 
+
         List<Instruction> instructions = generator.code;
+        Map<String, FunctionBlock> fbs = generator.functions;
 
         line_break();
+
+        System.out.println( "[[ Functions ]]" );
+
+        for ( String function : fbs.keySet() ) {
+            FunctionBlock fb = fbs.get(function);
+            System.out.println( fb.function_label );
+            for ( Instruction instruction : fb.instructions ) {
+                System.out.println( instruction );
+            }
+        }
+
+        System.out.println( "[[ Main Code ]]" );
+
+
         for ( Instruction instruction : instructions ) {
             System.out.println( instruction );
         }
@@ -274,7 +310,7 @@ public final class App {
         System.out.println( "Passing instruction to CodeEmitter");
         line_break();
 
-        X86Emitter emitter = new X86Emitter( instructions, scopes );
+        X86Emitter emitter = new X86Emitter( instructions, fbs, scopes );
 
         String asm_code = emitter.run();
         System.out.println( asm_code );

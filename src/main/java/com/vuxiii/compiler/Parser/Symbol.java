@@ -22,6 +22,7 @@ public class Symbol {
 
     public static final NonTerminal n_Function_Signature = new NonTerminal( "FUNCTION_SIGNATURE" );
 
+    public static final NonTerminal n_Function_Call = new NonTerminal( "FUNCTION_CALL" );
 
     public static final NonTerminal n_Function_Param_Signature = new NonTerminal( "FUNCTION_PARAM_SIGNATURE" );
     public static final NonTerminal n_Parameter_List = new NonTerminal( "PARAMETER_LIST" );
@@ -40,6 +41,7 @@ public class Symbol {
     public static final NonTerminal n_User_Type = new NonTerminal( "TYPE_USER" );
     public static final NonTerminal n_Field_List = new NonTerminal( "FIELD_LIST" );
     public static final NonTerminal n_Field = new NonTerminal( "FIELD" );
+
 
 
     public static final NonTerminal n_Print = new NonTerminal( "PRINT" );

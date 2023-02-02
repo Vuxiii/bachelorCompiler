@@ -23,5 +23,10 @@ public enum Opcode {
     LOAD_VARIABLE,
     STORE_VARIABLE,
 
+    SETUP_STACK,
+    RESTORE_STACK,
+
+    LABEL,
+
     PRINT,
 }

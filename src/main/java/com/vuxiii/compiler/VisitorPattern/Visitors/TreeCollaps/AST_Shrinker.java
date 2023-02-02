@@ -43,7 +43,8 @@ public class AST_Shrinker extends VisitorBase {
 
     @VisitorPattern( when = VisitOrder.EXIT_NODE, order = 2 )
     public void cleanup_assignment( Assignment assignment ) {
-        assignment.value = assignment.value.getChild1().get();
+        if ( assignment.value.getChild1().isPresent() )
+            assignment.value = assignment.value.getChild1().get();
     }
 
     @VisitorPattern( when = VisitOrder.EXIT_NODE, order = 2 )

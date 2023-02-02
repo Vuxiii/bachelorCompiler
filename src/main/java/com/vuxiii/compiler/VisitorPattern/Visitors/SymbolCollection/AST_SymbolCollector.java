@@ -7,14 +7,17 @@ import com.vuxiii.Visitor.VisitorBase;
 import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexIdent;
 import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexLiteral;
 import com.vuxiii.compiler.Parser.Nodes.Argument;
+import com.vuxiii.compiler.Parser.Nodes.Assignment;
 import com.vuxiii.compiler.Parser.Nodes.Capture;
 import com.vuxiii.compiler.Parser.Nodes.Declaration;
 import com.vuxiii.compiler.Parser.Nodes.ScopeNode;
+import com.vuxiii.compiler.Parser.Nodes.Types.FunctionType;
 import com.vuxiii.compiler.VisitorPattern.Annotations.VisitOrder;
 import com.vuxiii.compiler.VisitorPattern.Annotations.VisitorPattern;
 
 public class AST_SymbolCollector extends VisitorBase {
     
+    public List<Assignment> functions;
 
     public List<Scope> scopes;
     private int current_index = 0;
@@ -24,7 +27,39 @@ public class AST_SymbolCollector extends VisitorBase {
     public AST_SymbolCollector( Scope main_scope ) {
         scopes = new ArrayList<>();
         scopes.add( main_scope );
+
+        functions = new ArrayList<>();
     }
+
+
+    @VisitorPattern( when = VisitOrder.ENTER_NODE )
+    public void make_function_mode( Assignment assignment_node ) {
+        if ( !(assignment_node.value instanceof FunctionType) ) return;
+
+        functions.add( assignment_node );
+
+        // Before enter in function:
+
+            // Caller should push the parameters 1, 2, ..., n - in that order.
+            // call function_label
+
+        // Upon enter in function:
+        
+            // Setup stackpointer
+
+            // Call the code inside the function body
+
+            // Restore stackpointer
+            // ret
+
+        // Setup stack
+            // 
+
+        
+
+    }
+
+
 
     @VisitorPattern( when = VisitOrder.ENTER_NODE )
     public void new_scope( ScopeNode scope ) {
