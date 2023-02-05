@@ -35,4 +35,10 @@ public class AliasType extends Type  {
         return "Alias_Type ";
     }
     
+    @Override
+    public String simple_type_name() {
+        return aliasInfo.str();
+    }
+    
+    
 }

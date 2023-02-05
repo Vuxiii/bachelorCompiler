@@ -10,18 +10,18 @@ import com.vuxiii.compiler.VisitorPattern.Annotations.VisitNumber;
 public class Parameter extends ASTNode {
 
 
-    @VisitNumber( number = 1 ) public ASTNode param; // Not ident because this is an actual argument. It could be a literal!
+    @VisitNumber( number = 1 ) public Declaration param; // Not ident because this is an actual argument. It could be a literal!
 
     @VisitNumber( number = 2 ) public final Optional<Parameter> next;
 
 
-    public Parameter( Term term, ASTNode parameter ) {
+    public Parameter( Term term, Declaration parameter ) {
         super( term ); 
         this.param = parameter;
         next = Optional.empty();
         super.setup_ASTNodeQueue();
     }
-    public Parameter( Term term, ASTNode parameter, Parameter next ) {
+    public Parameter( Term term, Declaration parameter, Parameter next ) {
         super( term ); 
         this.param = parameter;
         this.next = Optional.of(next);
@@ -51,6 +51,18 @@ public class Parameter extends ASTNode {
     public String getPrintableName() {
         return (next.isEmpty()  ? "Parameter" 
                                 : "Parameter_List");
+    }
+
+    public String get_readable_parameter_list() {
+        String out = "";
+
+        Parameter current = this;
+        while ( current != null ) {
+            out += ((Declaration)current.param).get_parameter_form() + ", ";
+            current = current.next.isPresent() ? current.next.get() : null;
+        }
+
+        return out.substring(0, out.length()-2);
     }
     
 }

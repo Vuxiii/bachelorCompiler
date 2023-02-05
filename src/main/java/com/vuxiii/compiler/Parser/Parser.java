@@ -38,6 +38,7 @@ import com.vuxiii.compiler.Parser.Nodes.Field;
 import com.vuxiii.compiler.Parser.Nodes.FunctionCall;
 import com.vuxiii.compiler.Parser.Nodes.Parameter;
 import com.vuxiii.compiler.VisitorPattern.ASTNode;
+import com.vuxiii.compiler.VisitorPattern.Visitors.Debug.AST_Printer;
 
 
 public class Parser {
@@ -47,11 +48,18 @@ public class Parser {
     private static Map<String, Type> stored_user_types = new HashMap<>();
 
     public static ASTNode getAST( List<ASTToken> tokens ) {
-        if ( g == null )
+        if ( g == null ) {
+            long bf = System.currentTimeMillis();
             init();
+            long after = System.currentTimeMillis();
+            System.out.println( "Compiling the parser took: " + (after - bf) + " milliseconds");
+        }
 
         
+        long bf = System.currentTimeMillis();
         ParseTable table = LRParser.parse( g, Symbol.n_Start );
+        long after = System.currentTimeMillis();
+        System.out.println( "Parsing the input took: " + (after - bf) + " milliseconds");
         
         // System.out.println( tokens );
 
@@ -304,14 +312,14 @@ public class Parser {
             Statement body = (Statement)t.get(2);
             if ( func.parameters.isPresent() ) {
                 if ( func.return_type.isPresent() )
-                    return new FunctionType( Symbol.n_Assignment_Function, func.parameters.get(), func.return_type.get(), body );
+                    return new FunctionType( Symbol.n_Assignment_Function, func.parameters, func.return_type, Optional.of(body) );
                 else
-                   return new FunctionType( Symbol.n_Assignment_Function, func.parameters.get(), body );
+                   return new FunctionType( Symbol.n_Assignment_Function, func.parameters, Optional.empty(), Optional.of(body) );
             } else {
                 if ( func.return_type.isPresent() )
-                    return new FunctionType( Symbol.n_Assignment_Function, func.return_type.get(), body );
+                    return new FunctionType( Symbol.n_Assignment_Function, Optional.empty(), func.return_type, Optional.of(body) );
                 else
-                   return new FunctionType( Symbol.n_Assignment_Function, body );
+                   return new FunctionType( Symbol.n_Assignment_Function, Optional.empty(), Optional.empty(), Optional.of(body) );
             }
         });
 
@@ -331,9 +339,9 @@ public class Parser {
             // System.out.println( func.parameters );
 
             if ( func.parameters.isPresent() )
-                return new FunctionType( Symbol.n_Function_Signature, func.parameters.get(), return_type );
+                return new FunctionType( Symbol.n_Function_Signature, func.parameters, Optional.of(return_type), Optional.empty() );
             else
-                return new FunctionType( Symbol.n_Function_Signature, return_type );
+                return new FunctionType( Symbol.n_Function_Signature, Optional.empty(), Optional.of(return_type), Optional.empty() );
         });
 
         // Function with implicit return type of 'void'
@@ -342,20 +350,20 @@ public class Parser {
             FunctionType func = (FunctionType)t.get(0);
             
             if ( func.parameters.isPresent() )
-                return new FunctionType( Symbol.n_Function_Signature, func.parameters.get() ); // Do std.void
+                return new FunctionType( Symbol.n_Function_Signature, func.parameters, Optional.empty(), Optional.empty() ); // Do std.void
             else
-                return new FunctionType( Symbol.n_Function_Signature ); // Do std.void
+                return new FunctionType( Symbol.n_Function_Signature, Optional.empty(), Optional.empty(), Optional.empty() ); // Do std.void
         });
 
         // n_Function_Param_Signature -> t_LParen n_Parameter_List t_RParen
         g.addRuleWithReduceFunction( Symbol.n_Function_Param_Signature, List.of( Symbol.t_LParen, Symbol.n_Parameter_List, Symbol.t_RParen ), t -> {
             Parameter param_list = (Parameter)t.get(1);
-            return new FunctionType( Symbol.n_Function_Param_Signature, param_list );
+            return new FunctionType( Symbol.n_Function_Param_Signature, Optional.of(param_list), Optional.empty(), Optional.empty() );
         });
 
         // n_Function_Param_Signature -> t_LParen t_RParen
         g.addRuleWithReduceFunction( Symbol.n_Function_Param_Signature, List.of( Symbol.t_LParen, Symbol.t_RParen ), t -> {
-            return new FunctionType( Symbol.n_Function_Param_Signature );
+            return new FunctionType( Symbol.n_Function_Param_Signature, Optional.empty(), Optional.empty(), Optional.empty() );
         });
 
         // n_Return_Type -> t_Arrow_Right n_Any_Type

@@ -42,4 +42,8 @@ public class Scope {
     public boolean can_access( String variable ) {
         return vars.containsKey( variable ) || capture_vars.containsKey( variable );
     }
+
+    public String toString() {
+        return vars.keySet().toString();
+    }
 }

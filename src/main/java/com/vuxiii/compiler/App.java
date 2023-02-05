@@ -9,6 +9,7 @@ import com.vuxiii.compiler.VisitorPattern.Visitors.CodeGeneration.AST_StackMachi
 import com.vuxiii.compiler.VisitorPattern.Visitors.CodeGeneration.FunctionBlock;
 import com.vuxiii.compiler.VisitorPattern.Visitors.CodeGeneration.Instruction;
 import com.vuxiii.compiler.VisitorPattern.Visitors.Debug.AST_Printer;
+import com.vuxiii.compiler.VisitorPattern.Visitors.SymbolCollection.AST_FixTypes;
 import com.vuxiii.compiler.VisitorPattern.Visitors.SymbolCollection.AST_SymbolCollector;
 import com.vuxiii.compiler.VisitorPattern.Visitors.SymbolCollection.Scope;
 import com.vuxiii.compiler.VisitorPattern.Visitors.TreeCollaps.AST_Shrinker;
@@ -167,19 +168,64 @@ public final class App {
                 print( age );
             };
 
-            """;
-            input = """
-                type my_func: ();
-                let a: my_func;
-    
-                a = () {
-                    print( 2 );
-                };
-    
-                a();
+        """;
+        input = """
+            type string: int;
+            type my_func: ();
+            type second: ( z: int ) -> int;
+            let a: my_func;
+            let b: second;
 
-                """;
-        
+            a = () {
+                print( 2 );
+            };
+
+            b = ( z: int ) -> int {
+                print( z + 3 );
+            };
+
+            a();
+            b(3);
+
+        """;
+        input = """
+            type functype: (x: int) -> int;
+            let a: ( z: int ) -> int;
+            let b: functype;
+
+            a = ( z: int ) -> int {
+                let inner_var: int;
+                inner_var = 2;
+                print( inner_var + z );
+            };
+        """;
+        input = """
+            let a: int;
+            a = 3;
+            let my_function: ( x: int ) -> int;
+            let b: int;
+
+            b = 2;
+
+            my_function = ( x: int ) -> int {
+                let inner_var: int;
+                inner_var = 3;
+                print( x );
+            };
+
+            let my_second_function: ( x: int, b: int ) -> int;
+            my_second_function = (x: int, b: int) -> int {
+                let inner_fn: ( z: int ) -> int;
+                inner_fn = ( z: int ) -> int {
+                    let inner_fn_var: int;
+                    print( z );
+                };
+                print(x+b);
+            };
+
+            my_second_function( 2, 2 );
+        """;
+    
         
         // [[ Tokenizer ]]
         List<ASTToken> tokens = Lexer.lex( input );
@@ -192,11 +238,10 @@ public final class App {
         line_break();
 
         Settings.showGrammar = true;
-        Settings.showParsingTable = true;
+        Settings.showParsingTable = false;
         // [[ Parser ]]
         
         ASTToken ast = Parser.getAST( tokens );
-
         System.out.println( ast );
         
         line_break();
@@ -220,7 +265,6 @@ public final class App {
     
         System.out.println( ast );
 
-        line_break();
 
         // ConstantPropagation cp = new ConstantPropagation();
         // do {
@@ -228,14 +272,32 @@ public final class App {
         //     ast.accept( cp );
         // } while ( cp.run_again );
 
+        // printer = new AST_Printer();
+        // ast.accept( printer );
+        // System.out.println( printer.get_ascii() );
+        
+        line_break();
+        System.out.println( "TYPE_FIXER BEFORE" );
+        line_break();
         printer = new AST_Printer();
         ast.accept( printer );
         System.out.println( printer.get_ascii() );
+
+        AST_FixTypes type_fixer = new AST_FixTypes();
+        ast.accept( type_fixer );
         
+        line_break();
+        System.out.println( "TYPE_FIXER AFTER" );
+        line_break();
+
+        
+        printer = new AST_Printer();
+        ast.accept( printer );
+        System.out.println( printer.get_ascii() );
         line_break();
 
         // [[ Symbol Collecting ]]
-        AST_SymbolCollector symbolCollector = new AST_SymbolCollector( new Scope() );
+        AST_SymbolCollector symbolCollector = new AST_SymbolCollector();
         ast.accept( symbolCollector );
 
         List<Scope> scopes = symbolCollector.scopes;
@@ -252,6 +314,9 @@ public final class App {
                 
             System.out.println();
         }
+
+        System.out.println( symbolCollector.scope_map.keySet() );
+        symbolCollector.scope_map.keySet().forEach( k -> { System.out.println( "Key: " + k + " -> " + symbolCollector.scope_map.get(k) ); } );
 
         line_break();
 

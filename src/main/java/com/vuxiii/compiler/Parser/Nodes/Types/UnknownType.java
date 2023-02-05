@@ -35,4 +35,9 @@ public class UnknownType extends Type  {
         return "Unknown_Type ";
     }
     
+    @Override
+    public String simple_type_name() {
+        return unknown_type.name;
+    }
+    
 }

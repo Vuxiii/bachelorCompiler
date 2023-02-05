@@ -14,78 +14,16 @@ public class FunctionType extends Type {
     @VisitNumber( number = 2 ) public final Optional<Type> return_type;
     @VisitNumber( number = 3 ) public final Optional<Statement> body;
 
-    public FunctionType( Term term, Parameter parameter_list, Type return_type, Statement body ) {
+    public FunctionType( Term term, Optional<Parameter> parameter_list, Optional<Type> return_type, Optional<Statement> body ) {
         super(term);
         
-        this.parameters = Optional.of( parameter_list );
-        this.return_type = Optional.of(return_type);
-        this.body = Optional.of(body);
+        this.parameters =  parameter_list;
+        this.return_type = return_type;
+        this.body = body;
         super.setup_ASTNodeQueue();
     }
 
-    public FunctionType( Term term, Parameter parameter_list, Statement body ) {
-        super(term);
-        
-        this.parameters = Optional.of( parameter_list );
-        this.return_type = Optional.empty();
-        this.body = Optional.of(body);
-        super.setup_ASTNodeQueue();
-    }
-
-    public FunctionType( Term term, Parameter parameter_list, Type return_type ) {
-        super(term);
-        
-        this.parameters = Optional.of( parameter_list );
-        this.return_type = Optional.of(return_type);
-        this.body = Optional.empty();
-        super.setup_ASTNodeQueue();
-    }
-
-    public FunctionType( Term term, Type return_type ) {
-        super(term);
-        
-        this.parameters = Optional.empty();
-        this.return_type = Optional.of(return_type);
-        this.body = Optional.empty();
-        super.setup_ASTNodeQueue();
-    }
-
-    public FunctionType( Term term, Parameter parameters ) {
-        super(term);
-        
-        this.parameters = Optional.of(parameters);
-        this.return_type = Optional.empty();
-        this.body = Optional.empty();
-        super.setup_ASTNodeQueue();
-    }
-
-    public FunctionType( Term term ) {
-        super(term);
-        
-        this.parameters = Optional.empty();
-        this.return_type = Optional.empty();
-        this.body = Optional.empty();
-        super.setup_ASTNodeQueue();
-    }
-
-    public FunctionType( Term term, Statement body ) {
-        super(term);
-        
-        this.parameters = Optional.empty();
-        this.return_type = Optional.empty();
-        this.body = Optional.of(body);
-        super.setup_ASTNodeQueue();
-    }
-
-    public FunctionType( Term term, Type return_type, Statement body ) {
-        super(term);
-        
-        this.parameters = Optional.empty();
-        this.return_type = Optional.of(return_type);
-        this.body = Optional.of(body);
-        super.setup_ASTNodeQueue();
-    }
-
+    
     @Override
     public Optional<ASTNode> getChild1() {
         if ( parameters.isPresent() )
@@ -111,7 +49,25 @@ public class FunctionType extends Type {
 
     @Override
     public String getPrintableName() {
-        return "FUNC_Type";
+        return "FUNC_Type: " + simple_type_name();
+
+    }
+    
+    @Override
+    public String simple_type_name() {
+        String out = "(";
+
+        if ( parameters.isPresent() ) {
+            out += parameters.get().get_readable_parameter_list();
+        }
+        
+        out += ") -> ";
+
+        if ( return_type.isPresent() ) 
+            out += ((Type)return_type.get()).simple_type_name();
+        else
+            out += "void";
+        return out;
     }
     
 }

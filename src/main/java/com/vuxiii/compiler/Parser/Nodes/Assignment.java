@@ -45,7 +45,7 @@ public class Assignment extends ASTNode {
 
     @Override
     public String getPrintableName() {
-        return "Assignment";
+        return "Assignment " + getChildrenCount();
     }
     
 }

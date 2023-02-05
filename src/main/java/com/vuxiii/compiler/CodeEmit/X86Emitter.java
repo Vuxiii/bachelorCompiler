@@ -179,6 +179,7 @@ public class X86Emitter {
 
                 case RETURN: {
                     push_code( "ret" );
+                    push_code( "" );
                 } break;
 
                 case CALL: {

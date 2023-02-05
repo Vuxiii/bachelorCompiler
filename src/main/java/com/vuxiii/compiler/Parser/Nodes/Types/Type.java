@@ -11,4 +11,6 @@ public abstract class Type extends ASTNode {
     public Type(Term term) {
         super(term);
     }
+
+    public abstract String simple_type_name();
 }

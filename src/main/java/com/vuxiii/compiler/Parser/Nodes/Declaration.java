@@ -15,9 +15,9 @@ public class Declaration extends ASTNode {
 
     @VisitNumber( number = 1 ) public final LexIdent id;
 
-    @VisitNumber( number = 2 ) public final Type type;
+    @VisitNumber( number = 2 ) public Type type;
 
-    public final DeclarationKind kind;
+    public DeclarationKind kind;
 
     /**
      * This constructor constructs either a variable declaration or a type alias declaration, where:
@@ -55,6 +55,10 @@ public class Declaration extends ASTNode {
     @Override
     public String getPrintableName() {
         return "Declaration: " + kind;
+    }
+
+    public String get_parameter_form() {
+        return id.name + ": " + type.simple_type_name();
     }
     
 }

@@ -29,4 +29,9 @@ public class LexType extends Type {
     public String getPrintableName() {
         return type + " ~ Line " + matchInfo.lineNumber();
     }
+    
+    @Override
+    public String simple_type_name() {
+        return type.name;
+    }
 }

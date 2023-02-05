@@ -37,4 +37,9 @@ public class UserType extends Type {
         return "User_Type";
     }
     
+    @Override
+    public String simple_type_name() {
+        return identifier.name;
+    }
+
 }

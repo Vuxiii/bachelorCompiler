@@ -34,4 +34,8 @@ public class StandardType extends Type  {
         return "STD_Type";
     }
     
+    @Override
+    public String simple_type_name() {
+        return type.type.name;
+    }
 }
