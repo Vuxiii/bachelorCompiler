@@ -78,7 +78,6 @@ public class AST_Printer extends Visitor {
         else
             prefix += bar_with_child;
 
-        
         if ( token.isLeaf() )
             ast_string += prefix + child_indicator + pinkCode + token.getPrintableName() + reset + "\n";
         else 
@@ -159,9 +158,12 @@ public class AST_Printer extends Visitor {
         String prefix = get_prefix(node);
         ASTNode parent = maybeParent.get();
 
-        if ( get_children_left(parent) != 1 )
-            parent_prefix.put( node, prefix + spacing );
+        if ( get_children_left(parent) < 1 )
+            prefix = prefix + spacing;
         else
-            parent_prefix.put( node, prefix + bar_with_spacing );
+            prefix = prefix + bar_with_spacing;
+
+        parent_prefix.put( node, prefix );
+
     }
 }
