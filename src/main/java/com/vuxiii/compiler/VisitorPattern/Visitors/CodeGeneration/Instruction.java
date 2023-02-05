@@ -9,6 +9,8 @@ public class Instruction {
 
     public final Optional<Comment> comment;
 
+    public final boolean target_is_parameter; // Update.
+
     public Instruction( Opcode opcode, Arguments arguments ) {
         this( opcode, arguments, new Comment("") );
     }
@@ -17,14 +19,23 @@ public class Instruction {
         this.opcode = opcode;
         args = Optional.empty();
         comment = Optional.empty();
+        this.target_is_parameter = false;
     }
 
     public Instruction( Opcode opcode, Arguments arguments, Comment comment ) {
         this.opcode = opcode;
         this.args = Optional.of( arguments );
         this.comment = Optional.of( comment );
+        this.target_is_parameter = false;
     }
     
+    public Instruction(Opcode opcode, Arguments arguments, Comment comment, boolean target_is_parameter) {
+        this.opcode = opcode;
+        this.args = Optional.of( arguments );
+        this.comment = Optional.of( comment );
+        this.target_is_parameter = target_is_parameter;
+    }
+
     public String toString() {
         String start = opcode.toString();
         String middle = "";

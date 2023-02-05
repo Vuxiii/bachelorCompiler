@@ -1,23 +1,32 @@
 package com.vuxiii.compiler.VisitorPattern.Visitors.CodeGeneration;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
+import com.vuxiii.DFANFA.MatchInfo;
+import com.vuxiii.compiler.Lexer.Tokens.TokenType;
 import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexIdent;
 import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexLiteral;
 import com.vuxiii.compiler.Parser.Nodes.Assignment;
 import com.vuxiii.compiler.Parser.Nodes.BinaryOperation;
+import com.vuxiii.compiler.Parser.Nodes.Declaration;
 import com.vuxiii.compiler.Parser.Nodes.FunctionCall;
+import com.vuxiii.compiler.Parser.Nodes.Parameter;
 import com.vuxiii.compiler.Parser.Nodes.Print;
 import com.vuxiii.compiler.Parser.Nodes.Types.FunctionType;
+import com.vuxiii.compiler.VisitorPattern.ASTNode;
 import com.vuxiii.compiler.VisitorPattern.Visitor;
 import com.vuxiii.compiler.VisitorPattern.Annotations.VisitOrder;
 import com.vuxiii.compiler.VisitorPattern.Annotations.VisitorPattern;
+import com.vuxiii.compiler.VisitorPattern.Visitors.SymbolCollection.Scope;
 
 public class AST_StackMachine extends Visitor {
     
+    private Map<String, Scope> scopes;
 
     public LinkedList<Instruction> code = new LinkedList<>();
 
@@ -25,23 +34,41 @@ public class AST_StackMachine extends Visitor {
 
     private int function_depth = 0;
 
-    public AST_StackMachine( List<Assignment> functions ) {
+    Set<String> parameters = new HashSet<>();
+
+    Scope current_scope;
+
+    public AST_StackMachine( List<Assignment> functions, Map<String, Scope> scopes ) {
+        this.scopes = scopes;
         for ( Assignment node : functions ) { 
-            function_assembler(node);
+            function_assembler( node, scopes.get( node.id.name ) );
         }
     }
 
-    private void function_assembler( Assignment root ) {
-        String label = root.id.name;
+    public AST_StackMachine( Scope scope ) {
+        this.parameters = scope.get_parameters();
+        this.current_scope = scope;
+    }
+
+    private void function_assembler( Assignment function, Scope current_scope ) {
+        String label = function.id.name;
         FunctionBlock fb = new FunctionBlock( label );
 
-        AST_StackMachine stackMachine = new AST_StackMachine( List.of() ); // Insert internal functions here.
+
+        
 
         fb.push( new Instruction( Opcode.LABEL, new Arguments( label ) ) );
 
         fb.push( new Instruction( Opcode.SETUP_STACK ) );
 
-        root.value.accept( stackMachine );
+        parameters = current_scope.get_parameters();
+
+        System.out.println( parameters );
+
+
+        AST_StackMachine stackMachine = new AST_StackMachine( current_scope ); // Insert internal functions here.
+
+        function.value.accept( stackMachine );
 
         fb.instructions.addAll( stackMachine.code );
 
@@ -58,7 +85,7 @@ public class AST_StackMachine extends Visitor {
         push( new Instruction( Opcode.PUSH, new Arguments( leaf_int ), new Comment( "Pushing value " + leaf_int.val ) ) );
     }
 
-    @VisitorPattern( when = VisitOrder.ENTER_NODE )
+    @VisitorPattern( when = VisitOrder.EXIT_NODE )
     public void function_call( FunctionCall call ) {
         if ( function_depth != 0 ) return;
         
@@ -74,12 +101,18 @@ public class AST_StackMachine extends Visitor {
         // System.out.println( binop );
         
         if ( binop.right.isLeaf() && binop.right instanceof LexIdent )
-            push( new Instruction( Opcode.LOAD_VARIABLE, new Arguments( ((LexIdent)binop.right).name, Register.RCX ), new Comment( "Load variable " + ((LexIdent)binop.right).name ) ) );
+            push( new Instruction( Opcode.LOAD_VARIABLE, 
+                                    new Arguments( ((LexIdent)binop.right).name, Register.RCX ), 
+                                    new Comment( "Load variable " + ((LexIdent)binop.right).name ),
+                                    current_scope.get_parameters().contains(((LexIdent)binop.right).name) ) );
         else
             push( new Instruction( Opcode.POP, new Arguments( Register.RCX ), new Comment( "Retrieving second argument" ) ) );
         
         if ( binop.left.isLeaf() && binop.left instanceof LexIdent )
-            push( new Instruction( Opcode.LOAD_VARIABLE, new Arguments( ((LexIdent)binop.left).name, Register.RBX ), new Comment( "Load variable " + ((LexIdent)binop.left).name ) ) );
+            push( new Instruction( Opcode.LOAD_VARIABLE, 
+                                    new Arguments( ((LexIdent)binop.left).name, Register.RBX ), 
+                                    new Comment( "Load variable " + ((LexIdent)binop.left).name ),
+                                    current_scope.get_parameters().contains(((LexIdent)binop.left).name)  ) );
         else
             push( new Instruction( Opcode.POP, new Arguments( Register.RBX ), new Comment( "Retrieving first argument" ) ) );
         

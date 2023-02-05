@@ -1,8 +1,10 @@
 package com.vuxiii.compiler.CodeEmit;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexIdent;
 import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexLiteral;
@@ -19,12 +21,13 @@ public class X86Emitter {
     private String asm = "";
 
     private List<Instruction> instructions;
-    private List<Scope> scopes;
+    // private List<Scope> scopes;
+    private Map<String, Scope> scopes;
     Map<String, FunctionBlock> functions;
 
     Map<String, Integer> var_offsets;
 
-    public X86Emitter( List<Instruction> instructions, Map<String, FunctionBlock> functions, List<Scope> scopes ) {
+    public X86Emitter( List<Instruction> instructions, Map<String, FunctionBlock> functions, Map<String, Scope> scopes ) {
         this.instructions = instructions;
         this.scopes = scopes;
         var_offsets = new HashMap<>();
@@ -65,13 +68,14 @@ public class X86Emitter {
         push( ".section .text" );
         
 
-        Scope current_scope = scopes.get(0);
+        // Scope current_scope = scopes.get(0);
 
 
         for ( String function : functions.keySet() ) {
             FunctionBlock fb = functions.get(function);
             
-            _run( fb.instructions, new Scope() );
+            
+            _run( fb.instructions, scopes.get( function ) );
             
         }
 
@@ -80,7 +84,7 @@ public class X86Emitter {
 
         setup_stackpointer();
 
-        _run( instructions, current_scope );
+        _run( instructions, scopes.get( "root" ) );
         
         restore_stackpointer();
 
@@ -91,11 +95,16 @@ public class X86Emitter {
 
     
     private void _run( List<Instruction> instructions, Scope current_scope ) {
-        int i = 0;
+        
         for ( String var : current_scope.get_variables() ) {
-            push_code( "push $0 # Making place for variable: " + var );
-            var_offsets.put( var, i++ );
+            var_offsets.put( var, current_scope.get_variable_offset(var) ); // Capture missing
         }
+
+        for ( String var : current_scope.get_parameters() ) {
+            var_offsets.put( var, current_scope.get_parameter_offset(var) );
+        }
+
+        System.out.println();
 
         for ( Instruction instruction : instructions ) {
 
@@ -106,7 +115,7 @@ public class X86Emitter {
                 } break;
                 case MINUS: {
                     push_code( "subq " + getReg(instruction.args.get().src_1) +", " + getReg(instruction.args.get().src_2) );
-                    push_code( "movq " + getReg(instruction.args.get().src_1) +", " + getReg(instruction.args.get().target) );
+                    push_code( "movq " + getReg(instruction.args.get().src_2) +", " + getReg(instruction.args.get().target) );
                 } break;
                 case MULT: {
                     if ( instruction.args.get().value == null ) {
@@ -128,24 +137,35 @@ public class X86Emitter {
 
                 case LOAD_VARIABLE: {
                     String var = instruction.args.get().variable;
+                    
+                    // System.out.println( current_scope );
+                    // System.out.println( var_offsets );
+                    // System.out.println( var );
+
                     int offset = var_offsets.get( var );
                     Register target = instruction.args.get().target;
+                    int sign = instruction.target_is_parameter ? 1 : -1;
+
                     push_code ( "" );
                     push_code ("# [[ Loading variable " + var + " ]] " );
                     push_code ("# [[ offset is " + offset + " ]] " );
-                    push_code( "movq $" + offset + ", " + getReg(target) ); // What offset is the variable stored at
-                    push_code( "movq -8(" + getReg(Register.RBP) + ", " + getReg(target) + ", 8), " + getReg(target) );
+                    push_code( "movq " + (sign*offset*8) + "(%rbp), " + getReg(target) ); // What offset is the variable stored at
+                    // push_code( "movq $" + offset + ", " + getReg(target) ); // What offset is the variable stored at
+                    // push_code( "movq -8(" + getReg(Register.RBP) + ", " + getReg(target) + ", 8), " + getReg(target) );
                 } break;
 
                 case STORE_VARIABLE: {
                     String var = instruction.args.get().variable;
                     int offset = var_offsets.get( var );
                     Register src_1 = instruction.args.get().src_1;
+                    int sign = instruction.target_is_parameter ? 1 : -1;
+
                     push_code ( "" );
                     push_code ("# [[ Storing variable " + var + " ]] " );
                     push_code ("# [[ offset is " + offset + " ]] " );
-                    push_code( "movq $" + offset + ", " + getReg( Register.RCX ) );
-                    push_code( "movq " + getReg(src_1) + ", -8(" + getReg(Register.RBP) + ", " + getReg(Register.RCX) + ", 8)" );
+                    push_code( "movq " + getReg(src_1) + ", " + (sign*offset*8) + "(" + getReg(Register.RBP) + ")" );
+                    // push_code( "movq $" + offset + ", " + getReg( Register.RCX ) );
+                    // push_code( "movq " + getReg(src_1) + ", -8(" + getReg(Register.RBP) + ", " + getReg(Register.RCX) + ", 8)" );
                 } break;
                 
                 
@@ -171,6 +191,8 @@ public class X86Emitter {
 
                 case SETUP_STACK: {
                     setup_stackpointer();
+                    push_code( "subq $" + (8*current_scope.get_variables().size()) + ", %rsp" );
+
                 } break;
 
                 case RESTORE_STACK: {
@@ -209,7 +231,7 @@ public class X86Emitter {
 
     private void restore_stackpointer() {
         push_code( "movq " + getReg( Register.RBP) + ", " + getReg( Register.RSP ) + " # Restore stackpointer" );
-        push_code( "pop %rax" );
+        push_code( "pop %rbp" );
     }
 
     private String getReg( Register reg ) { 

@@ -108,58 +108,6 @@ public final class App {
             print( a );
             """;
         input = """
-            let type string: int;
-            let type Person: {
-                name: string,
-                age: int
-            };
-        """;
-        input = """
-            let type string: int;
-        """;
-        // input = """
-        //     let type char: int;
-        //     let type string: char;
-        //     let type Person: {
-        //         name: string;
-        //         sure_name: char;
-        //     };
-        //     let type Dansker: Person;
-        //     let name: string;
-        //     let letter: char;
-        //     let william: Person;
-
-        //     let age: int;
-        //     age = 3;
-
-        // """;
-        // input = """
-        //     let type char: int;
-        //     let type string: char;
-        // """;
-        input = """
-            let type Person: {
-                name: int;
-                sur_name: int;
-                father: Person;
-            };
-        """;
-        input = """
-            let type integer: int;
-            let a: integer;
-            a = 4;
-            let b: integer;
-            b = 4 * a;
-            let c: int;
-            c = 42;
-            [a, b] {
-                print(a);
-                b = b + 5;
-                print( b );
-            }
-            print( c + b );
-        """;
-        input = """
             type string: int;
             type my_func: ( name: string, age: int );
             let a: my_func;
@@ -223,9 +171,20 @@ public final class App {
                 print(x+b);
             };
 
-            my_second_function( 2, 2 );
+            my_second_function( 2, 7 );
         """;
-    
+        input = """
+        
+        let function: (first: int, second: int) -> int;
+        function = (first: int, second: int) {
+            let third: int;
+            third = 2 * first;
+            print( first + second * third );
+        };
+
+        function(10, 20);
+
+        """;
         
         // [[ Tokenizer ]]
         List<ASTToken> tokens = Lexer.lex( input );
@@ -318,6 +277,8 @@ public final class App {
         System.out.println( symbolCollector.scope_map.keySet() );
         symbolCollector.scope_map.keySet().forEach( k -> { System.out.println( "Key: " + k + " -> " + symbolCollector.scope_map.get(k) ); } );
 
+        Map<String, Scope> scope_map = symbolCollector.scope_map; 
+
         line_break();
 
         // [[ Type Checking ]]
@@ -331,7 +292,7 @@ public final class App {
 
 
         
-        AST_StackMachine generator = new AST_StackMachine( symbolCollector.functions );
+        AST_StackMachine generator = new AST_StackMachine( symbolCollector.functions, scope_map );
         ast.accept(generator);
 
         System.out.println( "Internal Low-Level Representation");
@@ -362,9 +323,9 @@ public final class App {
         line_break();
         System.out.println( "Running interpreter on the above code" );
 
-        Interpreter interpreter = new Interpreter( generator.code );
+        // Interpreter interpreter = new Interpreter( generator.code );
 
-        interpreter.run();
+        // interpreter.run();
 
         // [[ Code Optimization ]]
 
@@ -375,7 +336,7 @@ public final class App {
         System.out.println( "Passing instruction to CodeEmitter");
         line_break();
 
-        X86Emitter emitter = new X86Emitter( instructions, fbs, scopes );
+        X86Emitter emitter = new X86Emitter( instructions, fbs, scope_map );
 
         String asm_code = emitter.run();
         System.out.println( asm_code );

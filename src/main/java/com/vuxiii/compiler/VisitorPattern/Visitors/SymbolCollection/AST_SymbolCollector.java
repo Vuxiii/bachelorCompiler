@@ -52,7 +52,7 @@ public class AST_SymbolCollector extends VisitorBase {
 
         scope_map.put( decl_node.id.name, new Scope() );
 
-        scope_map.get( current_scope_name ).add( decl_node.id );
+        scope_map.get( current_scope_name ).add_variable( decl_node.id );
 
         prev_scope_name = current_scope_name;
         current_scope_name = decl_node.id.name;
@@ -69,7 +69,8 @@ public class AST_SymbolCollector extends VisitorBase {
     @VisitorPattern( when = VisitOrder.ENTER_NODE )
     public void parameter_mode( Parameter param ) {
         LexIdent id = param.param.id;
-        scope_map.get( current_scope_name ).add( id );
+        Scope sc = scope_map.get( current_scope_name );
+        sc.add_parameter( id );
     }
 
     @VisitorPattern( when = VisitOrder.ENTER_NODE )
@@ -120,8 +121,11 @@ public class AST_SymbolCollector extends VisitorBase {
 
     @VisitorPattern( when = VisitOrder.ENTER_NODE, order = 2 )
     public void collect_variable( Declaration declaration_node ) {
+        if ( current_scope().get_parameters().contains(declaration_node.id.name) ) return;
+        
         System.out.println( "Adding " + declaration_node.id + " to scope " + current_scope_name );
-        current_scope().add( declaration_node.id );
+
+        current_scope().add_variable( declaration_node.id );
     }
 
     @VisitorPattern( when = VisitOrder.ENTER_NODE )
