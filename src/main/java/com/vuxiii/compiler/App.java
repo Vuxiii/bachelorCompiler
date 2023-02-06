@@ -185,6 +185,19 @@ public final class App {
         function(10, 20);
 
         """;
+        input = """
+        let first: int;
+        first = 5;
+        let third: int;
+        third = 2 * first;
+
+        let second: int;
+        second = 20;
+        print( first + second * third );
+
+        
+
+        """;
         
         // [[ Tokenizer ]]
         List<ASTToken> tokens = Lexer.lex( input );

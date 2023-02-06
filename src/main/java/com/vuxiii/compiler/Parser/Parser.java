@@ -99,11 +99,11 @@ public class Parser {
         });
 
         // n_Declaration -> n_Declaration_Function 
-        g.addRuleWithReduceFunction( Symbol.n_Declaration, List.of( Symbol.n_Declaration_Function ), t -> {
-            Declaration decl = (Declaration)t.get(0);
-            decl.term = Symbol.n_Declaration;
-            return decl;
-        });
+        // g.addRuleWithReduceFunction( Symbol.n_Declaration, List.of( Symbol.n_Declaration_Function ), t -> {
+        //     Declaration decl = (Declaration)t.get(0);
+        //     decl.term = Symbol.n_Declaration;
+        //     return decl;
+        // });
 
 
         // n_Declaration -> n_Declaration_Variable
@@ -135,42 +135,42 @@ public class Parser {
         // --[[ Scopes ]]--
 
         // n_Statement -> n_Scope
-        g.addRuleWithReduceFunction( Symbol.n_Statement, List.of( Symbol.n_Scope ), t -> {
-            // System.out.println( "yay");
-            // System.exit(-1);
-            return new Statement( Symbol.n_Statement, (ASTNode)t.get(0), StatementKind.SCOPE );
-        });
+        // g.addRuleWithReduceFunction( Symbol.n_Statement, List.of( Symbol.n_Scope ), t -> {
+        //     // System.out.println( "yay");
+        //     // System.exit(-1);
+        //     return new Statement( Symbol.n_Statement, (ASTNode)t.get(0), StatementKind.SCOPE );
+        // });
 
         // n_Scope -> n_Capture n_Scope_Block
-        g.addRuleWithReduceFunction( Symbol.n_Scope, List.of( Symbol.n_Capture, Symbol.n_Scope_Block ), t -> {
-            return new ScopeNode( Symbol.n_Scope, (Statement)t.get(1), (Capture)t.get(0) );
-        });
+        // g.addRuleWithReduceFunction( Symbol.n_Scope, List.of( Symbol.n_Capture, Symbol.n_Scope_Block ), t -> {
+        //     return new ScopeNode( Symbol.n_Scope, (Statement)t.get(1), (Capture)t.get(0) );
+        // });
 
         // n_Scope -> n_Scope_Block
-        g.addRuleWithReduceFunction( Symbol.n_Scope, List.of( Symbol.n_Scope_Block ), t -> {
-            return new ScopeNode( Symbol.n_Scope, (Statement)t.get(0) );
-        });
+        // g.addRuleWithReduceFunction( Symbol.n_Scope, List.of( Symbol.n_Scope_Block ), t -> {
+        //     return new ScopeNode( Symbol.n_Scope, (Statement)t.get(0) );
+        // });
 
         // n_Scope_Block -> t_LCurly n_StatementList t_RCurly
-        g.addRuleWithReduceFunction( Symbol.n_Scope_Block, List.of( Symbol.t_LCurly, Symbol.n_StatementList, Symbol.t_RCurly ), t -> {
-            Statement stm = (Statement)t.get(1);
-            if ( stm.next.isPresent() )
-                return new Statement( Symbol.n_Scope_Block, stm.node, stm.next.get(), stm.kind );
-            else
-                return new Statement( Symbol.n_Scope_Block, stm.node, stm.kind );
+        // g.addRuleWithReduceFunction( Symbol.n_Scope_Block, List.of( Symbol.t_LCurly, Symbol.n_StatementList, Symbol.t_RCurly ), t -> {
+        //     Statement stm = (Statement)t.get(1);
+        //     if ( stm.next.isPresent() )
+        //         return new Statement( Symbol.n_Scope_Block, stm.node, stm.next.get(), stm.kind );
+        //     else
+        //         return new Statement( Symbol.n_Scope_Block, stm.node, stm.kind );
 
-        });
+        // });
 
 
         // n_Capture -> t_LBracket n_Arg_List t_RBracket
-        g.addRuleWithReduceFunction( Symbol.n_Capture, List.of( Symbol.t_LBracket, Symbol.n_Arg_List, Symbol.t_RBracket ), t -> {
-            return new Capture( Symbol.n_Capture, (Argument)t.get(1) );
-        });
+        // g.addRuleWithReduceFunction( Symbol.n_Capture, List.of( Symbol.t_LBracket, Symbol.n_Arg_List, Symbol.t_RBracket ), t -> {
+        //     return new Capture( Symbol.n_Capture, (Argument)t.get(1) );
+        // });
 
         // n_Capture -> t_LBracket t_Dot t_Dot t_RBracket
-        g.addRuleWithReduceFunction( Symbol.n_Capture, List.of( Symbol.t_LBracket, Symbol.t_Dot, Symbol.t_Dot, Symbol.t_RBracket ), t -> {
-            return new Capture( Symbol.n_Capture );
-        });
+        // g.addRuleWithReduceFunction( Symbol.n_Capture, List.of( Symbol.t_LBracket, Symbol.t_Dot, Symbol.t_Dot, Symbol.t_RBracket ), t -> {
+        //     return new Capture( Symbol.n_Capture );
+        // });
 
 
 
@@ -180,46 +180,46 @@ public class Parser {
         // --[[ Functions ]]--
         
         // n_Statement -> t_Identifier t_LParen t_RParen t_Semicolon
-        g.addRuleWithReduceFunction( Symbol.n_Statement, List.of( Symbol.n_Function_Call, Symbol.t_Semicolon ), t -> {
-            FunctionCall function_name = (FunctionCall)t.get(0);
-            return new Statement( Symbol.n_Statement, function_name, StatementKind.EXPRESSION );
-        });
+        // g.addRuleWithReduceFunction( Symbol.n_Statement, List.of( Symbol.n_Function_Call, Symbol.t_Semicolon ), t -> {
+        //     FunctionCall function_name = (FunctionCall)t.get(0);
+        //     return new Statement( Symbol.n_Statement, function_name, StatementKind.EXPRESSION );
+        // });
 
         // n_Function_Call -> t_Identifier t_LParen t_RParen
-        g.addRuleWithReduceFunction( Symbol.n_Function_Call, List.of( Symbol.t_Identifier, Symbol.t_LParen, Symbol.t_RParen ), t -> {
-            LexIdent function_name = (LexIdent)t.get(0);
-            return new FunctionCall( Symbol.n_Function_Call, function_name );
-        });
+        // g.addRuleWithReduceFunction( Symbol.n_Function_Call, List.of( Symbol.t_Identifier, Symbol.t_LParen, Symbol.t_RParen ), t -> {
+        //     LexIdent function_name = (LexIdent)t.get(0);
+        //     return new FunctionCall( Symbol.n_Function_Call, function_name );
+        // });
 
         // n_Function_Call -> t_Identifier t_LParen n_Arg_List t_RParen
-        g.addRuleWithReduceFunction( Symbol.n_Function_Call, List.of( Symbol.t_Identifier, Symbol.t_LParen, Symbol.n_Arg_List, Symbol.t_RParen ), t -> {
-            LexIdent function_name = (LexIdent)t.get(0);
-            Argument args = (Argument)t.get(2);
-            return new FunctionCall( Symbol.n_Function_Call, function_name, args );
-        });
+        // g.addRuleWithReduceFunction( Symbol.n_Function_Call, List.of( Symbol.t_Identifier, Symbol.t_LParen, Symbol.n_Arg_List, Symbol.t_RParen ), t -> {
+        //     LexIdent function_name = (LexIdent)t.get(0);
+        //     Argument args = (Argument)t.get(2);
+        //     return new FunctionCall( Symbol.n_Function_Call, function_name, args );
+        // });
         
 
         // n_Arg_List -> n_Arg t_Comma n_Arg_List
-        g.addRuleWithReduceFunction( Symbol.n_Arg_List, List.of( Symbol.n_Arg, Symbol.t_Comma, Symbol.n_Arg_List ), t -> {
-            Argument arg = (Argument)t.get(0);
-            return new Argument( Symbol.n_Arg_List, arg.node, (Argument)t.get(2), arg.kind );
-        });
+        // g.addRuleWithReduceFunction( Symbol.n_Arg_List, List.of( Symbol.n_Arg, Symbol.t_Comma, Symbol.n_Arg_List ), t -> {
+        //     Argument arg = (Argument)t.get(0);
+        //     return new Argument( Symbol.n_Arg_List, arg.node, (Argument)t.get(2), arg.kind );
+        // });
 
         // n_Arg_List -> n_Arg
-        g.addRuleWithReduceFunction( Symbol.n_Arg_List, List.of( Symbol.n_Arg ), t -> {
-            Argument arg = (Argument)t.get(0);
-            return new Argument( Symbol.n_Arg_List, arg.node, arg.kind );
-        });
+        // g.addRuleWithReduceFunction( Symbol.n_Arg_List, List.of( Symbol.n_Arg ), t -> {
+        //     Argument arg = (Argument)t.get(0);
+        //     return new Argument( Symbol.n_Arg_List, arg.node, arg.kind );
+        // });
 
         // n_Arg -> t_Identifier
-        g.addRuleWithReduceFunction( Symbol.n_Arg, List.of( Symbol.t_Identifier ), t -> {
-            return new Argument( Symbol.n_Arg, (ASTNode)t.get(0), ArgumentKind.IDENTIFIER );
-        });
+        // g.addRuleWithReduceFunction( Symbol.n_Arg, List.of( Symbol.t_Identifier ), t -> {
+        //     return new Argument( Symbol.n_Arg, (ASTNode)t.get(0), ArgumentKind.IDENTIFIER );
+        // });
 
         // n_Arg -> t_Literal
-        g.addRuleWithReduceFunction( Symbol.n_Arg, List.of( Symbol.n_Literal ), t -> {
-            return new Argument( Symbol.n_Arg, (ASTNode)t.get(0), ArgumentKind.LITERAL );
-        });
+        // g.addRuleWithReduceFunction( Symbol.n_Arg, List.of( Symbol.n_Literal ), t -> {
+        //     return new Argument( Symbol.n_Arg, (ASTNode)t.get(0), ArgumentKind.LITERAL );
+        // });
 
 
         // --[[ Arithmetic ]]--
@@ -307,118 +307,118 @@ public class Parser {
 
 
         // n_Assignment_Function -> n_Function_Signature t_LCurly n_Statement_List t_RCurly
-        g.addRuleWithReduceFunction( Symbol.n_Assignment_Function, List.of( Symbol.n_Function_Signature, Symbol.t_LCurly, Symbol.n_StatementList, Symbol.t_RCurly ), t -> {
-            FunctionType func = (FunctionType)t.get(0);
-            Statement body = (Statement)t.get(2);
-            if ( func.parameters.isPresent() ) {
-                if ( func.return_type.isPresent() )
-                    return new FunctionType( Symbol.n_Assignment_Function, func.parameters, func.return_type, Optional.of(body) );
-                else
-                   return new FunctionType( Symbol.n_Assignment_Function, func.parameters, Optional.empty(), Optional.of(body) );
-            } else {
-                if ( func.return_type.isPresent() )
-                    return new FunctionType( Symbol.n_Assignment_Function, Optional.empty(), func.return_type, Optional.of(body) );
-                else
-                   return new FunctionType( Symbol.n_Assignment_Function, Optional.empty(), Optional.empty(), Optional.of(body) );
-            }
-        });
+        // g.addRuleWithReduceFunction( Symbol.n_Assignment_Function, List.of( Symbol.n_Function_Signature, Symbol.t_LCurly, Symbol.n_StatementList, Symbol.t_RCurly ), t -> {
+        //     FunctionType func = (FunctionType)t.get(0);
+        //     Statement body = (Statement)t.get(2);
+        //     if ( func.parameters.isPresent() ) {
+        //         if ( func.return_type.isPresent() )
+        //             return new FunctionType( Symbol.n_Assignment_Function, func.parameters, func.return_type, Optional.of(body) );
+        //         else
+        //            return new FunctionType( Symbol.n_Assignment_Function, func.parameters, Optional.empty(), Optional.of(body) );
+        //     } else {
+        //         if ( func.return_type.isPresent() )
+        //             return new FunctionType( Symbol.n_Assignment_Function, Optional.empty(), func.return_type, Optional.of(body) );
+        //         else
+        //            return new FunctionType( Symbol.n_Assignment_Function, Optional.empty(), Optional.empty(), Optional.of(body) );
+        //     }
+        // });
 
 
         // n_Declaration_Function -> t_Let t_Identifier t_Colon n_Function_Signature
-        g.addRuleWithReduceFunction( Symbol.n_Declaration_Function, List.of( Symbol.t_Let, Symbol.t_Identifier, Symbol.t_Colon, Symbol.n_Function_Signature ), t -> {
-            LexIdent name = (LexIdent)t.get(1);
-            FunctionType func = (FunctionType)t.get(3);
-            return new Declaration( Symbol.n_Declaration_Function, name, func, DeclarationKind.FUNCTION );
-        });
+        // g.addRuleWithReduceFunction( Symbol.n_Declaration_Function, List.of( Symbol.t_Let, Symbol.t_Identifier, Symbol.t_Colon, Symbol.n_Function_Signature ), t -> {
+        //     LexIdent name = (LexIdent)t.get(1);
+        //     FunctionType func = (FunctionType)t.get(3);
+        //     return new Declaration( Symbol.n_Declaration_Function, name, func, DeclarationKind.FUNCTION );
+        // });
 
         // n_Function_Signature -> n_Function_Param_Signature n_Return_Type
-        g.addRuleWithReduceFunction( Symbol.n_Function_Signature, List.of( Symbol.n_Function_Param_Signature, Symbol.n_Return_Type ), t -> {
-            FunctionType func = (FunctionType)t.get(0);
-            Type return_type = (Type)t.get(1);
-            // System.out.println( func );
-            // System.out.println( func.parameters );
+        // g.addRuleWithReduceFunction( Symbol.n_Function_Signature, List.of( Symbol.n_Function_Param_Signature, Symbol.n_Return_Type ), t -> {
+        //     FunctionType func = (FunctionType)t.get(0);
+        //     Type return_type = (Type)t.get(1);
+        //     // System.out.println( func );
+        //     // System.out.println( func.parameters );
 
-            if ( func.parameters.isPresent() )
-                return new FunctionType( Symbol.n_Function_Signature, func.parameters, Optional.of(return_type), Optional.empty() );
-            else
-                return new FunctionType( Symbol.n_Function_Signature, Optional.empty(), Optional.of(return_type), Optional.empty() );
-        });
+        //     if ( func.parameters.isPresent() )
+        //         return new FunctionType( Symbol.n_Function_Signature, func.parameters, Optional.of(return_type), Optional.empty() );
+        //     else
+        //         return new FunctionType( Symbol.n_Function_Signature, Optional.empty(), Optional.of(return_type), Optional.empty() );
+        // });
 
         // Function with implicit return type of 'void'
         // n_Function_Signature -> n_Function_Param_Signature
-        g.addRuleWithReduceFunction( Symbol.n_Function_Signature, List.of( Symbol.n_Function_Param_Signature ), t -> {
-            FunctionType func = (FunctionType)t.get(0);
+        // g.addRuleWithReduceFunction( Symbol.n_Function_Signature, List.of( Symbol.n_Function_Param_Signature ), t -> {
+        //     FunctionType func = (FunctionType)t.get(0);
             
-            if ( func.parameters.isPresent() )
-                return new FunctionType( Symbol.n_Function_Signature, func.parameters, Optional.empty(), Optional.empty() ); // Do std.void
-            else
-                return new FunctionType( Symbol.n_Function_Signature, Optional.empty(), Optional.empty(), Optional.empty() ); // Do std.void
-        });
+        //     if ( func.parameters.isPresent() )
+        //         return new FunctionType( Symbol.n_Function_Signature, func.parameters, Optional.empty(), Optional.empty() ); // Do std.void
+        //     else
+        //         return new FunctionType( Symbol.n_Function_Signature, Optional.empty(), Optional.empty(), Optional.empty() ); // Do std.void
+        // });
 
         // n_Function_Param_Signature -> t_LParen n_Parameter_List t_RParen
-        g.addRuleWithReduceFunction( Symbol.n_Function_Param_Signature, List.of( Symbol.t_LParen, Symbol.n_Parameter_List, Symbol.t_RParen ), t -> {
-            Parameter param_list = (Parameter)t.get(1);
-            return new FunctionType( Symbol.n_Function_Param_Signature, Optional.of(param_list), Optional.empty(), Optional.empty() );
-        });
+        // g.addRuleWithReduceFunction( Symbol.n_Function_Param_Signature, List.of( Symbol.t_LParen, Symbol.n_Parameter_List, Symbol.t_RParen ), t -> {
+        //     Parameter param_list = (Parameter)t.get(1);
+        //     return new FunctionType( Symbol.n_Function_Param_Signature, Optional.of(param_list), Optional.empty(), Optional.empty() );
+        // });
 
         // n_Function_Param_Signature -> t_LParen t_RParen
-        g.addRuleWithReduceFunction( Symbol.n_Function_Param_Signature, List.of( Symbol.t_LParen, Symbol.t_RParen ), t -> {
-            return new FunctionType( Symbol.n_Function_Param_Signature, Optional.empty(), Optional.empty(), Optional.empty() );
-        });
+        // g.addRuleWithReduceFunction( Symbol.n_Function_Param_Signature, List.of( Symbol.t_LParen, Symbol.t_RParen ), t -> {
+        //     return new FunctionType( Symbol.n_Function_Param_Signature, Optional.empty(), Optional.empty(), Optional.empty() );
+        // });
 
         // n_Return_Type -> t_Arrow_Right n_Any_Type
-        g.addRuleWithReduceFunction( Symbol.n_Return_Type, List.of( Symbol.t_Arrow_Right, Symbol.n_Any_Type ), t -> {
-            if ( t.get(1) instanceof StandardType ) {
-                StandardType type = (StandardType)t.get(1);
-                type.term = Symbol.n_Return_Type;
-                return type;
-            } else if ( t.get(1) instanceof UserType ) {
-                UserType type = (UserType)t.get(1);
-                type.term = Symbol.n_Return_Type;
-                return type;
-            } else if ( t.get(1) instanceof LexIdent ) {
-                return new UnknownType( Symbol.n_Return_Type, (LexIdent)t.get(1) );
-            } else if ( t.get(1) instanceof AliasType ) {
-                AliasType type = (AliasType)t.get(1);
-                type.term = Symbol.n_Return_Type;
-                return type;
-            } else if ( t.get(1) instanceof FunctionType ) {
-                FunctionType type = (FunctionType)t.get(1);
-                type.term = Symbol.n_Return_Type;
-                return type;
-            } else if ( t.get(1) instanceof UnknownType ) {
-                UnknownType type = (UnknownType)t.get(1);
-                type.term = Symbol.n_Return_Type;
-                return type;
-            } else {
-                System.out.println( t.get(1) );
-                System.out.println( "Found some unexpected token in n_Return_Type -> n_Any_Type" );
-                System.exit(-1);
-                return null;
-            }
+        // g.addRuleWithReduceFunction( Symbol.n_Return_Type, List.of( Symbol.t_Arrow_Right, Symbol.n_Any_Type ), t -> {
+        //     if ( t.get(1) instanceof StandardType ) {
+        //         StandardType type = (StandardType)t.get(1);
+        //         type.term = Symbol.n_Return_Type;
+        //         return type;
+        //     } else if ( t.get(1) instanceof UserType ) {
+        //         UserType type = (UserType)t.get(1);
+        //         type.term = Symbol.n_Return_Type;
+        //         return type;
+        //     } else if ( t.get(1) instanceof LexIdent ) {
+        //         return new UnknownType( Symbol.n_Return_Type, (LexIdent)t.get(1) );
+        //     } else if ( t.get(1) instanceof AliasType ) {
+        //         AliasType type = (AliasType)t.get(1);
+        //         type.term = Symbol.n_Return_Type;
+        //         return type;
+        //     } else if ( t.get(1) instanceof FunctionType ) {
+        //         FunctionType type = (FunctionType)t.get(1);
+        //         type.term = Symbol.n_Return_Type;
+        //         return type;
+        //     } else if ( t.get(1) instanceof UnknownType ) {
+        //         UnknownType type = (UnknownType)t.get(1);
+        //         type.term = Symbol.n_Return_Type;
+        //         return type;
+        //     } else {
+        //         System.out.println( t.get(1) );
+        //         System.out.println( "Found some unexpected token in n_Return_Type -> n_Any_Type" );
+        //         System.exit(-1);
+        //         return null;
+        //     }
             
-        });
+        // });
 
 
         // n_Parameter_List -> n_Parameter t_Comma n_Parameter_List
-        g.addRuleWithReduceFunction( Symbol.n_Parameter_List, List.of( Symbol.n_Parameter, Symbol.t_Comma, Symbol.n_Parameter_List ), t -> {
-            Declaration decl = (Declaration)t.get(0);
-            return new Parameter( Symbol.n_Parameter_List, decl, (Parameter)t.get(2) );
-        });
+        // g.addRuleWithReduceFunction( Symbol.n_Parameter_List, List.of( Symbol.n_Parameter, Symbol.t_Comma, Symbol.n_Parameter_List ), t -> {
+        //     Declaration decl = (Declaration)t.get(0);
+        //     return new Parameter( Symbol.n_Parameter_List, decl, (Parameter)t.get(2) );
+        // });
 
         // n_Parameter_List -> n_Parameter
-        g.addRuleWithReduceFunction( Symbol.n_Parameter_List, List.of( Symbol.n_Parameter ), t -> {
-            Declaration decl = (Declaration)t.get(0);
-            return new Parameter( Symbol.n_Parameter_List, decl );
-        });
+        // g.addRuleWithReduceFunction( Symbol.n_Parameter_List, List.of( Symbol.n_Parameter ), t -> {
+        //     Declaration decl = (Declaration)t.get(0);
+        //     return new Parameter( Symbol.n_Parameter_List, decl );
+        // });
 
 
         // n_Parameter -> t_Identifier t_Colon n_Standard_Type
-        g.addRuleWithReduceFunction( Symbol.n_Parameter, List.of( Symbol.t_Identifier, Symbol.t_Colon, Symbol.n_Any_Type ), t -> {
-            LexIdent id = (LexIdent)t.get(0);
-            Type type = (Type)t.get(2);
-            return new Declaration( Symbol.n_Parameter, id, type, DeclarationKind.PARAMETER );
-        });
+        // g.addRuleWithReduceFunction( Symbol.n_Parameter, List.of( Symbol.t_Identifier, Symbol.t_Colon, Symbol.n_Any_Type ), t -> {
+        //     LexIdent id = (LexIdent)t.get(0);
+        //     Type type = (Type)t.get(2);
+        //     return new Declaration( Symbol.n_Parameter, id, type, DeclarationKind.PARAMETER );
+        // });
 
         // n_Declaration_Variable -> t_Let t_Identifier t_Colon n_User_Type
         g.addRuleWithReduceFunction( Symbol.n_Declaration_Variable, List.of( Symbol.t_Let, Symbol.t_Identifier, Symbol.t_Colon, Symbol.n_Any_Type ), t -> {
@@ -461,28 +461,28 @@ public class Parser {
         });
 
 
-        // Make an 'alias' for a standard type. Like person -> int.
-        // n_Declaration_Type -> n_Declaration_Type_Body n_Standard_Type
-        g.addRuleWithReduceFunction( Symbol.n_Declaration_Type, List.of( Symbol.n_Declaration_Type_Body, Symbol.n_Any_Type ), t -> {
-            LexIdent id = (LexIdent)t.get(0);
-            Type type = (Type)t.get(1);
+        // // Make an 'alias' for a standard type. Like person -> int.
+        // // n_Declaration_Type -> n_Declaration_Type_Body n_Standard_Type
+        // g.addRuleWithReduceFunction( Symbol.n_Declaration_Type, List.of( Symbol.n_Declaration_Type_Body, Symbol.n_Any_Type ), t -> {
+        //     LexIdent id = (LexIdent)t.get(0);
+        //     Type type = (Type)t.get(1);
                         
-            return new Declaration( Symbol.n_Declaration_Type, id, type, DeclarationKind.UNKNOWN );
-        });
+        //     return new Declaration( Symbol.n_Declaration_Type, id, type, DeclarationKind.UNKNOWN );
+        // });
         
         
-        // n_Declaration_Type_Body -> t_Type_Declare t_Identifer t_Colon
-        g.addRuleWithReduceFunction( Symbol.n_Declaration_Type_Body, List.of( Symbol.t_Type_Declare, Symbol.t_Identifier, Symbol.t_Colon ), t -> {
+        // // n_Declaration_Type_Body -> t_Type_Declare t_Identifer t_Colon
+        // g.addRuleWithReduceFunction( Symbol.n_Declaration_Type_Body, List.of( Symbol.t_Type_Declare, Symbol.t_Identifier, Symbol.t_Colon ), t -> {
             
-            LexIdent body = (LexIdent)t.get(1);
-            body.term = Symbol.n_Declaration_Type_Body;
-            return body;
-        });
+        //     LexIdent body = (LexIdent)t.get(1);
+        //     body.term = Symbol.n_Declaration_Type_Body;
+        //     return body;
+        // });
         
-        // n_User_Type -> t_LCurly n_Field_List t_RCurly
-        g.addRuleWithReduceFunction( Symbol.n_User_Type, List.of( Symbol.t_LCurly, Symbol.n_Field_List, Symbol.t_RCurly ), t -> {
-            return new Field( Symbol.n_User_Type, (ASTNode)t.get(1) );
-        });
+        // // n_User_Type -> t_LCurly n_Field_List t_RCurly
+        // g.addRuleWithReduceFunction( Symbol.n_User_Type, List.of( Symbol.t_LCurly, Symbol.n_Field_List, Symbol.t_RCurly ), t -> {
+        //     return new Field( Symbol.n_User_Type, (ASTNode)t.get(1) );
+        // });
         
         
         // n_User_Type -> t_Identifier
@@ -492,69 +492,69 @@ public class Parser {
             return new UnknownType( Symbol.n_User_Type, id );
         });
 
-        // n_User_Type -> n_Function_Signature
-        g.addRuleWithReduceFunction( Symbol.n_User_Type, List.of( Symbol.n_Function_Signature ), t -> {
-            FunctionType id = (FunctionType)t.get(0);
-            id.term = Symbol.n_User_Type;
+        // // n_User_Type -> n_Function_Signature
+        // g.addRuleWithReduceFunction( Symbol.n_User_Type, List.of( Symbol.n_Function_Signature ), t -> {
+        //     FunctionType id = (FunctionType)t.get(0);
+        //     id.term = Symbol.n_User_Type;
             
-            return id;
-        });
+        //     return id;
+        // });
         
         // --[[ FIELD IN STRUCT ]]--
 
         // n_Field_List -> n_Field t_Semicolon n_Field_List
-        g.addRuleWithReduceFunction( Symbol.n_Field_List, List.of( Symbol.n_Field, Symbol.t_Semicolon, Symbol.n_Field_List ), t -> {
-            Declaration decl = (Declaration)t.get(0);
-            return new Statement( Symbol.n_Field_List, decl, (Statement)t.get(2), StatementKind.DECLARATION );
-        });
+        // g.addRuleWithReduceFunction( Symbol.n_Field_List, List.of( Symbol.n_Field, Symbol.t_Semicolon, Symbol.n_Field_List ), t -> {
+        //     Declaration decl = (Declaration)t.get(0);
+        //     return new Statement( Symbol.n_Field_List, decl, (Statement)t.get(2), StatementKind.DECLARATION );
+        // });
         
         // n_Field_List -> n_Field t_Semicolon
-        g.addRuleWithReduceFunction( Symbol.n_Field_List, List.of( Symbol.n_Field, Symbol.t_Semicolon ), t -> {
-            return new Statement( Symbol.n_Field_List, (Declaration)t.get(0), StatementKind.DECLARATION );
-        });
+        // g.addRuleWithReduceFunction( Symbol.n_Field_List, List.of( Symbol.n_Field, Symbol.t_Semicolon ), t -> {
+        //     return new Statement( Symbol.n_Field_List, (Declaration)t.get(0), StatementKind.DECLARATION );
+        // });
         
         // n_Field -> t_Identifier t_Colon n_Standard_Type
-        g.addRuleWithReduceFunction( Symbol.n_Field, List.of( Symbol.t_Identifier, Symbol.t_Colon, Symbol.n_Standard_Type ), t -> {
-            LexIdent id = (LexIdent)t.get(0);
-            StandardType type = (StandardType)t.get(2);
+        // g.addRuleWithReduceFunction( Symbol.n_Field, List.of( Symbol.t_Identifier, Symbol.t_Colon, Symbol.n_Standard_Type ), t -> {
+        //     LexIdent id = (LexIdent)t.get(0);
+        //     StandardType type = (StandardType)t.get(2);
             
-            return new Declaration( Symbol.n_Field, id, type, DeclarationKind.VARIABLE );
-        });
+        //     return new Declaration( Symbol.n_Field, id, type, DeclarationKind.VARIABLE );
+        // });
 
 
         // n_Field -> t_Identifier t_Colon n_User_Type
-        g.addRuleWithReduceFunction( Symbol.n_Field, List.of( Symbol.t_Identifier, Symbol.t_Colon, Symbol.n_User_Type ), t -> {
-            LexIdent id = (LexIdent)t.get(0);
+        // g.addRuleWithReduceFunction( Symbol.n_Field, List.of( Symbol.t_Identifier, Symbol.t_Colon, Symbol.n_User_Type ), t -> {
+        //     LexIdent id = (LexIdent)t.get(0);
             
-            if ( t.get(2) instanceof LexIdent ) {
+        //     if ( t.get(2) instanceof LexIdent ) {
                 
-                Type type = stored_user_types.get(((LexIdent)t.get(2)).name);
+        //         Type type = stored_user_types.get(((LexIdent)t.get(2)).name);
                 
-                if ( type == null ) {
-                    return new Declaration( Symbol.n_Field, id, new UnknownType(Symbol.n_Field, (LexIdent)t.get(2) ), DeclarationKind.ALIAS_TO_USER_TYPE );
-                }
+        //         if ( type == null ) {
+        //             return new Declaration( Symbol.n_Field, id, new UnknownType(Symbol.n_Field, (LexIdent)t.get(2) ), DeclarationKind.ALIAS_TO_USER_TYPE );
+        //         }
 
-                stored_user_types.putIfAbsent( id.matchInfo.str(), type );
+        //         stored_user_types.putIfAbsent( id.matchInfo.str(), type );
                 
-                return new Declaration( Symbol.n_Field, id, type, DeclarationKind.ALIAS_TO_USER_TYPE );
+        //         return new Declaration( Symbol.n_Field, id, type, DeclarationKind.ALIAS_TO_USER_TYPE );
                 
-            } else if ( t.get(2) instanceof Field ) {
+        //     } else if ( t.get(2) instanceof Field ) {
 
-                Field fields = (Field)t.get(2);
-                UserType type = new UserType(Symbol.n_Declaration_Type, id, fields );
+        //         Field fields = (Field)t.get(2);
+        //         UserType type = new UserType(Symbol.n_Declaration_Type, id, fields );
                 
-                stored_user_types.putIfAbsent( id.matchInfo.str(), type );
+        //         stored_user_types.putIfAbsent( id.matchInfo.str(), type );
                 
-                return new Declaration( Symbol.n_Field, id, type, DeclarationKind.USER_TYPE );
+        //         return new Declaration( Symbol.n_Field, id, type, DeclarationKind.USER_TYPE );
 
-            }
+        //     }
             
-            System.out.println( "Something bad happend in parsin n_Field -> t_Identifier t_Colon n_User_Type" );
-            System.exit(-1);
-            return null;
+        //     System.out.println( "Something bad happend in parsin n_Field -> t_Identifier t_Colon n_User_Type" );
+        //     System.exit(-1);
+        //     return null;
 
     
-        });
+        // });
 
 
         // --[[ TYPES ]]--
@@ -586,10 +586,10 @@ public class Parser {
             return new Assignment( Symbol.n_Assignment, (LexIdent)t.get(0), (ASTNode)t.get(2)  );
         });
 
-        // n_Assignment -> t_Identifier t_Equals n_Assignment_Function
-        g.addRuleWithReduceFunction( Symbol.n_Assignment, List.of( Symbol.t_Identifier, Symbol.t_Equals, Symbol.n_Assignment_Function ), t -> {
-            return new Assignment( Symbol.n_Assignment, (LexIdent)t.get(0), (ASTNode)t.get(2)  );
-        });
+        // // n_Assignment -> t_Identifier t_Equals n_Assignment_Function
+        // g.addRuleWithReduceFunction( Symbol.n_Assignment, List.of( Symbol.t_Identifier, Symbol.t_Equals, Symbol.n_Assignment_Function ), t -> {
+        //     return new Assignment( Symbol.n_Assignment, (LexIdent)t.get(0), (ASTNode)t.get(2)  );
+        // });
 
         // n_Print -> t_Print t_Equals t_LParen n_Expression t_RParen
         g.addRuleWithReduceFunction( Symbol.n_Print, List.of( Symbol.t_Print, Symbol.t_LParen, Symbol.n_Expression, Symbol.t_RParen ), t -> {
