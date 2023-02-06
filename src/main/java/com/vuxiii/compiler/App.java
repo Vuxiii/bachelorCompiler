@@ -174,15 +174,11 @@ public final class App {
             my_second_function( 2, 7 );
         """;
         input = """
-        
-        let function: (first: int, second: int) -> int;
-        function = (first: int, second: int) {
-            let third: int;
-            third = 2 * first;
-            print( first + second * third );
-        };
 
-        function(10, 20);
+            let b: int;
+            b = 4;
+
+            print( b * 2 + 4);
 
         """;
         input = """
