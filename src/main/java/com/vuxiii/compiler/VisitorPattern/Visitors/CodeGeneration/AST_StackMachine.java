@@ -36,11 +36,12 @@ public class AST_StackMachine extends Visitor {
 
     Set<String> parameters = new HashSet<>();
 
-    Scope current_scope;
+    Scope current_scope = new Scope();
 
     public AST_StackMachine( List<Assignment> functions, Map<String, Scope> scopes ) {
         this.scopes = scopes;
         for ( Assignment node : functions ) { 
+            current_scope = scopes.get( node.id.name );
             function_assembler( node, scopes.get( node.id.name ) );
         }
     }
@@ -160,9 +161,18 @@ public class AST_StackMachine extends Visitor {
         if ( assignment_node.value instanceof FunctionType ) { function_depth--; return; }
         if ( function_depth != 0 ) return;
 
-        push( new Instruction( Opcode.POP, 
+        if ( assignment_node.value instanceof LexIdent ) {
+            push( new Instruction( Opcode.LOAD_VARIABLE, 
+                                    new Arguments( ((LexIdent)assignment_node.value).name, Register.RAX ), 
+                                    new Comment( "Load variable " + ((LexIdent)assignment_node.value).name ),
+                                    current_scope.get_parameters().contains(((LexIdent)assignment_node.value).name)  ) );
+        } else { // Literal
+            push( new Instruction( Opcode.POP, 
                                 new Arguments( Register.RAX ), 
                                 new Comment( "Fetching value" ) ) );
+        }
+
+        
         push( new Instruction( Opcode.STORE_VARIABLE, 
                                 new Arguments( Register.RAX, assignment_node.id.name ), 
                                 new Comment( "Store in variable " + assignment_node.id.name ) ) );

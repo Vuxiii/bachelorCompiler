@@ -194,6 +194,16 @@ public final class App {
         
 
         """;
+        input = """
+        let first: int;
+        first = 7;
+        let second: int;
+        
+        print( 4 + 2 * first );
+        print( 2 * first + 4 );
+
+        print( 2 + 3 * first );        
+        """;
         
         // [[ Tokenizer ]]
         List<ASTToken> tokens = Lexer.lex( input );
