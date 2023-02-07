@@ -44,6 +44,13 @@ public class AST_StackMachine extends Visitor {
             current_scope = scopes.get( node.id.name );
             function_assembler( node, scopes.get( node.id.name ) );
         }
+
+        // Make room for our main function's variables!
+
+        int total_variables_in_main = scopes.get("root").get_variables().size();
+
+        push( new Instruction( Opcode.MINUS, new Arguments( "" + (-total_variables_in_main*8), Register.RSP ), new Comment( "Making room for local variables in main scope!") ) );
+                                            // new LexLiteral( new MatchInfo( "" + (-total_variables_in_main*8), -1, -1), TokenType.INT ), Register.RSP ) ) );
     }
 
     public AST_StackMachine( Scope scope ) {

@@ -341,17 +341,17 @@ public final class App {
 
         line_break();
         System.out.println( "Running interpreter on the above code" );
+        line_break();
 
-        // Interpreter interpreter = new Interpreter( generator.code );
+        Interpreter interpreter = new Interpreter( generator.code );
 
-        // interpreter.run();
+        interpreter.run();
 
         // [[ Code Optimization ]]
 
         // [[ Code Emit ]]
         
         line_break();
-
         System.out.println( "Passing instruction to CodeEmitter");
         line_break();
 

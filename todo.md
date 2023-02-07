@@ -10,6 +10,11 @@ Note for jump instructions
 
 Husk at tjekke om en variable bliver brugt inden den er blevet assignet noget!!!!
 
+
+
+Lmao. Har glemt at gøre plads til lokale variabler i main. Åbenbart.....
+
+
 Add scoping
 
     [ .. ]       This defines that the coming scope can access any outer_scoped variables
