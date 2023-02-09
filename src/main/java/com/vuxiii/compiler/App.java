@@ -202,7 +202,16 @@ public final class App {
         print( 4 + 2 * first );
         print( 2 * first + 4 );
 
-        print( 2 + 3 * first );        
+        print( 2 + 3 * first );
+        """;
+        input = """
+        let first: int;
+        first = 7;
+        let second: int;
+        
+        print( 2 * first + 4 );
+        print( 2 * first + 4 );
+
         """;
         
         // [[ Tokenizer ]]
@@ -345,7 +354,7 @@ public final class App {
 
         Interpreter interpreter = new Interpreter( generator.code );
 
-        interpreter.run();
+        // interpreter.run();
 
         // [[ Code Optimization ]]
 

@@ -48,9 +48,14 @@ public class AST_StackMachine extends Visitor {
         // Make room for our main function's variables!
 
         int total_variables_in_main = scopes.get("root").get_variables().size();
+        int total_offset = total_variables_in_main*8;
 
-        push( new Instruction( Opcode.MINUS, new Arguments( "" + (-total_variables_in_main*8), Register.RSP ), new Comment( "Making room for local variables in main scope!") ) );
-                                            // new LexLiteral( new MatchInfo( "" + (-total_variables_in_main*8), -1, -1), TokenType.INT ), Register.RSP ) ) );
+        Operand left = new Operand( -total_offset, AddressingMode.IMMEDIATE );
+        Operand right = new Operand( Register.RSP, AddressingMode.REGISER );
+        Arguments args = new Arguments( left, right, right );
+        Instruction ins = new Instruction( Opcode.MINUS, args, new Comment( "Making room for local variables in main scope!" ) );
+        
+        push( ins );
     }
 
     public AST_StackMachine( Scope scope ) {
@@ -65,7 +70,7 @@ public class AST_StackMachine extends Visitor {
 
         
 
-        fb.push( new Instruction( Opcode.LABEL, new Arguments( label ) ) );
+        fb.push( new Instruction( Opcode.LABEL, Arguments.from_label( label ) ) );
 
         fb.push( new Instruction( Opcode.SETUP_STACK ) );
 
@@ -90,7 +95,7 @@ public class AST_StackMachine extends Visitor {
     @VisitorPattern( when = VisitOrder.ENTER_NODE )
     public void literal_int( LexLiteral leaf_int ) {
         if ( function_depth != 0 ) return;
-        push( new Instruction( Opcode.PUSH, new Arguments( leaf_int ), new Comment( "Pushing value " + leaf_int.val ) ) );
+        push( new Instruction( Opcode.PUSH, Arguments.from_int( Integer.parseInt(leaf_int.val) ), new Comment( "Pushing value " + leaf_int.val ) ) );
     }
 
     @VisitorPattern( when = VisitOrder.EXIT_NODE )
@@ -99,36 +104,44 @@ public class AST_StackMachine extends Visitor {
         
 
         // Setup arguments here.
-        push( new Instruction( Opcode.CALL, new Arguments( call.func_name.name ), new Comment( "Calling function " + call.func_name.name ) ) );
+        push( new Instruction( Opcode.CALL, Arguments.from_label( call.func_name.name ), new Comment( "Calling function " + call.func_name.name ) ) );
 
     }
 
     @VisitorPattern( when = VisitOrder.EXIT_NODE )
     public void binop_expression( BinaryOperation binop ) {
         if ( function_depth != 0 ) return;
-        // System.out.println( binop );
         
-        if ( binop.right.isLeaf() && binop.right instanceof LexIdent )
+        if ( binop.right.isLeaf() && binop.right instanceof LexIdent ) {
+            String var_name = ((LexIdent)binop.right).name;
+            Operand var = new Operand( var_name, AddressingMode.IMMEDIATE );
+            Operand target = new Operand( Register.RCX, AddressingMode.REGISER );
+            boolean target_is_parameter = current_scope.get_parameters().contains( var_name );
             push( new Instruction( Opcode.LOAD_VARIABLE, 
-                                    new Arguments( ((LexIdent)binop.right).name, Register.RCX ), 
-                                    new Comment( "Load variable " + ((LexIdent)binop.right).name ),
-                                    current_scope.get_parameters().contains(((LexIdent)binop.right).name) ) );
-        else
-            push( new Instruction( Opcode.POP, new Arguments( Register.RCX ), new Comment( "Retrieving second argument" ) ) );
-        
-        if ( binop.left.isLeaf() && binop.left instanceof LexIdent )
+                                    new Arguments( var, target, target ), 
+                                    new Comment( "Load variable " + var_name ),
+                                    target_is_parameter ) );
+        } else {
+            push( new Instruction( Opcode.POP, Arguments.from_register( Register.RCX ), new Comment( "Retrieving second argument" ) ) );
+        }
+        if ( binop.left.isLeaf() && binop.left instanceof LexIdent ) {
+            String var_name = ((LexIdent)binop.left).name;
+            Operand var = new Operand( var_name, AddressingMode.IMMEDIATE );
+            Operand target = new Operand( Register.RBX, AddressingMode.REGISER );
+            boolean target_is_parameter = current_scope.get_parameters().contains( var_name );
+
             push( new Instruction( Opcode.LOAD_VARIABLE, 
-                                    new Arguments( ((LexIdent)binop.left).name, Register.RBX ), 
-                                    new Comment( "Load variable " + ((LexIdent)binop.left).name ),
-                                    current_scope.get_parameters().contains(((LexIdent)binop.left).name)  ) );
-        else
-            push( new Instruction( Opcode.POP, new Arguments( Register.RBX ), new Comment( "Retrieving first argument" ) ) );
+                                    new Arguments( var, target, target ), 
+                                    new Comment( "Load variable " + var_name ),
+                                    target_is_parameter ) );
+        } else
+            push( new Instruction( Opcode.POP, Arguments.from_register( Register.RBX ), new Comment( "Retrieving first argument" ) ) );
         
         
         Opcode opcode = null;
-        Register r1 = Register.RBX; 
-        Register r2 = Register.RCX; 
-        Register target = Register.RAX;
+        Operand r1 = new Operand( Register.RBX, AddressingMode.REGISER ); 
+        Operand r2 = new Operand( Register.RCX, AddressingMode.REGISER ); 
+        Operand target = new Operand( Register.RAX, AddressingMode.REGISER ); 
         switch (binop.kind) {
             case PLUS: {
                 opcode = Opcode.ADD;
@@ -159,7 +172,7 @@ public class AST_StackMachine extends Visitor {
                                     new Arguments( r1, r2, target ), 
                                     new Comment( target + " = " + binop  ) ) );
         push( new Instruction( Opcode.PUSH, 
-                                    new Arguments( target ), 
+                                    Arguments.from_operand( target ), 
                                     new Comment( "Storing computed value" ) ) );
     }
 
@@ -168,20 +181,26 @@ public class AST_StackMachine extends Visitor {
         if ( assignment_node.value instanceof FunctionType ) { function_depth--; return; }
         if ( function_depth != 0 ) return;
 
+
+
         if ( assignment_node.value instanceof LexIdent ) {
+            String var_name = ((LexIdent)assignment_node.value).name;
+            Operand var_to_load = new Operand( var_name, AddressingMode.IMMEDIATE );
+            boolean target_is_parameter = current_scope.get_parameters().contains( var_name );
+
             push( new Instruction( Opcode.LOAD_VARIABLE, 
-                                    new Arguments( ((LexIdent)assignment_node.value).name, Register.RAX ), 
-                                    new Comment( "Load variable " + ((LexIdent)assignment_node.value).name ),
-                                    current_scope.get_parameters().contains(((LexIdent)assignment_node.value).name)  ) );
+                                    new Arguments( var_to_load, new Operand( Register.RAX, AddressingMode.REGISER ) ), 
+                                    new Comment( "Load variable " + var_name ),
+                                    target_is_parameter ) );
         } else { // Literal
             push( new Instruction( Opcode.POP, 
-                                new Arguments( Register.RAX ), 
+                                Arguments.from_register( Register.RAX ), 
                                 new Comment( "Fetching value" ) ) );
         }
 
         
         push( new Instruction( Opcode.STORE_VARIABLE, 
-                                new Arguments( Register.RAX, assignment_node.id.name ), 
+                                new Arguments( new Operand( assignment_node.id.name, AddressingMode.IMMEDIATE ), new Operand( Register.RAX, AddressingMode.REGISER ) ), 
                                 new Comment( "Store in variable " + assignment_node.id.name ) ) );
         
     }
@@ -194,17 +213,18 @@ public class AST_StackMachine extends Visitor {
     @VisitorPattern( when = VisitOrder.EXIT_NODE )
     public void print( Print print_node ) {
         if ( function_depth != 0 ) return;
-        if ( print_node.value instanceof LexIdent )
+        if ( print_node.value instanceof LexIdent ) {
+
             push( new Instruction( Opcode.LOAD_VARIABLE, 
-                                    new Arguments( ((LexIdent)print_node.value).name, Register.RAX ), 
+                                    new Arguments( new Operand( Register.RAX, AddressingMode.REGISER ), new Operand( ((LexIdent)print_node.value).name, AddressingMode.IMMEDIATE ) ), 
                                     new Comment( "Loading value of " + print_node.value ) ) );
-        else 
+        } else 
             push( new Instruction( Opcode.POP, 
-                                    new Arguments( Register.RAX ), 
+                                    Arguments.from_register( Register.RAX ), 
                                     new Comment( "Fetching value " + print_node.value ) ) );
                 
         push( new Instruction( Opcode.PRINT, 
-                                new Arguments( Register.RAX ), 
+                                Arguments.from_register( Register.RAX ), 
                                 new Comment( "Printing value of " + print_node.value ) ) );
 
     }

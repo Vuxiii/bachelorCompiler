@@ -14,6 +14,20 @@ Husk at tjekke om en variable bliver brugt inden den er blevet assignet noget!!!
 
 Lmao. Har glemt at gøre plads til lokale variabler i main. Åbenbart.....
 
+Addressing modes
+
+    Register Addressing
+
+    Immediate Addressing
+
+    Direct Memory Addressing
+
+    Direct Offset Addressing
+
+    Indirect Memory Addressing
+
+    
+
 
 Add scoping
 

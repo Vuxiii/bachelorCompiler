@@ -1,121 +1,84 @@
 package com.vuxiii.compiler.VisitorPattern.Visitors.CodeGeneration;
 
-import com.vuxiii.DFANFA.MatchInfo;
-import com.vuxiii.compiler.Lexer.Tokens.TokenType;
-import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexLiteral;
-import com.vuxiii.compiler.VisitorPattern.ASTNode;
+import java.util.Optional;
 
 public class Arguments {
     
-    public final Register src_1;
-    public final Register src_2;
-    public final Register target;
-
-    public final ASTNode value;
-
-    public final String variable;
-
-    public final int kind;
-
-    public final String label_string;
+    public Optional<Operand> operand_1 = Optional.empty();
+    public Optional<Operand> operand_2 = Optional.empty();
+    public Optional<Operand> target = Optional.empty();
     
-    public Arguments( String label ) {
-        this.src_1 = null;
-        this.src_2 = null;
-        this.target = null;
-        this.value = null;
-        this.variable = null;
-        label_string = label;
-        kind = 6;
-    }
-
-    public Arguments( Register src_1, Register src_2, Register target ) {
-        this.src_1 = src_1;
-        this.src_2 = src_2;
-        this.target = target;
-        this.value = null;
-        this.variable = null;
-        this.label_string = null;
-        kind = 0;
-    }
-    public Arguments( Register src_1, Register target ) {
-        this.src_1 = src_1;
-        this.src_2 = null;
-        this.target = target;
-        this.value = null;
-        this.variable = null;
-        this.label_string = null;
-        kind = 1;
-    }
-
-    public Arguments( ASTNode src ) {
-        this.value = src;
-        this.src_1 = null;
-        this.src_2 = null;
-        this.target = null;
-        this.variable = null;
-        this.label_string = null;
-        kind = 2;
-    }
-
-    public Arguments( Register src_1 ) {
-        this.value = null;
-        this.src_1 = src_1;
-        this.src_2 = null;
-        this.target = null;
-        this.variable = null;
-        this.label_string = null;
-        kind = 3;
-    }
+    public ArgumentKind kind;
     
-    public Arguments( Register src_1, String target ) {
-        this.src_1 = src_1;
-        this.src_2 = null;
-        this.target = null;
-        this.variable = target;
-        this.value = null;
-        this.label_string = null;
-        kind = 4;
+    private Arguments() {}
+
+    public static Arguments from_label( String label ) {
+        Arguments arg = new Arguments();
+
+        arg.operand_1 = Optional.of( new Operand( label, AddressingMode.IMMEDIATE ) );
+        arg.kind = ArgumentKind.LABEL;
+        return arg;
     }
 
-    public Arguments( String src_1, Register target ) {
-        this.src_1 = null;
-        this.src_2 = null;
-        this.target = target;
-        this.variable = src_1;
-        this.value = null;
-        this.label_string = null;
-        kind = 5;
+
+    public static Arguments from_int( int num_int ) {
+        Arguments arg = new Arguments();
+
+        arg.operand_1 = Optional.of( new Operand( num_int, AddressingMode.IMMEDIATE ) );
+        arg.kind = ArgumentKind.ONE_LITERAL;
+        return arg;
     }
 
-    // public Arguments( int i, Register target ) {
-    //     this.target = target;
-    //     this.value = ;
+    public static Arguments from_double( double num_double ) {
+        Arguments arg = new Arguments();
 
-    //     this.src_1 = null;
-    //     this.src_2 = null;
-    //     this.variable = null;
-    //     this.label_string = null;
-    //     this.kind = 7;
-    // }
+        arg.operand_1 = Optional.of( new Operand( num_double, AddressingMode.IMMEDIATE ) );
+        arg.kind = ArgumentKind.ONE_LITERAL;
+        return arg;
+    }
+
+    public static Arguments from_register( Register reg ) {
+        Arguments arg = new Arguments();
+
+        arg.operand_1 = Optional.of( new Operand( reg, AddressingMode.REGISER ) );
+        arg.kind = ArgumentKind.ONE_REG;
+        return arg;
+    }
+
+    public static Arguments from_operand( Operand operand ) {
+        Arguments arg = new Arguments();
+        arg.operand_1 = Optional.of( operand );
+        arg.kind = ArgumentKind.ONE_REG;
+        return arg;
+    }
+
+    public Arguments( Operand operand_1, Operand operand_2, Operand target ) {
+        this.operand_1 = Optional.of(operand_1);
+        this.operand_2 = Optional.of(operand_2);
+        this.target = Optional.of(target);
+        kind = ArgumentKind.REG_REG_TARGET;
+    }
+
+    public Arguments( Operand operand_1, Operand target ) {
+        this.operand_1 = Optional.of(operand_1);
+        this.target = Optional.of(target);
+        kind = ArgumentKind.REG_TARGET;
+    }
+
 
     public String toString() {
-        if ( kind == 2 ) {
-            return value.toString();
-        } else if ( kind == 0 ) {
-            return src_1 + ", " + src_2 + " -> " + target;
-        } else if (kind == 3 ) {
-            return src_1.toString();
-        } else if ( kind == 4 ) {
-            return src_1  + " -> " + variable;
-        } else if ( kind == 5 ) {
-            return variable + " -> " + target;
-        } else if ( kind == 6 ) {
-            return label_string + ":";
-        } else if ( kind == 7 ) {
-            return value + " -> " + target;
-        } else {
-            return src_1 + " -> " + target;
+        String out = "";
+        if ( target.isPresent() ) {
+            out += target.get().toString() + " ";
+            if (operand_1.isPresent()) {
+                out += "= ";
+            }
         }
+        if ( operand_1.isPresent() )
+            out += operand_1.get().toString() + " ";
+        if ( operand_2.isPresent() )
+            out += operand_2.get().toString();
+    
+        return out;
     }
 }
