@@ -47,18 +47,10 @@ printStringWithReplace:
         movq (%rsi, %r10, 8), %r12
         jmp printStringWithReplace_start
 printStringWithReplace_next:
-        push %rcx
-        push %rdx
-        push %rdi
-        push %rsi
+        
         
         movq (%rdx, %r10, 8), %rdi
-        call printNum           # This call modifies: rcx, rdx, rdi, rsi
-        
-        pop %rsi
-        pop %rdi
-        pop %rdx
-        pop %rcx        
+        call printNum
         
         dec %rcx
         inc %r10                # Increment the index, indicating how many substitution elements we have been through
@@ -153,13 +145,14 @@ printNum:
 # INPUT: rdi: The Number
 # MODIFIES: rax
 # MODIFIES: rbx
-# MODIFIES: rcx
-# MODIFIES: rdx
-# MODIFIES: rsi
-# MODIFIES: rdi
 
         push %rbp
         movq %rsp, %rbp         # Setup stackpointer
+
+        push %rcx
+        push %rdx
+        push %rdi
+        push %rsi
 
         movq $10, %rbx          # Divide by 10 to get the digits one by one.
         movq $0, %rcx           # Initial length of 0
@@ -180,6 +173,11 @@ printNumLoop:
         movq $1, %rdi           # Standart out
         movq %rcx, %rdx         # How long is the string
         syscall                 # Make the call
+
+        pop %rsi
+        pop %rdi
+        pop %rdx
+        pop %rcx
 
         movq %rbp, %rsp         # Restore stackpointer
         pop %rbp
