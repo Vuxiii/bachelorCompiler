@@ -1,7 +1,7 @@
 .section .data
 .section .text
 .section .data
-hellotext: .ascii "hejsa%\n"
+hellotext: .ascii "hejsa%\nWilliam\n"
 substitute: .space 8
 stopindicators: .space 16 # Fill me with 7 8. This grows positive for some reason lmao.
 
@@ -19,12 +19,16 @@ _start:
     leaq stopindicators, %rsi # Loading the buffer address
 
     movq $5, (%rsi) # Making the indicator stops
-    movq $8, 8(%rsi) # Making the indicator stops
+    movq $15, 8(%rsi) # Making the indicator stops
     
     leaq substitute, %rdx # Loading the substitute buffer address
     movq $420, (%rdx)
 
+    movq $1, %rcx # We have one substitute
     call printStringWithReplace
+
+    # movq $620, %rdi
+    # call printNum
 
 
     movq %rbp, %rsp # Restore stackpointer
