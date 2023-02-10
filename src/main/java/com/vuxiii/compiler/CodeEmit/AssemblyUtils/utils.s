@@ -1,5 +1,5 @@
 .section .data
-
+size_of_char: .quad 8
 .section .text
 
 .type openFileRO, @function
@@ -53,7 +53,7 @@ printStringWithReplace_next:
         push %rsi
         
         movq (%rdx, %r10, 8), %rdi
-        call printNum # This call modifies: rcx, rdx, rdi, rsi
+        call printNum           # This call modifies: rcx, rdx, rdi, rsi
         
         pop %rsi
         pop %rdi
@@ -61,10 +61,10 @@ printStringWithReplace_next:
         pop %rcx        
         
         dec %rcx
-        inc %r10 # Increment the index, indicating how many substitution elements we have been through
+        inc %r10                # Increment the index, indicating how many substitution elements we have been through
         
-        movq %r12, %r11 # Fetch the start for the next substring
-        inc %r11 # Account for the removal of '%'
+        movq %r12, %r11         # Fetch the start for the next substring
+        inc %r11                # Account for the removal of '%'
 
         movq (%rsi, %r10, 8), %r12 # Fetch the next ending location for this substring
 
@@ -77,9 +77,9 @@ printStringWithReplace_start:
 
         # Find the length of the substring
         
-        movq (%rsi, %r10, 8), %r8 # The position in the main_string this substring ends
+        movq (%rsi, %r10, 8), %r8   # The position in the main_string this substring ends
         
-        subq %r11, %r8 # The length of the substring
+        subq %r11, %r8              # The length of the substring
         
         push %rdx
         call printString
@@ -169,8 +169,8 @@ printNumLoop:
         cqto
         idivq %rbx
         addq $48, %rdx          # The char '0'
-        push %rdx               # The left-most digit 
-        addq $8, %rcx           # Size of one char
+        push %dx                # The left-most digit 
+        addq $2, %rcx           # Size of dx 2 bytes
 
         cmp $0, %rax
         jnz printNumLoop

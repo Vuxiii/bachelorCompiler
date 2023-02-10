@@ -10,28 +10,28 @@ stopindicators: .space 16 # Fill me with 7 8. This grows positive for some reaso
 .global _start
 _start:
     push %rbp
-    movq %rsp, %rbp # Setup stackpointer
+    movq %rsp, %rbp                 # Setup stackpointer
     
     # subq $8, %rsp
 
-    movq $hellotext, %rdi # The input text
+    movq $hellotext, %rdi           # The input text
     
-    leaq stopindicators, %rsi # Loading the buffer address
+    leaq stopindicators, %rsi       # Loading the buffer address
 
-    movq $5, (%rsi) # Making the indicator stops
-    movq $15, 8(%rsi) # Making the indicator stops
+    movq $5, (%rsi)                 # Making the indicator stops
+    movq $15, 8(%rsi)               # Making the indicator stops
     
-    leaq substitute, %rdx # Loading the substitute buffer address
+    leaq substitute, %rdx           # Loading the substitute buffer address
     movq $420, (%rdx)
 
-    movq $1, %rcx # We have one substitute
+    movq $1, %rcx                   # We have one substitute
     call printStringWithReplace
 
     # movq $620, %rdi
     # call printNum
 
 
-    movq %rbp, %rsp # Restore stackpointer
+    movq %rbp, %rsp                 # Restore stackpointer
     pop %rbp
     
 # Exit call
