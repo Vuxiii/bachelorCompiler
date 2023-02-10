@@ -3,6 +3,7 @@
 .section .text
 
 .global printString
+.global printStringWithReplace
 .global openFileRO
 .global closeFile
 .global read4Byte
@@ -31,6 +32,61 @@ read4Byte:
         syscall
         ret
 
+printStringWithReplace:
+# INPUT: RDI: The string buffer
+# INPUT: RSI: Array containing indexes for stop indicators. '%' from the input string marks a stop indicator
+# INPUT: RDX: Array containing what to substitute '%' with.
+# INPUT: RCX: Number of substitutions to perform
+
+        # r10: Stores the index of the current substitution element
+        # r11: Stores the value of the start of the substring
+        # r12: Stores the value of the current stop_indicator | RSI[r10]
+        movq $0, %r10
+        movq $0, %r11
+        movq (%rsi, %r10, 8), %r12
+        jmp printStringWithReplace_start
+printStringWithReplace_next:
+        dec %rcx
+        inc %r10 # Increment the index, indicating how many substitution elements we have been through
+        
+        movq %r12, %r11 # Fetch the start for the next substring
+        inc %r11 # Account for the removal of '%'
+
+        movq (%rsi, %r10, 8), %r12 # Fetch the next ending location for this substring
+
+printStringWithReplace_start:
+        # Step 1: Print the first substring upto the first stop_pointer
+        
+        # Offset into the inputbuffer the correct amount!!
+        leaq (%rdi, %r11, 1), %rax # Start of substring
+        
+
+        # Find the length of the substring
+        
+        movq (%rsi, %r10, 8), %r8 # The position in the main_string this substring ends
+        
+        subq %r11, %r8 # The length of the substring
+        
+        push %rcx
+        call printString
+        pop %rcx
+
+        # Step 2: If there are any substitutions left: Print the substitution goto 1.
+
+        push %rdi
+        # Fetch what to write
+        leaq (%rdx, %r10, 8), %rdi # 
+        # movq (%rdi), %rax
+        # movq (%r15), %rdi
+        call printNum
+        
+        pop %rdi
+
+        cmpq $0, %rcx
+        jnz printStringWithReplace_next
+
+        ret
+
 printString:
 # INPUT: RAX: the String
 # INPUT: R8: the length, 0 if unknown
@@ -54,7 +110,6 @@ loopBegin:
         jmp loopBegin
 
 loopEnd:
-
         # rcx is the length of the string
 
         movq %rax, %rsi

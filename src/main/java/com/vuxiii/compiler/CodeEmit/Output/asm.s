@@ -1,57 +1,32 @@
 .section .data
 .section .text
 .section .data
+hellotext: .ascii "hejsa%\n"
+substitute: .space 8
+stopindicators: .space 16 # Fill me with 7 8. This grows positive for some reason lmao.
+
+
 .section .text
 .global _start
 _start:
     push %rbp
     movq %rsp, %rbp # Setup stackpointer
-    subq $-16, %rsp
-    movq %rsp, %rsp
-    push $7
-    pop %rax
     
-    # [[ Storing variable first ]] 
-    # [[ offset is 1 ]] 
-    movq %rax, -8(%rbp)
-    push $2
+    # subq $8, %rsp
+
+    movq $hellotext, %rdi # The input text
     
-    # [[ Loading variable first ]] 
-    # [[ offset is 1 ]] 
-    movq -8(%rbp), %rcx
-    pop %rbx
-    movq %rbx, %rax
-    imulq %rcx
-    movq %rax, %rax
-    push %rax
-    push $4
-    pop %rcx
-    pop %rbx
-    addq %rbx, %rcx
-    movq %rcx, %rax
-    push %rax
-    pop %rax
-    # movq %rax, %rdi
-    # call printNum
-    push $2
+    leaq stopindicators, %rsi # Loading the buffer address
+
+    movq $5, (%rsi) # Making the indicator stops
+    movq $8, 8(%rsi) # Making the indicator stops
     
-    # [[ Loading variable first ]] 
-    # [[ offset is 1 ]] 
-    movq -8(%rbp), %rcx
-    pop %rbx
-    movq %rbx, %rax
-    imulq %rcx
-    movq %rax, %rax
-    push %rax
-    push $4
-    pop %rcx
-    pop %rbx
-    addq %rbx, %rcx
-    movq %rcx, %rax
-    push %rax
-    pop %rax
-    # movq %rax, %rdi
-    # call printNum
+    leaq substitute, %rdx # Loading the substitute buffer address
+    movq $420, (%rdx)
+
+    call printStringWithReplace
+
+
     movq %rbp, %rsp # Restore stackpointer
     pop %rbp
     
