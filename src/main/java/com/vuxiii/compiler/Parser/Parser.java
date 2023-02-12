@@ -220,15 +220,23 @@ public class Parser {
             return new Assignment( Symbol.n_Assignment, (LexIdent)t.get(0), (ASTNode)t.get(2)  );
         });
 
-        // n_Print -> t_Print t_Equals t_LParen n_Expression t_RParen
+        // n_Print -> t_Print t_LParen n_Expression t_RParen
         g.addRuleWithReduceFunction( Symbol.n_Print, List.of( Symbol.t_Print, Symbol.t_LParen, Symbol.n_Expression, Symbol.t_RParen ), t -> {
+            return new Print( Symbol.n_Print, (ASTNode)t.get(2) );
+        });
+
+        // n_Print -> t_Print t_LParen t_StringLiteral t_Comma n_Arg_List t_RParen
+        g.addRuleWithReduceFunction( Symbol.n_Print, List.of( Symbol.t_Print, Symbol.t_LParen, Symbol.t_StringLiteral, Symbol.t_Comma, Symbol.n_Arg_List, Symbol.t_RParen ), t -> {
+            return new Print( Symbol.n_Print, (ASTNode)t.get(2), (Argument)t.get(4) );
+        });
+        // n_Print -> t_Print t_LParen t_StringLiteral t_RParen
+        g.addRuleWithReduceFunction( Symbol.n_Print, List.of( Symbol.t_Print, Symbol.t_LParen, Symbol.t_StringLiteral, Symbol.t_RParen ), t -> {
             return new Print( Symbol.n_Print, (ASTNode)t.get(2) );
         });
         
     }
 
     private static void init_scope_capture() {
-        // --[[ Scopes ]]--
 
         // n_Statement -> n_Scope
         g.addRuleWithReduceFunction( Symbol.n_Statement, List.of( Symbol.n_Scope ), t -> {
@@ -420,7 +428,7 @@ public class Parser {
 
         // n_Value -> t_Minus n_Factor
         g.addRuleWithReduceFunction( Symbol.n_Value, List.of( Symbol.t_Minus, Symbol.n_Factor ), t -> {
-            return new BinaryOperation( Symbol.n_Value, new LexLiteral(new MatchInfo("0", -1, -1), TokenType.INT), (ASTNode)t.get(1), new LexOperator( new MatchInfo("-", -1, -1), TokenType.MINUS ), BinaryOperationKind.MINUS );
+            return new BinaryOperation( Symbol.n_Value, new LexLiteral(new MatchInfo("0", -1, -1), TokenType.INT_LITERAL), (ASTNode)t.get(1), new LexOperator( new MatchInfo("-", -1, -1), TokenType.MINUS ), BinaryOperationKind.MINUS );
         });
 
         // n_Value -> n_Factor
@@ -496,9 +504,15 @@ public class Parser {
             return new Argument( Symbol.n_Arg, (ASTNode)t.get(0), ArgumentKind.IDENTIFIER );
         });
 
+        //TODO: Fix me. 
         // n_Arg -> t_Literal
-        g.addRuleWithReduceFunction( Symbol.n_Arg, List.of( Symbol.n_Literal ), t -> {
-            return new Argument( Symbol.n_Arg, (ASTNode)t.get(0), ArgumentKind.LITERAL );
+        // g.addRuleWithReduceFunction( Symbol.n_Arg, List.of( Symbol.n_Literal ), t -> {
+        //     return new Argument( Symbol.n_Arg, (ASTNode)t.get(0), ArgumentKind.LITERAL );
+        // });
+        
+        // n_Arg -> n_Expression
+        g.addRuleWithReduceFunction( Symbol.n_Arg, List.of( Symbol.n_Expression ), t -> {
+            return new Argument( Symbol.n_Arg, (ASTNode)t.get(0), ArgumentKind.EXPRESSION );
         });
 
         // n_Assignment_Function -> n_Function_Signature t_LCurly n_Statement_List t_RCurly

@@ -11,17 +11,20 @@ import com.vuxiii.DFANFA.MatchInfo;
 import com.vuxiii.compiler.Lexer.Tokens.TokenType;
 import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexIdent;
 import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexLiteral;
+import com.vuxiii.compiler.Parser.Nodes.Argument;
 import com.vuxiii.compiler.Parser.Nodes.Assignment;
 import com.vuxiii.compiler.Parser.Nodes.BinaryOperation;
 import com.vuxiii.compiler.Parser.Nodes.Declaration;
 import com.vuxiii.compiler.Parser.Nodes.FunctionCall;
 import com.vuxiii.compiler.Parser.Nodes.Parameter;
 import com.vuxiii.compiler.Parser.Nodes.Print;
+import com.vuxiii.compiler.Parser.Nodes.PrintKind;
 import com.vuxiii.compiler.Parser.Nodes.Types.FunctionType;
 import com.vuxiii.compiler.VisitorPattern.ASTNode;
 import com.vuxiii.compiler.VisitorPattern.Visitor;
 import com.vuxiii.compiler.VisitorPattern.Annotations.VisitOrder;
 import com.vuxiii.compiler.VisitorPattern.Annotations.VisitorPattern;
+import com.vuxiii.compiler.VisitorPattern.Visitors.CodeGeneration.StringCollection.StringNode;
 import com.vuxiii.compiler.VisitorPattern.Visitors.SymbolCollection.Scope;
 
 public class AST_StackMachine extends Visitor {
@@ -32,18 +35,24 @@ public class AST_StackMachine extends Visitor {
 
     public Map<String, FunctionBlock> functions = new HashMap<>();
 
+    public Map<String, StringNode> strings;
+
     private int function_depth = 0;
 
     Set<String> parameters = new HashSet<>();
 
     Scope current_scope = new Scope();
 
-    public AST_StackMachine( List<Assignment> functions, Map<String, Scope> scopes ) {
+    public AST_StackMachine( List<Assignment> functions, Map<String, Scope> scopes, Map<String, StringNode> strings ) {
+        this.strings = strings;
         this.scopes = scopes;
+        
         for ( Assignment node : functions ) { 
             current_scope = scopes.get( node.id.name );
             function_assembler( node, scopes.get( node.id.name ) );
         }
+
+        
 
         // Make room for our main function's variables!
 
@@ -58,7 +67,7 @@ public class AST_StackMachine extends Visitor {
         push( ins );
     }
 
-    public AST_StackMachine( Scope scope ) {
+    public AST_StackMachine( Scope scope, Map<String, StringNode> strings ) {
         this.parameters = scope.get_parameters();
         this.current_scope = scope;
     }
@@ -79,7 +88,7 @@ public class AST_StackMachine extends Visitor {
         System.out.println( parameters );
 
 
-        AST_StackMachine stackMachine = new AST_StackMachine( current_scope ); // Insert internal functions here.
+        AST_StackMachine stackMachine = new AST_StackMachine( current_scope, strings ); // Insert internal functions here.
 
         function.value.accept( stackMachine );
 
@@ -93,9 +102,22 @@ public class AST_StackMachine extends Visitor {
     }
 
     @VisitorPattern( when = VisitOrder.ENTER_NODE )
-    public void literal_int( LexLiteral leaf_int ) {
+    public void literal( LexLiteral leaf_literal ) {
         if ( function_depth != 0 ) return;
-        push( new Instruction( Opcode.PUSH, Arguments.from_int( Integer.parseInt(leaf_int.val) ), new Comment( "Pushing value " + leaf_int.val ) ) );
+        switch (leaf_literal.literal_type) {
+            case DOUBLE: {
+                push( new Instruction( Opcode.PUSH, Arguments.from_double( Double.parseDouble(leaf_literal.val) ), new Comment( "Pushing value " + leaf_literal.val ) ) );
+            } break;
+            case INT: {
+                push( new Instruction( Opcode.PUSH, Arguments.from_int( Integer.parseInt(leaf_literal.val) ), new Comment( "Pushing value " + leaf_literal.val ) ) );
+            } break;
+            case STRING: {
+                // WHat to do.......
+            } break;
+        
+            default:
+                break;
+        }
     }
 
     @VisitorPattern( when = VisitOrder.EXIT_NODE )
@@ -210,22 +232,84 @@ public class AST_StackMachine extends Visitor {
             function_depth++;
     }
 
+    // @VisitorPattern( when = VisitOrder.ENTER_NODE )
+    // public void evaluate_argument( Argument arg ) {
+
+    // }
+
     @VisitorPattern( when = VisitOrder.EXIT_NODE )
     public void print( Print print_node ) {
         if ( function_depth != 0 ) return;
-        if ( print_node.value instanceof LexIdent ) {
 
-            push( new Instruction( Opcode.LOAD_VARIABLE, 
-                                    new Arguments( new Operand( Register.RAX, AddressingMode.REGISER ), new Operand( ((LexIdent)print_node.value).name, AddressingMode.IMMEDIATE ) ), 
-                                    new Comment( "Loading value of " + print_node.value ) ) );
-        } else 
+
+                                // Make some fancy string stuff.
+        if ( print_node.kind == PrintKind.NORMAL ) {
             push( new Instruction( Opcode.POP, 
-                                    Arguments.from_register( Register.RAX ), 
+                                    Arguments.from_register( Register.RDI ), 
                                     new Comment( "Fetching value " + print_node.value ) ) );
-                
-        push( new Instruction( Opcode.PRINT, 
-                                Arguments.from_register( Register.RAX ), 
-                                new Comment( "Printing value of " + print_node.value ) ) );
+            push( new Instruction( Opcode.PRINT, Arguments.from_label( "%\n" ) ) ); 
+        }
+        else {
+            // Do the fancy things
+            // Fetch the String -> rdi
+            String str_literal = ((LexIdent)print_node.value).matchInfo.str();
+            StringNode str_node = strings.get( str_literal );
+            Operand string_operand = new Operand( str_node.name, AddressingMode.IMMEDIATE );
+            Operand string_target = new Operand( Register.RDI, AddressingMode.REGISER );
+            push( new Instruction( Opcode.MOVE, 
+                                    new Arguments( string_operand, string_target ),
+                                    new Comment( "The input text" ) ) );
+
+            // Create the stop indicators -> rsi
+
+            Operand string_stopindicator_buffer = new Operand( str_node.stop_name, AddressingMode.IMMEDIATE );
+            Operand string_stopindicator_target = new Operand( Register.RSI, AddressingMode.REGISER );
+            push( new Instruction( Opcode.LEA, 
+                                    new Arguments( string_stopindicator_buffer, string_stopindicator_target),
+                                    new Comment( "Loading the stopindicator's buffer address" ) ) );
+
+            // Create the indicators
+            for ( int i = 0; i < str_node.stop_indicators.size(); ++i ) {
+                Operand stop_indicator = new Operand( str_node.stop_indicators.get(i), AddressingMode.IMMEDIATE );
+                Operand rsi_offset = new Operand( Register.RSI, AddressingMode.DIRECT_OFFSET );
+                rsi_offset.offset = i;
+
+                push( new Instruction( Opcode.MOVE,
+                                        new Arguments( stop_indicator, rsi_offset ),
+                                        new Comment( "Making indicator stop" ) ) );
+            }
+            // Substitutes -> rdx
+
+            Operand string_substitute_buffer = new Operand( str_node.substitute_name, AddressingMode.IMMEDIATE );
+            Operand string_substitute_target = new Operand( Register.RDX, AddressingMode.REGISER );
+            push( new Instruction( Opcode.LEA, 
+                                    new Arguments( string_substitute_buffer, string_substitute_target),
+                                    new Comment( "Loading the substitute's buffer address" ) ) );
+            
+            // Move the substitutes into the buffer 
+            // for ( int i = 0; i < str_node.substitutes.size(); ++i ) {
+            //     Operand substitute = new Operand( str_node.substitutes.get(i), AddressingMode.IMMEDIATE );
+            //     Operand rdx_offset = new Operand( Register.RDX, AddressingMode.DIRECT_OFFSET );
+            //     rdx_offset.offset = i;
+
+            //     push( new Instruction( Opcode.MOVE,
+            //                             new Arguments( substitute, rdx_offset ),
+            //                             new Comment( "Loading the substitute" ) ) ); // These should probably be computed on the stack. Just before. So we should do pop!
+            // }
+            // Amount of substitues -> rcx
+
+            Operand size = new Operand( str_node.substitutes.size(), AddressingMode.IMMEDIATE );
+            Operand rcx = new Operand( Register.RCX, AddressingMode.REGISER );
+            push( new Instruction( Opcode.MOVE, 
+                                    new Arguments( size, rcx ),
+                                    new Comment( "Amount of substitutes" ) ) );
+            
+
+            push( new Instruction( Opcode.PRINT ) );
+        }
+        // push( new Instruction( Opcode.PRINT, 
+        //                         Arguments.from_register( Register.RAX ), 
+        //                         new Comment( "Printing value of " + print_node.value ) ) );
 
     }
 

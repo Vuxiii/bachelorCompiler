@@ -31,8 +31,9 @@ public enum TokenType {
     LET( Symbol.t_Let ),
     ARROW_RIGHT( Symbol.t_Arrow_Right ),
 
-    INT( Symbol.t_Integer, PrimitiveType.INT ),
-    DOUBLE( Symbol.t_Double, PrimitiveType.DOUBLE ),
+    INT_LITERAL( Symbol.t_Integer, PrimitiveType.INT ),
+    DOUBLE_LITERAL( Symbol.t_Double, PrimitiveType.DOUBLE ),
+    STRING_LITERAL( Symbol.t_StringLiteral, PrimitiveType.STRING ),
     TYPE_DECL( Symbol.t_Type_Declare ),
     TYPE_INT( Symbol.t_Type_Int, PrimitiveType.INT ),
     TYPE_DOUBLE( Symbol.t_Type_Double, PrimitiveType.DOUBLE );

@@ -8,6 +8,8 @@ import com.vuxiii.compiler.Parser.Nodes.Assignment;
 import com.vuxiii.compiler.VisitorPattern.Visitors.CodeGeneration.AST_StackMachine;
 import com.vuxiii.compiler.VisitorPattern.Visitors.CodeGeneration.FunctionBlock;
 import com.vuxiii.compiler.VisitorPattern.Visitors.CodeGeneration.Instruction;
+import com.vuxiii.compiler.VisitorPattern.Visitors.CodeGeneration.StringCollection.StringCollector;
+import com.vuxiii.compiler.VisitorPattern.Visitors.CodeGeneration.StringCollection.StringNode;
 import com.vuxiii.compiler.VisitorPattern.Visitors.Debug.AST_Printer;
 import com.vuxiii.compiler.VisitorPattern.Visitors.SymbolCollection.AST_FixTypes;
 import com.vuxiii.compiler.VisitorPattern.Visitors.SymbolCollection.AST_SymbolCollector;
@@ -213,7 +215,20 @@ public final class App {
         print( 2 * first + 4 );
 
         """;
+        input = """
+        print( "Counter is: %\\n", 1 );
+
+        """;
+        input = """
+        let a: int;
+        a = 1 + 2 + 3;
+        print( "%\\n", a + 1 );
+        a = 69 + a;
+        print( "%\\n", a );
+        """;
         
+        System.out.println( input );
+
         // [[ Tokenizer ]]
         List<ASTToken> tokens = Lexer.lex( input );
 
@@ -281,9 +296,13 @@ public final class App {
         printer = new AST_Printer();
         ast.accept( printer );
         System.out.println( printer.get_ascii() );
-        line_break();
 
         // [[ Symbol Collecting ]]
+
+
+        line_break();
+        System.out.println( "Symbol collector" );
+        line_break();
         AST_SymbolCollector symbolCollector = new AST_SymbolCollector();
         ast.accept( symbolCollector );
 
@@ -308,6 +327,19 @@ public final class App {
         Map<String, Scope> scope_map = symbolCollector.scope_map; 
 
         line_break();
+        System.out.println( "String collector" );
+        line_break();
+
+        StringCollector str_collector = new StringCollector();
+        ast.accept( str_collector );
+
+        Map<String, StringNode> strings = str_collector.strings;
+
+        for ( String s : strings.keySet() ) {
+            System.out.println( s + " -> " + strings.get( s ) );
+        }
+
+
 
         // [[ Type Checking ]]
 
@@ -320,16 +352,17 @@ public final class App {
 
 
         
-        AST_StackMachine generator = new AST_StackMachine( symbolCollector.functions, scope_map );
+        AST_StackMachine generator = new AST_StackMachine( symbolCollector.functions, scope_map, strings );
         ast.accept(generator);
 
+        line_break();
         System.out.println( "Internal Low-Level Representation");
+        line_break();
 
 
         List<Instruction> instructions = generator.code;
         Map<String, FunctionBlock> fbs = generator.functions;
 
-        line_break();
 
         System.out.println( "[[ Functions ]]" );
 
@@ -394,8 +427,5 @@ public final class App {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-
-        
-
     }
 }

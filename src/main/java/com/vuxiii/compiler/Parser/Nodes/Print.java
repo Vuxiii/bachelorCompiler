@@ -9,10 +9,21 @@ import com.vuxiii.compiler.VisitorPattern.Annotations.VisitNumber;
 public class Print extends ASTNode {
 
     @VisitNumber( number = 1 ) public ASTNode value;
+    @VisitNumber( number = 2 ) public Optional<Argument> arg_list = Optional.empty();
 
-    public Print( Term term, ASTNode value ) {
+    public final PrintKind kind;
+
+    public Print( Term term, ASTNode value) {
         super( term ); 
         this.value = value;
+        this.kind = PrintKind.NORMAL;
+        super.setup_ASTNodeQueue();
+    }
+    public Print( Term term, ASTNode string_literal, Argument args ) {
+        super( term ); 
+        this.value = string_literal;
+        this.arg_list = Optional.of( args );
+        this.kind = PrintKind.STRING_SUBSTITUTE;
 
         super.setup_ASTNodeQueue();
     }
@@ -28,16 +39,8 @@ public class Print extends ASTNode {
 
     @Override
     public Optional<ASTNode> getChild2() {
-        return Optional.empty();
-    }
-
-    @Override
-    public Optional<ASTNode> getChild3() {
-        return Optional.empty();
-    }
-
-    @Override
-    public Optional<ASTNode> getChild4() {
+        if ( arg_list.isPresent() )
+            return Optional.of(arg_list.get());
         return Optional.empty();
     }
 

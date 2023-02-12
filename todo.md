@@ -14,6 +14,15 @@ Husk at tjekke om en variable bliver brugt inden den er blevet assignet noget!!!
 
 Lmao. Har glemt at gøre plads til lokale variabler i main. Åbenbart.....
 
+Print funktion i assembly:
+    For hvert et print skal jeg angive:
+    * String buffer: Hvad der skal printes
+      * Kan laves under compile
+    * stop_indicator array: Angiver hvilke indekser der skal erstattes.
+      * Kan laves under compile
+    * Substitute Array: Angiver hvad der skal erstattes med.
+      * Kan laves under compile
+
 Addressing modes
 
     Register Addressing
@@ -26,7 +35,7 @@ Addressing modes
 
     Indirect Memory Addressing
 
-    
+
 
 
 Add scoping

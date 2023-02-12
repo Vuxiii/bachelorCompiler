@@ -9,6 +9,7 @@ public class Operand {
     private Optional<Double> num_double = Optional.empty();
 
     public AddressingMode addressing_mode;
+    public int offset;
 
 
     public Operand( String str, AddressingMode mode ) {

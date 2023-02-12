@@ -46,7 +46,7 @@ public class ConstantPropagation extends Visitor {
 
                 int line = ((LexLiteral)binop.left).matchInfo.lineNumber();
                 int column = ((LexLiteral)binop.left).matchInfo.columnNumber();
-                replace_node = new LexLiteral( new MatchInfo( value, line, column ), TokenType.INT );
+                replace_node = new LexLiteral( new MatchInfo( value, line, column ), TokenType.INT_LITERAL );
             }
         }
     }
@@ -81,7 +81,7 @@ public class ConstantPropagation extends Visitor {
             Integer value = scope.get( n.name );
             if ( value == null ) return; // Not registered in scope yet.
 
-            node.left = new LexLiteral( new MatchInfo( value + "", n.matchInfo.lineNumber(), n.matchInfo.columnNumber() ), TokenType.INT );
+            node.left = new LexLiteral( new MatchInfo( value + "", n.matchInfo.lineNumber(), n.matchInfo.columnNumber() ), TokenType.INT_LITERAL );
             run_again = true;
 
         } else if ( node.right instanceof LexIdent ) {
@@ -89,7 +89,7 @@ public class ConstantPropagation extends Visitor {
             Integer value = scope.get( n.name );
             if ( value == null ) return; // Not registered in scope yet.
 
-            node.right = new LexLiteral( new MatchInfo( value + "", n.matchInfo.lineNumber(), n.matchInfo.columnNumber() ), TokenType.INT );
+            node.right = new LexLiteral( new MatchInfo( value + "", n.matchInfo.lineNumber(), n.matchInfo.columnNumber() ), TokenType.INT_LITERAL );
             run_again = true;
         }
     }

@@ -28,5 +28,5 @@ public enum Opcode {
 
     LABEL,
 
-    PRINT,
+    PRINT, LEA,
 }

@@ -212,9 +212,8 @@ public class X86Emitter {
                     push_code( "call " + instruction.args.get().operand_1.get().get_string() );
                 } break;
 
-                case PRINT: {
-                    push_code( "movq " + getReg(instruction.args.get().operand_1.get().get_reg()) + ", %rdi" );
-                    push_code( "call printNum" );
+                case PRINT: {                    
+                    push_code( "call printStringWithReplace" );
                 } break;
                 default: {
                     System.out.println( "\u001B[41m\u001B[37m--[[ Emitter Error ]]--\u001B[0m\nMissing implementation for opcode " + instruction.opcode + "\nExiting!");
@@ -244,6 +243,9 @@ public class X86Emitter {
             case RCX: return "%rcx";
             case RBP: return "%rbp";
             case RSP: return "%rsp";
+            case RDI: return "%rdi";
+            case RDX: return "%rdx";
+            case RSI: return "%rsi";
             default: return "unknown " + reg;
         }
     }

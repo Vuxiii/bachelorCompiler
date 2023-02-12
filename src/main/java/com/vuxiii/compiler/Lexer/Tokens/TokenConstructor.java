@@ -31,7 +31,7 @@ public class TokenConstructor {
             case IDENTIFIER: {
                 return new LexIdent( matchInfo, type );
             }
-            case INT: case DOUBLE: {
+            case INT_LITERAL: case DOUBLE_LITERAL: {
                 return new LexLiteral( matchInfo, type );
             }
             case TYPE_INT: case TYPE_DOUBLE: {
@@ -78,8 +78,12 @@ public class TokenConstructor {
             }
             case COMMA: {
                 return new LexComma( matchInfo, type );
-            } case ARROW_RIGHT: {
+            } 
+            case ARROW_RIGHT: {
                 return new LexArrowRight( matchInfo, type );
+            }
+            case STRING_LITERAL: {
+                return new LexLiteral( matchInfo, type );
             }
             default: {
                 // Unkown. Not implemented yet. Throw error

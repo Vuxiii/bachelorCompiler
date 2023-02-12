@@ -31,6 +31,7 @@ read4Byte:
         movq $20, %rdx
         syscall
         ret
+        
 .type printStringWithReplace, @function
 .globl printStringWithReplace
 printStringWithReplace:

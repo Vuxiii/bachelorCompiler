@@ -27,10 +27,10 @@ public class Lexer {
 
         reg = new Regex<>(PrimitiveType.INT.name,         matchInfo -> TokenConstructor.construct( matchInfo, TokenType.TYPE_INT ) );
 
-        // reg.addRegex( "int", in -> new LexType( in ) );
         reg.addRegex( PrimitiveType.DOUBLE.name,          matchInfo -> TokenConstructor.construct( matchInfo, TokenType.TYPE_DOUBLE ) );
-        reg.addRegex( "[:digit:][:digit:]*",              matchInfo -> TokenConstructor.construct( matchInfo, TokenType.INT ) );
-        reg.addRegex( "[:digit:][:digit:]*\\.[:digit:]*", matchInfo -> TokenConstructor.construct( matchInfo, TokenType.DOUBLE ) );
+        reg.addRegex( '"' + "(.| |\n)*" + '"',                   matchInfo -> TokenConstructor.construct( matchInfo, TokenType.STRING_LITERAL ) );
+        reg.addRegex( "[:digit:][:digit:]*",              matchInfo -> TokenConstructor.construct( matchInfo, TokenType.INT_LITERAL ) );
+        reg.addRegex( "[:digit:][:digit:]*\\.[:digit:]*", matchInfo -> TokenConstructor.construct( matchInfo, TokenType.DOUBLE_LITERAL ) );
         reg.addRegex( ";",                                matchInfo -> TokenConstructor.construct( matchInfo, TokenType.SEMICOLON ) );
         reg.addRegex( ":",                                matchInfo -> TokenConstructor.construct( matchInfo, TokenType.COLON ) );
         reg.addRegex( "=",                                matchInfo -> TokenConstructor.construct( matchInfo, TokenType.EQUAL ) );
@@ -40,7 +40,7 @@ public class Lexer {
         reg.addRegex( "/",                                matchInfo -> TokenConstructor.construct( matchInfo, TokenType.DIVISION ) );
         reg.addRegex( "print",                            matchInfo -> TokenConstructor.construct( matchInfo, TokenType.PRINT ) );
         reg.addRegex( "let",                              matchInfo -> TokenConstructor.construct( matchInfo, TokenType.LET ) );
-        reg.addRegex( "\\->",                               matchInfo -> TokenConstructor.construct( matchInfo, TokenType.ARROW_RIGHT ) );
+        reg.addRegex( "\\->",                             matchInfo -> TokenConstructor.construct( matchInfo, TokenType.ARROW_RIGHT ) );
         reg.addRegex( "type",                             matchInfo -> TokenConstructor.construct( matchInfo, TokenType.TYPE_DECL ) );
         reg.addRegex( "\\(",                              matchInfo -> TokenConstructor.construct( matchInfo, TokenType.LEFT_PARENTHESIS ) );
         reg.addRegex( "\\)",                              matchInfo -> TokenConstructor.construct( matchInfo, TokenType.RIGHT_PARENTHESIS ) );
