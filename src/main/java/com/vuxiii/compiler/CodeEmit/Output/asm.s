@@ -47,7 +47,7 @@ _start:
     pop %rax
     movq %rax, (%rdx)
     movq $1, %rcx
-    call printStringWithReplace
+    # call printStringWithReplace
     
     # End Print
     
@@ -84,7 +84,7 @@ _start:
     pop %rax
     movq %rax, (%rdx)
     movq $1, %rcx
-    call printStringWithReplace
+    # call printStringWithReplace
     
     # End Print
     
