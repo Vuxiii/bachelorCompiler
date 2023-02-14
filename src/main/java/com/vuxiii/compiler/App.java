@@ -5,6 +5,7 @@ import com.vuxiii.compiler.InternalInterpreter.Interpreter;
 import com.vuxiii.compiler.Lexer.Lexer;
 import com.vuxiii.compiler.Parser.Parser;
 import com.vuxiii.compiler.Parser.Nodes.Assignment;
+import com.vuxiii.compiler.Parser.Nodes.Print;
 import com.vuxiii.compiler.VisitorPattern.Visitors.CodeGeneration.AST_StackMachine;
 import com.vuxiii.compiler.VisitorPattern.Visitors.CodeGeneration.FunctionBlock;
 import com.vuxiii.compiler.VisitorPattern.Visitors.CodeGeneration.Instruction;
@@ -21,6 +22,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.vuxiii.LR.Records.ASTToken;
 import com.vuxiii.LR.Settings;
@@ -211,21 +213,22 @@ public final class App {
         first = 7;
         let second: int;
         
-        print( 2 * first + 4 );
-        print( 2 * first + 4 );
+        print( "as: %\\n", 2 * first + 4 );
+        print( "as: %\\n", 2 * first + 4 );
 
         """;
-        input = """
-        print( "Counter is: %\\n", 1 );
+        // input = """
+        // print( "Counter is: %\\n", 1 );
 
-        """;
-        input = """
-        let a: int;
-        a = 1 + 2 + 3;
-        print( "%\\n", a + 1 );
-        a = 69 + a;
-        print( "%\\n", a );
-        """;
+        // """;
+        // input = """
+        // let a: int;
+        // a = 1 + 2 + 3;
+        // a = 69 + a;
+        // print( "a: %\\n", a );
+        // print( "a: %\\n", a + 1 );
+        // """;
+        
         
         System.out.println( input );
 
@@ -333,11 +336,11 @@ public final class App {
         StringCollector str_collector = new StringCollector();
         ast.accept( str_collector );
 
-        Map<String, StringNode> strings = str_collector.strings;
+        Map<Print, StringNode> strings = str_collector.strings;
 
-        for ( String s : strings.keySet() ) {
-            System.out.println( s + " -> " + strings.get( s ) );
-        }
+        // for ( String s : strings.keySet() ) {
+        //     System.out.println( s + " -> " + strings.get( s ) );
+        // }
 
 
 
@@ -397,7 +400,7 @@ public final class App {
         System.out.println( "Passing instruction to CodeEmitter");
         line_break();
 
-        X86Emitter emitter = new X86Emitter( instructions, fbs, scope_map );
+        X86Emitter emitter = new X86Emitter( instructions, fbs, scope_map, strings );
 
         String asm_code = emitter.run();
         System.out.println( asm_code );

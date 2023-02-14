@@ -35,7 +35,7 @@ public class AST_StackMachine extends Visitor {
 
     public Map<String, FunctionBlock> functions = new HashMap<>();
 
-    public Map<String, StringNode> strings;
+    public Map<Print, StringNode> strings;
 
     private int function_depth = 0;
 
@@ -43,7 +43,7 @@ public class AST_StackMachine extends Visitor {
 
     Scope current_scope = new Scope();
 
-    public AST_StackMachine( List<Assignment> functions, Map<String, Scope> scopes, Map<String, StringNode> strings ) {
+    public AST_StackMachine( List<Assignment> functions, Map<String, Scope> scopes, Map<Print, StringNode> strings ) {
         this.strings = strings;
         this.scopes = scopes;
         
@@ -67,7 +67,7 @@ public class AST_StackMachine extends Visitor {
         push( ins );
     }
 
-    public AST_StackMachine( Scope scope, Map<String, StringNode> strings ) {
+    public AST_StackMachine( Scope scope, Map<Print, StringNode> strings ) {
         this.parameters = scope.get_parameters();
         this.current_scope = scope;
     }
@@ -241,7 +241,7 @@ public class AST_StackMachine extends Visitor {
     public void print( Print print_node ) {
         if ( function_depth != 0 ) return;
 
-
+        push( new Instruction( Opcode.COMMENT, Arguments.from_label( "Setup Print" ) ) );
                                 // Make some fancy string stuff.
         if ( print_node.kind == PrintKind.NORMAL ) {
             push( new Instruction( Opcode.POP, 
@@ -252,8 +252,8 @@ public class AST_StackMachine extends Visitor {
         else {
             // Do the fancy things
             // Fetch the String -> rdi
-            String str_literal = ((LexIdent)print_node.value).matchInfo.str();
-            StringNode str_node = strings.get( str_literal );
+            // String str_literal = ((LexLiteral)print_node.value).matchInfo.str();
+            StringNode str_node = strings.get( print_node );
             Operand string_operand = new Operand( str_node.name, AddressingMode.IMMEDIATE );
             Operand string_target = new Operand( Register.RDI, AddressingMode.REGISER );
             push( new Instruction( Opcode.MOVE, 
@@ -287,15 +287,33 @@ public class AST_StackMachine extends Visitor {
                                     new Comment( "Loading the substitute's buffer address" ) ) );
             
             // Move the substitutes into the buffer 
-            // for ( int i = 0; i < str_node.substitutes.size(); ++i ) {
-            //     Operand substitute = new Operand( str_node.substitutes.get(i), AddressingMode.IMMEDIATE );
-            //     Operand rdx_offset = new Operand( Register.RDX, AddressingMode.DIRECT_OFFSET );
-            //     rdx_offset.offset = i;
+            for ( int i = str_node.substitutes.size()-1; i >= 0 ; --i ) {
+                Operand inter = new Operand( Register.RAX, AddressingMode.REGISER );
+                ASTNode current_node = str_node.substitutes.get(i);
+                System.out.println( "Current node in sub is " + current_node.getPrintableName() );
+                if ( current_node instanceof LexIdent ) {
+                    String var_name = ((LexIdent)current_node).name;
+                    Operand var = new Operand( var_name, AddressingMode.IMMEDIATE );
+                    Operand target = new Operand( Register.RAX, AddressingMode.REGISER );
+                    boolean target_is_parameter = current_scope.get_parameters().contains( var_name );
+                    
+                    push( new Instruction( Opcode.LOAD_VARIABLE, 
+                                        new Arguments( var, target, target ), 
+                                        new Comment( "Load variable " + var_name ),
+                                        target_is_parameter ) );
+                } else {
+                    push( new Instruction( Opcode.POP, 
+                                        Arguments.from_register( Register.RAX ) ) );
+                }
+                
+                // Operand substitute = new Operand( str_node.substitutes.get(i), AddressingMode.IMMEDIATE );
+                Operand rdx_offset = new Operand( Register.RDX, AddressingMode.DIRECT_OFFSET );
+                rdx_offset.offset = i;
 
-            //     push( new Instruction( Opcode.MOVE,
-            //                             new Arguments( substitute, rdx_offset ),
-            //                             new Comment( "Loading the substitute" ) ) ); // These should probably be computed on the stack. Just before. So we should do pop!
-            // }
+                push( new Instruction( Opcode.MOVE,
+                                        new Arguments( inter, rdx_offset ),
+                                        new Comment( "Loading the substitute into offset: " + i ) ) ); // These should probably be computed on the stack. Just before. So we should do pop!
+            }
             // Amount of substitues -> rcx
 
             Operand size = new Operand( str_node.substitutes.size(), AddressingMode.IMMEDIATE );
@@ -306,7 +324,9 @@ public class AST_StackMachine extends Visitor {
             
 
             push( new Instruction( Opcode.PRINT ) );
+
         }
+        push( new Instruction( Opcode.COMMENT, Arguments.from_label( "End Print" ) ) );
         // push( new Instruction( Opcode.PRINT, 
         //                         Arguments.from_register( Register.RAX ), 
         //                         new Comment( "Printing value of " + print_node.value ) ) );

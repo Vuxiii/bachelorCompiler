@@ -34,7 +34,7 @@ public class StringNode {
             // We want to be able to print the string '%' by escaping it.
             if ( i > 0 && str_literal.charAt(i-1) == '\\' ) continue;            
 
-            stop_indicators.add( i );
+            stop_indicators.add( i-1 );
 
         }
 

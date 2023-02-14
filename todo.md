@@ -28,14 +28,19 @@ Addressing modes
     Register Addressing
 
     Immediate Addressing
+        Constant value
 
     Direct Memory Addressing
+        mov buffer, %rax
 
     Direct Offset Addressing
+        Bruges ikke rigtig. Måske
+        Vil være offset lige efter hvor label ligger.
 
     Indirect Memory Addressing
-
-
+        mov $42, (buffer)
+    Indirect Offset Addressing
+        mov $42, 8(buffer)
 
 
 Add scoping
