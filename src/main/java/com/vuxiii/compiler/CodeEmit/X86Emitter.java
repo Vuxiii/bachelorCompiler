@@ -249,9 +249,9 @@ public class X86Emitter {
                     push_code( "call printStringWithReplace" );
                 } break;
                 case COMMENT: {
-                    push_code( "" );
-                    push_code( "# " + instruction.args.get().operand_1.get().get_string() );
-                    push_code( "" );
+                    push_no_offset( "" );
+                    push_no_offset( "# " + instruction.args.get().operand_1.get().get_string() );
+                    push_no_offset( "" );
                 } break;
                 default: {
                     System.out.println( "\u001B[41m\u001B[37m--[[ Emitter Error ]]--\u001B[0m\nMissing implementation for opcode " + instruction.opcode + "\nExiting!");

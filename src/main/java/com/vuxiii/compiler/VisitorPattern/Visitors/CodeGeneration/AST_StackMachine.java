@@ -59,7 +59,7 @@ public class AST_StackMachine extends Visitor {
         int total_variables_in_main = scopes.get("root").get_variables().size();
         int total_offset = total_variables_in_main*8;
 
-        Operand left = new Operand( -total_offset, AddressingMode.IMMEDIATE );
+        Operand left = new Operand( total_offset, AddressingMode.IMMEDIATE );
         Operand right = new Operand( Register.RSP, AddressingMode.REGISER );
         Arguments args = new Arguments( left, right, right );
         Instruction ins = new Instruction( Opcode.MINUS, args, new Comment( "Making room for local variables in main scope!" ) );

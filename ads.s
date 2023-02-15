@@ -36,26 +36,32 @@ _start:
     addq %rbx, %rcx
     movq %rcx, %rax
     push %rax
-
-# Setup Print
-
+    
+    # Setup Print
+    
     movq $string0, %rdi
     leaq string0_stops, %rsi
     movq $4, (%rsi)
-    movq $0, 8(%rsi)
+    movq $6, 8(%rsi)
     leaq string0_subs, %rdx
     pop %rax
     movq %rax, (%rdx)
     movq $1, %rcx
     call printStringWithReplace
-
-# End Print
-
+    
+    # End Print
+    
     push $2
     
     # [[ Loading variable first ]] 
     # [[ offset is 1 ]] 
     movq -8(%rbp), %rcx
+
+    # movq %rcx, %rdi
+    # call printNum
+
+
+
     pop %rbx
     movq %rbx, %rax
     imulq %rcx
@@ -67,21 +73,21 @@ _start:
     addq %rbx, %rcx
     movq %rcx, %rax
     push %rax
-
-# Setup Print
-
+    
+    # Setup Print
+    
     movq $string1, %rdi
     leaq string1_stops, %rsi
     movq $4, (%rsi)
-    movq $0, 8(%rsi)
+    movq $6, 8(%rsi)
     leaq string1_subs, %rdx
     pop %rax
     movq %rax, (%rdx)
     movq $1, %rcx
     call printStringWithReplace
-
-# End Print
-
+    
+    # End Print
+    
     movq %rbp, %rsp # Restore stackpointer
     pop %rbp
     

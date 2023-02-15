@@ -26,8 +26,11 @@ public class StringNode {
         name = "string" + id;
         stop_name = name + "_stops";
         substitute_name = name + "_subs";
+        System.out.println(str_literal + "#################");
         
-        for ( int i = 0; i < str_literal.length(); ++i ) {
+        int actual_length = 0;
+                
+        for ( int i = 1; i < str_literal.length()-1; ++i ) { // To skip the quotes '"' '"'
             char c = str_literal.charAt( i );
             if ( c != '%' ) continue;
 
@@ -35,8 +38,8 @@ public class StringNode {
             if ( i > 0 && str_literal.charAt(i-1) == '\\' ) continue;            
 
             stop_indicators.add( i-1 );
-
         }
+
 
         Argument current = arg_list;
         while ( current != null ) {
@@ -47,7 +50,10 @@ public class StringNode {
             current = arg_list.next.isPresent() ? arg_list.next.get() : null;
         }
 
-        stop_indicators.add( str_literal.length() );
+        
+
+        stop_indicators.add( actual_length );
+        System.out.println( stop_indicators );
     }
 
     public String toString() {
