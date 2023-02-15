@@ -67,10 +67,12 @@ printStringWithReplace_next:
         push %rdx
         push %rdi
         push %rsi
-        
+        push %r11
+
         movq (%rdx, %r10, 8), %rdi
-        call printNum           # This call modifies: rcx, rdx, rdi, rsi
+        call printNum           # This call modifies: rcx, rdx, rdi, rsi, syscall -> r11
         
+        pop %r11
         pop %rsi
         pop %rdi
         pop %rdx
@@ -208,13 +210,20 @@ printNum:
         movq $10, %rbx          # Divide by 10 to get the digits one by one.
         movq $0, %rcx           # Initial length of 0
         movq %rdi, %rax
+        
+        # movq %rsp, %r15         # Store stackpointer
 printNumLoop:
 
         cqto
         idivq %rbx
         addq $48, %rdx          # The char '0'
-        push %rdx               # The left-most digit 
-        addq $8, %rcx           # Size of rdx 6 bytes
+        subq $1, %rsp           # Make room for the char
+        mov %dl, (%rsp)         # Move the char into buffer
+
+        addq $1, %rcx           # increase buffer size
+
+        
+
 
         cmp $0, %rax
         jnz printNumLoop
@@ -224,6 +233,10 @@ printNumLoop:
         movq $1, %rdi           # Standart out
         movq %rcx, %rdx         # How long is the string
         syscall                 # Make the call
+        
+        addq %rcx, %rsp         # Restore stackpointer alignment
+
+        # movq %r15, %rsp         # Restore stackpointer alignment
 
 
         movq %rbp, %rsp         # Restore stackpointer

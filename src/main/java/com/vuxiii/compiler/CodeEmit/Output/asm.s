@@ -12,7 +12,7 @@ string1_subs: .space 8
 _start:
     push %rbp
     movq %rsp, %rbp # Setup stackpointer
-    subq $-16, %rsp
+    subq $16, %rsp
     movq %rsp, %rsp
     push $7
     pop %rax
@@ -42,12 +42,12 @@ _start:
     movq $string0, %rdi
     leaq string0_stops, %rsi
     movq $4, (%rsi)
-    movq $9, 8(%rsi)
+    movq $6, 8(%rsi)
     leaq string0_subs, %rdx
     pop %rax
     movq %rax, (%rdx)
     movq $1, %rcx
-    # call printStringWithReplace
+    call printStringWithReplace
     
     # End Print
     
@@ -79,12 +79,12 @@ _start:
     movq $string1, %rdi
     leaq string1_stops, %rsi
     movq $4, (%rsi)
-    movq $9, 8(%rsi)
+    movq $6, 8(%rsi)
     leaq string1_subs, %rdx
     pop %rax
     movq %rax, (%rdx)
     movq $1, %rcx
-    # call printStringWithReplace
+    call printStringWithReplace
     
     # End Print
     
