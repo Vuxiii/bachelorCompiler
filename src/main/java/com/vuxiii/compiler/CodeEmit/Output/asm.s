@@ -42,7 +42,7 @@ _start:
     movq $string0, %rdi
     leaq string0_stops, %rsi
     movq $4, (%rsi)
-    movq $0, 8(%rsi)
+    movq $6, 8(%rsi)
     leaq string0_subs, %rdx
     pop %rax
     movq %rax, (%rdx)
@@ -73,7 +73,7 @@ _start:
     movq $string1, %rdi
     leaq string1_stops, %rsi
     movq $4, (%rsi)
-    movq $0, 8(%rsi)
+    movq $6, 8(%rsi)
     leaq string1_subs, %rdx
     pop %rax
     movq %rax, (%rdx)

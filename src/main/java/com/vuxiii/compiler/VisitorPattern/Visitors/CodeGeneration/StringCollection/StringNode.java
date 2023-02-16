@@ -28,7 +28,7 @@ public class StringNode {
         substitute_name = name + "_subs";
         System.out.println(str_literal + "#################");
         
-        int actual_length = 0;
+        // int actual_length = 0;
                 
         for ( int i = 1; i < str_literal.length()-1; ++i ) { // To skip the quotes '"' '"'
             char c = str_literal.charAt( i );
@@ -52,10 +52,23 @@ public class StringNode {
 
         
 
-        stop_indicators.add( actual_length );
+        stop_indicators.add( count_length(str_literal.substring( 1, str_literal.length()-1 ) ) );
         System.out.println( stop_indicators );
     }
 
+    public int count_length( String s ) {
+        int len = 0;
+
+        for ( int i = 0; i < s.length(); ++i ) {
+            char curr = s.charAt( i );
+            if ( curr == '\\' )
+                if ( i+1 < s.length() )
+                    if ( s.charAt(i+1) != '\\' ) continue;
+            len++;
+        }
+
+        return len;
+    }
     public String toString() {
         String out  = "";
 
