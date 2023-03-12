@@ -7,15 +7,23 @@ import com.vuxiii.compiler.VisitorPattern.ASTNode;
 import com.vuxiii.compiler.VisitorPattern.Annotations.VisitNumber;
 
 public class IfNode extends ASTNode {
+    private static int if_node_counter = 0;
+
 
     @VisitNumber( number = 1 ) public final Expression guard;
 
     @VisitNumber( number = 2 ) public final Statement body;
 
+    public final String label_enter;
+    public final String label_exit;
+
     public IfNode( Term term, Expression guard, Statement body ) {
         super( term ); 
         this.guard = guard;
         this.body = body;
+
+        this.label_enter = "IfLabelEnter" + (++if_node_counter);
+        this.label_exit = "IfLabelExit" + (if_node_counter);
 
         super.setup_ASTNodeQueue();
     }

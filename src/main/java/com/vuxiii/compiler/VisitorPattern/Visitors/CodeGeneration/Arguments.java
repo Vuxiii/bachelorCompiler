@@ -2,6 +2,9 @@ package com.vuxiii.compiler.VisitorPattern.Visitors.CodeGeneration;
 
 import java.util.Optional;
 
+import com.vuxiii.compiler.Error.Error;
+import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexLiteral;
+
 public class Arguments {
     
     public Optional<Operand> operand_1 = Optional.empty();
@@ -25,6 +28,14 @@ public class Arguments {
         Arguments arg = new Arguments();
 
         arg.operand_1 = Optional.of( new Operand( num_int, AddressingMode.IMMEDIATE ) );
+        arg.kind = ArgumentKind.ONE_LITERAL;
+        return arg;
+    }
+
+    public static Arguments from_bool( boolean bool ) {
+        Arguments arg = new Arguments();
+
+        arg.operand_1 = Optional.of( new Operand( bool, AddressingMode.IMMEDIATE ) );
         arg.kind = ArgumentKind.ONE_LITERAL;
         return arg;
     }
@@ -80,5 +91,33 @@ public class Arguments {
             out += operand_2.get().toString();
     
         return out;
+    }
+
+    public static Arguments from_literal(LexLiteral lit) {
+        switch (lit.literal_type) {
+            case INT: {
+                return Arguments.from_int( Integer.parseInt( lit.val ) );
+            }
+            case DOUBLE: {
+                return Arguments.from_double( Double.parseDouble( lit.val ) );
+            } 
+            case BOOL: {
+                return Arguments.from_bool( Boolean.parseBoolean( lit.val ) );
+            } 
+            default: {
+                System.out.println( new Error( "Type Error (Arguments.java)", "Unsupported type: " + lit.literal_type + ". Exiting!" ) );
+                System.exit(-1);
+            } break;
+        }
+        return null;
+    }
+
+    public static Arguments compare( Register rax, int i ) {
+        Arguments arg = new Arguments();
+
+        arg.operand_1 = Optional.of( new Operand( rax, AddressingMode.REGISER ) );
+        arg.operand_2 = Optional.of( new Operand( i, AddressingMode.IMMEDIATE ) );
+        arg.kind = ArgumentKind.REG_LITERAL;
+        return arg;
     }
 }

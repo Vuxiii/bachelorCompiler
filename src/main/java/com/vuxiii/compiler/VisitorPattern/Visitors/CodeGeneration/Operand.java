@@ -7,6 +7,7 @@ public class Operand {
     private Optional<Register> reg = Optional.empty();
     private Optional<Integer> num_int = Optional.empty();
     private Optional<Double> num_double = Optional.empty();
+    private Optional<Boolean> num_bool = Optional.empty();
 
     public AddressingMode addressing_mode;
     public OperandKind kind;
@@ -52,6 +53,12 @@ public class Operand {
         this.addressing_mode = mode;
     }
 
+    public Operand( boolean bool, AddressingMode mode ) {
+        this.num_bool = Optional.of(bool);
+        this.kind = OperandKind.BOOL;
+        this.addressing_mode = mode;
+    }
+
     public Register get_reg() {
         return reg.get();
     }
@@ -68,6 +75,10 @@ public class Operand {
         return num_double.get();
     }
 
+    public boolean get_bool() {
+        return num_bool.get();
+    }
+
     public String toString() {
         if ( str.isPresent() ) {
             return str.get();
@@ -77,8 +88,10 @@ public class Operand {
             return "" + num_int.get();
         } else if ( num_double.isPresent() ) {
             return "" + num_double.get();
+        } else if ( num_bool.isPresent() ) {
+            return "" + num_bool.get();
         }
-        return "unknown operand";
+        return "unknown operand (Not implemented!)";
     }
 
 }

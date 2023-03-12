@@ -2,6 +2,7 @@ package com.vuxiii.compiler.Lexer;
 
 import java.util.List;
 
+import com.vuxiii.LR.ParserException;
 import com.vuxiii.LR.Records.ASTToken;
 import com.vuxiii.Regex.Regex;
 import com.vuxiii.Regex.Token.TokenEOP;
@@ -13,15 +14,21 @@ import com.vuxiii.compiler.Parser.Symbol;
 public class Lexer {
     private static Regex<ASTToken> reg = null;
     public static List<ASTToken> lex( String input ) {
-        Regex<ASTToken> lexer = getRegex();
+        try {
+            Regex<ASTToken> lexer = getRegex();
+            List<ASTToken> li = lexer.match( input );
+            li.add( new TokenEOP( Symbol.t_Dollar ) );
 
-        List<ASTToken> li = lexer.match( input );
-        li.add( new TokenEOP( Symbol.t_Dollar ) );
-
-        return li;    
+            return li;    
+        } catch ( ParserException e ) {
+            e.printStackTrace();
+            System.out.println( new com.vuxiii.compiler.Error.Error( "Lexer Error", "Couldn't parse the input for some reason.\nThis is a mistake made by the developer of this compiler!" ).toString() );
+            System.exit(-1);
+        }
+        return null;
     }
 
-    private static Regex<ASTToken> getRegex() {
+    private static Regex<ASTToken> getRegex() throws ParserException {
         if ( reg != null )
             return reg;
 

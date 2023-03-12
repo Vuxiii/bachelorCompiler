@@ -8,27 +8,32 @@ _start:
     movq %rsp, %rbp # Setup stackpointer
     subq $8, %rsp
     movq %rsp, %rsp
+    push $1
     pop %rax
     
     # [[ Storing variable bas ]] 
     # [[ offset is 1 ]] 
     movq %rax, -8(%rbp)
-
-# Setup Print
-
-    pop %rdi
-    call printStringWithReplace
-
-# End Print
-
-
-# Setup Print
-
-    pop %rdi
-    call printStringWithReplace
-
-# End Print
-
+    
+    # [[ Loading variable bas ]] 
+    # [[ offset is 1 ]] 
+    movq -8(%rbp), %rax
+    cmpq %rax, $1
+    jne IfLabelExit1
+    push $0
+    pop %rax
+    
+    # [[ Storing variable bas ]] 
+    # [[ offset is 1 ]] 
+    movq %rax, -8(%rbp)
+    jmp IfLabelExit1
+IfLabelEnter1:
+    push $1
+    pop %rax
+    
+    # [[ Storing variable bas ]] 
+    # [[ offset is 1 ]] 
+    movq %rax, -8(%rbp)
     movq %rbp, %rsp # Restore stackpointer
     pop %rbp
     

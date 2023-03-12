@@ -9,7 +9,9 @@ import com.vuxiii.DFANFA.MatchInfo;
 import com.vuxiii.LR.Grammar;
 import com.vuxiii.LR.LRParser;
 import com.vuxiii.LR.ParseTable;
+import com.vuxiii.LR.ParserException;
 import com.vuxiii.LR.Records.ASTToken;
+import com.vuxiii.compiler.Error.Error;
 import com.vuxiii.compiler.Lexer.Tokens.TokenType;
 import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexIdent;
 import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexLiteral;
@@ -60,15 +62,40 @@ public class Parser {
 
         
         long bf = System.currentTimeMillis();
-        ParseTable table = LRParser.parse( g, Symbol.n_Start );
+        ParseTable table = LRParser.compile( g, Symbol.n_Start );
         long after = System.currentTimeMillis();
         System.out.println( "Parsing the input took: " + (after - bf) + " milliseconds");
         
         // System.out.println( tokens );
 
-        ASTNode ast = (ASTNode)LRParser.getAST( table, tokens );
-        // return AST;
-        return ast;
+        try {
+            ASTNode ast = (ASTNode)LRParser.parse( table, tokens );
+            return ast;
+
+        } catch (ParserException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            
+            System.out.println( new Error( "Parser Error!", "Something bad happend while trying to parse the input!").toString() );
+
+            if ( e.ast != null ) {
+                AST_Printer printer = new AST_Printer();
+                e.ast.accept( printer );
+
+                System.out.println( printer.get_ascii() );
+            } else {
+                AST_Printer printer = new AST_Printer();
+                
+                e.ast.accept( printer );
+
+                System.out.println( printer.get_ascii() );
+
+            }
+            System.exit(-1);
+        }
+
+
+        return null; // Make compiler happy -.-
     }
 
     private static void init() {

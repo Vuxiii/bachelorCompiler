@@ -253,6 +253,19 @@ public class X86Emitter {
                     push_no_offset( "# " + instruction.args.get().operand_1.get().get_string() );
                     push_no_offset( "" );
                 } break;
+                case COMPARE: {
+                    Operand left = instruction.args.get().operand_1.get();
+                    Operand right = instruction.args.get().operand_2.get();
+
+                    push_code( "cmpq " + ope_string( left ) + ", " + ope_string(right) );
+
+                } break;
+                case JUMP_NOT_EQUAL: {
+                    push_code( "jne " + instruction.args.get().operand_1.get().get_string() );
+                } break;
+                case JUMP: {
+                    push_code( "jmp " + instruction.args.get().operand_1.get().get_string() );
+                } break;
                 default: {
                     System.out.println( "\u001B[41m\u001B[37m--[[ Emitter Error ]]--\u001B[0m\nMissing implementation for opcode " + instruction.opcode + "\nExiting!");
                     System.exit(-1);
@@ -325,6 +338,9 @@ public class X86Emitter {
                     } break;
                     case STRING: {
                         out += ope.get_string();
+                    } break;
+                    case BOOL: {
+                        out += ope.get_bool() == true ? 1 : 0;
                     } break;
                 }
             } break;

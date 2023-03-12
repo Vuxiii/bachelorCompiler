@@ -6,5 +6,5 @@ public enum ArgumentKind {
     REG_REG_TARGET,
     REG_TARGET,
     ONE_LITERAL, 
-    ONE_REG,
+    ONE_REG, REG_LITERAL,
 }

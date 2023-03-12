@@ -9,9 +9,12 @@ import java.util.Set;
 
 import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexIdent;
 import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexLiteral;
+import com.vuxiii.compiler.Parser.Nodes.Argument;
 import com.vuxiii.compiler.Parser.Nodes.Assignment;
 import com.vuxiii.compiler.Parser.Nodes.BinaryOperation;
+import com.vuxiii.compiler.Parser.Nodes.Expression;
 import com.vuxiii.compiler.Parser.Nodes.FunctionCall;
+import com.vuxiii.compiler.Parser.Nodes.IfNode;
 import com.vuxiii.compiler.Parser.Nodes.Print;
 import com.vuxiii.compiler.Parser.Nodes.PrintKind;
 import com.vuxiii.compiler.Parser.Nodes.Types.FunctionType;
@@ -33,6 +36,9 @@ public class AST_StackMachine extends Visitor {
     public Map<Print, StringNode> strings;
 
     private int function_depth = 0;
+
+    private IfState if_state = IfState.NONE;
+    private boolean setup_if_jump = false;
 
     Set<String> parameters = new HashSet<>();
 
@@ -99,20 +105,92 @@ public class AST_StackMachine extends Visitor {
     @VisitorPattern( when = VisitOrder.ENTER_NODE )
     public void literal( LexLiteral leaf_literal ) {
         if ( function_depth != 0 ) return;
-        switch (leaf_literal.literal_type) {
-            case DOUBLE: {
-                push( new Instruction( Opcode.PUSH, Arguments.from_double( Double.parseDouble(leaf_literal.val) ), new Comment( "Pushing value " + leaf_literal.val ) ) );
+
+        push( new Instruction( Opcode.PUSH, Arguments.from_literal( leaf_literal ), new Comment( "Pushing value " + leaf_literal.val ) ) );
+
+    }
+
+    @VisitorPattern( when = VisitOrder.ENTER_NODE )
+    public void if_statement( IfNode if_node ) {
+        if_state = IfState.ENTER_GUARD;
+    }
+    
+    @VisitorPattern( when = VisitOrder.BEFORE_CHILD )
+    public void if_statement_before_child( IfNode if_node ) {
+        switch (if_state) {
+            case ENTER_BODY: {
+
             } break;
-            case INT: {
-                push( new Instruction( Opcode.PUSH, Arguments.from_int( Integer.parseInt(leaf_literal.val) ), new Comment( "Pushing value " + leaf_literal.val ) ) );
+            case EXIT_BODY: {
+
             } break;
-            case STRING: {
-                // WHat to do.......
+            case ENTER_GUARD: {
+
+            } break;
+            case EXIT_GUARD: {
+                push( new Instruction( Opcode.JUMP_NOT_EQUAL, Arguments.from_label( if_node.label_exit ) ) );
+                if_state = IfState.ENTER_BODY;
             } break;
         
-            default:
-                break;
+            case NONE: {
+                if_state = IfState.ENTER_GUARD;
+            } break;
         }
+    }
+    
+    @VisitorPattern( when = VisitOrder.AFTER_CHILD )
+    public void if_statement_after_child( IfNode if_node ) {
+        switch (if_state) {
+            case ENTER_BODY: {
+                push( new Instruction( Opcode.JUMP, Arguments.from_label( if_node.label_exit ) ) );
+                if_state = IfState.NONE;
+            } break;
+            case EXIT_BODY: {
+                
+            } break;
+            case ENTER_GUARD: {
+                if_state = IfState.EXIT_GUARD;
+            } break;
+            case EXIT_GUARD: {
+
+            } break;
+        
+            case NONE: {
+                if_state = IfState.ENTER_GUARD;
+            } break;
+        }
+    }
+
+    @VisitorPattern( when = VisitOrder.EXIT_NODE )
+    public void if_statement_leave( IfNode if_node ) {
+        push( new Instruction( Opcode.LABEL, Arguments.from_label( if_node.label_enter ) ) );
+        if_state = IfState.NONE;
+    }
+
+    @VisitorPattern( when = VisitOrder.ENTER_NODE )
+    public void if_guard_enter( Expression guard ) {
+        if ( if_state != IfState.ENTER_GUARD ) return; // Ensure that we actually are in an if block
+
+        if ( guard.node instanceof LexIdent ) {
+            // Load the value
+            LexIdent id = (LexIdent)guard.node;
+            _load_var(id, new Operand( Register.RAX, AddressingMode.REGISER ) );
+        } else if ( guard.node instanceof LexLiteral ) {
+            // Load the literal
+            LexLiteral lit = (LexLiteral)guard.node;
+            push( new Instruction( Opcode.PUSH, Arguments.from_literal( lit ), new Comment( "Pushing value: " + lit.val ) ) );
+            push( new Instruction( Opcode.POP, Arguments.from_register( Register.RAX ), new Comment( "Loading value stored at the top of the stack" ) ) );
+        }
+    }
+
+    @VisitorPattern( when = VisitOrder.EXIT_NODE )
+    public void if_guard_leave( Expression guard ) {
+        if ( if_state != IfState.ENTER_GUARD) return;
+
+
+        push( new Instruction( Opcode.COMPARE, Arguments.compare( Register.RAX, 1 ) ) );
+
+        setup_if_jump = true;
     }
 
     @VisitorPattern( when = VisitOrder.EXIT_NODE )
@@ -130,27 +208,12 @@ public class AST_StackMachine extends Visitor {
         if ( function_depth != 0 ) return;
         
         if ( binop.right.isLeaf() && binop.right instanceof LexIdent ) {
-            String var_name = ((LexIdent)binop.right).name;
-            Operand var = new Operand( var_name, AddressingMode.IMMEDIATE );
-            Operand target = new Operand( Register.RCX, AddressingMode.REGISER );
-            boolean target_is_parameter = current_scope.get_parameters().contains( var_name );
-            push( new Instruction( Opcode.LOAD_VARIABLE, 
-                                    new Arguments( var, target, target ), 
-                                    new Comment( "Load variable " + var_name ),
-                                    target_is_parameter ) );
+            _load_var( (LexIdent)binop.right, new Operand( Register.RCX, AddressingMode.REGISER ) );
         } else {
             push( new Instruction( Opcode.POP, Arguments.from_register( Register.RCX ), new Comment( "Retrieving second argument" ) ) );
         }
         if ( binop.left.isLeaf() && binop.left instanceof LexIdent ) {
-            String var_name = ((LexIdent)binop.left).name;
-            Operand var = new Operand( var_name, AddressingMode.IMMEDIATE );
-            Operand target = new Operand( Register.RBX, AddressingMode.REGISER );
-            boolean target_is_parameter = current_scope.get_parameters().contains( var_name );
-
-            push( new Instruction( Opcode.LOAD_VARIABLE, 
-                                    new Arguments( var, target, target ), 
-                                    new Comment( "Load variable " + var_name ),
-                                    target_is_parameter ) );
+            _load_var( (LexIdent)binop.left, new Operand( Register.RBX, AddressingMode.REGISER ) );
         } else
             push( new Instruction( Opcode.POP, Arguments.from_register( Register.RBX ), new Comment( "Retrieving first argument" ) ) );
         
@@ -332,6 +395,19 @@ public class AST_StackMachine extends Visitor {
         code.add( instruction );
     }
 
+    /**
+     * This method loads the given variable into rax.
+     * @param id
+     */
+    private void _load_var( LexIdent id, Operand target ) {
+        String var_name = id.name;
+        Operand var = new Operand( var_name, AddressingMode.IMMEDIATE );
+        boolean target_is_parameter = current_scope.get_parameters().contains( var_name );
+        push( new Instruction( Opcode.LOAD_VARIABLE, 
+                                new Arguments( var, target, target ), 
+                                new Comment( "Load variable " + var_name ),
+                                target_is_parameter ) );
+    }
 
 
 }

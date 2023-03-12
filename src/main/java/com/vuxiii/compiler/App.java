@@ -199,16 +199,6 @@ public final class App {
 
         """;
         input = """
-        let first: int;
-        first = 7;
-        let second: int;
-        
-        print( 4 + 2 * first );
-        print( 2 * first + 4 );
-
-        print( 2 + 3 * first );
-        """;
-        input = """
         if ( 4 + 4 ) {
             print( "If" );
         } 
@@ -241,22 +231,31 @@ public final class App {
         };
 
         """;
+        input = """
+        let first: int;
+        first = 7;
+        let second: int;
         
+        print( " %\\n", 4 + 2 * first );
+        print( " %\\n", 2 * first + 4 );
+
+        print( " %\\n", 2 + 3 * first );
+        """;
         input = """
 
         let bas: boolean;
         bas = true;
 
         if ( bas ) {
-            print( "It was true!" );
+            bas = false;
         } else {
-            print( "It was false!" );
+            bas = true;
         };
 
         """;
 
-        // 28 53
         
+
         System.out.println( input );
 
         // [[ Tokenizer ]]
