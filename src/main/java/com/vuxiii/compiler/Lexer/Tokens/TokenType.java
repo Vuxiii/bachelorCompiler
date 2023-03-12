@@ -29,6 +29,8 @@ public enum TokenType {
     DOT( Symbol.t_Dot ),
 
     LET( Symbol.t_Let ),
+    IF( Symbol.t_If ),
+    ELSE( Symbol.t_Else ),
     ARROW_RIGHT( Symbol.t_Arrow_Right ),
 
     INT_LITERAL( Symbol.t_Integer, PrimitiveType.INT ),

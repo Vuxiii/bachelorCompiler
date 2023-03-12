@@ -8,7 +8,6 @@ import com.vuxiii.compiler.Parser.Nodes.DeclarationKind;
 import com.vuxiii.compiler.Parser.Nodes.Types.AliasType;
 import com.vuxiii.compiler.Parser.Nodes.Types.FunctionType;
 import com.vuxiii.compiler.Parser.Nodes.Types.StandardType;
-import com.vuxiii.compiler.Parser.Nodes.Types.Type;
 import com.vuxiii.compiler.Parser.Nodes.Types.UnknownType;
 import com.vuxiii.compiler.VisitorPattern.Visitor;
 import com.vuxiii.compiler.VisitorPattern.Annotations.VisitOrder;

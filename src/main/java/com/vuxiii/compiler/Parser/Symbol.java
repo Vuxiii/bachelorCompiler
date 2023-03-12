@@ -42,6 +42,8 @@ public class Symbol {
     public static final NonTerminal n_Field_List = new NonTerminal( "FIELD_LIST" );
     public static final NonTerminal n_Field = new NonTerminal( "FIELD" );
 
+    public static final NonTerminal n_If = new NonTerminal( "IF" );
+    public static final NonTerminal n_Else = new NonTerminal( "ELSE" );
 
 
     public static final NonTerminal n_Print = new NonTerminal( "PRINT" );
@@ -91,6 +93,8 @@ public class Symbol {
     public static final Terminal t_RCurly = new Terminal( "'}'" );
     public static final Terminal t_Comma = new Terminal( "','" );
     public static final Terminal t_Dot = new Terminal( "'.'" );
+    public static final Terminal t_If = new Terminal( "if" );
+    public static final Terminal t_Else = new Terminal( "else" );
 
     public static final Terminal t_StringLiteral = new Terminal( "\"string_literal\"" );
 

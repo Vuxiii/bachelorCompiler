@@ -209,25 +209,24 @@ public final class App {
         print( 2 + 3 * first );
         """;
         input = """
-        let first: int;
-        first = 7;
-        let second: int;
-        
-        print( "as: %\\n", 2 * first + 4 );
-        print( "as: %\\n", 2 * first + 4 );
+        if ( 2 + 2 ) {
+            print( "123" );
+        }
 
+        if ( 3 + 3 ) {
+            print( "345" );
+        } else {
+            print( "57" );
+        }
+
+        if ( 4 + 4 ) {
+            print( "If" );
+        } else if ( 5 + 5 ) {
+            print( "Else if " );
+        } else {
+            print( "Else" );
+        }
         """;
-        // input = """
-        // print( "Counter is: %\\n", 1 );
-
-        // """;
-        // input = """
-        // let a: int;
-        // a = 1 + 2 + 3;
-        // a = 69 + a;
-        // print( "a: %\\n", a );
-        // print( "a: %\\n", a + 1 );
-        // """;
         
         
         System.out.println( input );

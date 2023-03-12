@@ -93,6 +93,8 @@ public class Parser {
             return new Statement( Symbol.n_StatementList, stm1.node, stm1.kind );
         });
 
+        init_if_statements();
+
         // n_Statement -> n_Declaration t_Semicolon
         g.addRuleWithReduceFunction( Symbol.n_Statement, List.of( Symbol.n_Declaration, Symbol.t_Semicolon ), t -> {
             return new Statement( Symbol.n_Statement, (Declaration)t.get(0), StatementKind.DECLARATION );
@@ -234,6 +236,45 @@ public class Parser {
             return new Print( Symbol.n_Print, (ASTNode)t.get(2) );
         });
         
+    }
+
+    private static void init_if_statements() {
+        // n_Statement -> n_If 
+        g.addRuleWithReduceFunction( Symbol.n_Statement, List.of( Symbol.n_If ), t -> {
+            Statement iff = (Statement)t.get(0);
+            iff.term = Symbol.n_Statement;
+            return iff;
+        });
+
+        // n_Statement -> n_If n_Else
+        g.addRuleWithReduceFunction( Symbol.n_Statement, List.of( Symbol.n_If, Symbol.n_Else ), t -> {
+            Statement if_block = (Statement)t.get(0);
+            Statement else_block = (Statement)t.get(1);
+
+            return Statement.make_if_else( Symbol.n_Statement, if_block, else_block );
+        });
+
+        // n_Statement -> n_If t_Else n_If
+        g.addRuleWithReduceFunction( Symbol.n_Statement, List.of( Symbol.n_If, Symbol.t_Else, Symbol.n_If ), t -> {
+            Statement if_block = (Statement)t.get(0);
+            Statement else_block = (Statement)t.get(1);
+
+            return Statement.make_if_else_if( Symbol.n_Statement, if_block, else_block );
+        });
+
+        // n_If -> t_If t_LParen n_Expression t_RParen t_LCurly n_StatementList t_RCurly
+        g.addRuleWithReduceFunction( Symbol.n_If, List.of( Symbol.t_If, Symbol.t_LParen, Symbol.n_Expression, Symbol.t_RParen, Symbol.t_LCurly, Symbol.n_StatementList, Symbol.t_RCurly ), t -> {
+            Expression guard = (Expression)t.get(2);
+            Statement body = (Statement)t.get(5);
+            return Statement.make_if( Symbol.n_If, guard, body );
+        });
+
+        // n_Else -> t_Else t_LParen n_Expression t_RParen t_LCurly n_StatementList t_RCurly
+        g.addRuleWithReduceFunction( Symbol.n_Else, List.of( Symbol.t_Else, Symbol.t_LParen, Symbol.n_Expression, Symbol.t_RParen, Symbol.t_LCurly, Symbol.n_StatementList, Symbol.t_RCurly ), t -> {
+            Expression guard = (Expression)t.get(2);
+            Statement body = (Statement)t.get(5);
+            return Statement.make_else( Symbol.n_Else, guard, body );
+        });
     }
 
     private static void init_scope_capture() {

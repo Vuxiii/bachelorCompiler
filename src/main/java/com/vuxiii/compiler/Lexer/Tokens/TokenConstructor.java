@@ -6,8 +6,10 @@ import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexArrowRight;
 import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexColon;
 import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexComma;
 import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexDot;
+import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexElse;
 import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexEqual;
 import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexIdent;
+import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexIf;
 import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexLBracket;
 import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexLCurly;
 import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexLiteral;
@@ -84,6 +86,12 @@ public class TokenConstructor {
             }
             case STRING_LITERAL: {
                 return new LexLiteral( matchInfo, type );
+            }
+            case IF: {
+                return new LexIf( matchInfo, type );
+            }
+            case ELSE: {
+                return new LexElse( matchInfo, type );
             }
             default: {
                 // Unkown. Not implemented yet. Throw error

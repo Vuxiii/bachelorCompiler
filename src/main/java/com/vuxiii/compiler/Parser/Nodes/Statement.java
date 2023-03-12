@@ -30,6 +30,23 @@ public class Statement extends ASTNode {
         super.setup_ASTNodeQueue();
     }
 
+    public static Statement make_if_else( Term term, Statement if_block, Statement else_block ) {
+        return new Statement( term, if_block, else_block, StatementKind.IF_ELSE );
+    }
+
+
+    public static Statement make_if_else_if( Term term, Statement if_block, Statement else_block ) {
+        return new Statement( term, if_block, else_block, StatementKind.IF_ELSE_IF );
+    }
+
+    public static Statement make_if( Term term, Expression guard, Statement statement ) {
+        return new Statement( term, guard, statement, StatementKind.IF );
+    }
+
+    public static Statement make_else( Term term, Expression guard, Statement statement ) {
+        return new Statement( term, guard, statement, StatementKind.ELSE );
+    }
+
     public String toString() {
         if ( next.isEmpty() )
             return "(" + kind + " " + node.toString() + ")";

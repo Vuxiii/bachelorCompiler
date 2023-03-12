@@ -5,6 +5,10 @@ public enum StatementKind {
     DECLARATION,
     ASSIGNMENT,
     SCOPE, 
-    EXPRESSION,
+    EXPRESSION, 
+    IF, 
+    ELSE,
+    IF_ELSE, 
+    IF_ELSE_IF, 
 
 }
