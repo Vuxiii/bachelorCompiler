@@ -44,7 +44,8 @@ public class Symbol {
 
     public static final NonTerminal n_If = new NonTerminal( "IF" );
     public static final NonTerminal n_Else = new NonTerminal( "ELSE" );
-
+    public static final NonTerminal n_Elif = new NonTerminal( "ELIF_BLOCK" );
+    public static final NonTerminal n_If_Blocks = new NonTerminal( "IF_ELSE_BLOCK" );
 
     public static final NonTerminal n_Print = new NonTerminal( "PRINT" );
     public static final NonTerminal n_Expression_Arithmetic = new NonTerminal( "ARITHMETIC_EXPRESSION" );
@@ -78,9 +79,14 @@ public class Symbol {
     public static final Terminal t_Identifier = new Terminal( "id" );
     public static final Terminal t_Integer = new Terminal( "integer" );
     public static final Terminal t_Double = new Terminal( "double" );
+    public static final Terminal t_BoolLiteral = new Terminal( "bool" );
+
     public static final Terminal t_Type_Declare = new Terminal( "type_decl" );
     public static final Terminal t_Type_Int = new Terminal( "type_int" );
     public static final Terminal t_Type_Double = new Terminal( "type_double" );
+    public static final Terminal t_Type_Bool = new Terminal( "type_bool" );
+    public static final Terminal t_Type_String = new Terminal( "type_string" );
+
     public static final Terminal t_Semicolon = new Terminal( "';'" );
     public static final Terminal t_Colon = new Terminal( "':'" );
     public static final Terminal t_Dollar = new Terminal( "$", true );
@@ -100,6 +106,9 @@ public class Symbol {
 
     public static final Terminal t_Let = new Terminal( "let" );
     public static final Terminal t_Arrow_Right = new Terminal( "'->'" );
+
+
+
 
 
 

@@ -209,15 +209,15 @@ public final class App {
         print( 2 + 3 * first );
         """;
         input = """
-        if ( 2 + 2 ) {
-            print( "123" );
-        }
+        if ( 4 + 4 ) {
+            print( "If" );
+        } 
 
-        if ( 3 + 3 ) {
-            print( "345" );
+        if ( 4 + 4 ) {
+            print( "If" );
         } else {
-            print( "57" );
-        }
+            print( "Else" );
+        };
 
         if ( 4 + 4 ) {
             print( "If" );
@@ -225,9 +225,37 @@ public final class App {
             print( "Else if " );
         } else {
             print( "Else" );
-        }
+        };
+
+        """;
+        input = """
+
+        if ( 4 + 4 ) {
+            print( "If" );
+        } else if ( 5 + 5 ) {
+            print( "Else if 1" );
+        } else if ( 5 + 50 ) {
+            print( "Else if 2" );
+        } else {
+            print( "Else" );
+        };
+
         """;
         
+        input = """
+
+        let bas: boolean;
+        bas = true;
+
+        if ( bas ) {
+            print( "It was true!" );
+        } else {
+            print( "It was false!" );
+        };
+
+        """;
+
+        // 28 53
         
         System.out.println( input );
 

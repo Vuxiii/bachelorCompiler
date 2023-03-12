@@ -36,9 +36,12 @@ public enum TokenType {
     INT_LITERAL( Symbol.t_Integer, PrimitiveType.INT ),
     DOUBLE_LITERAL( Symbol.t_Double, PrimitiveType.DOUBLE ),
     STRING_LITERAL( Symbol.t_StringLiteral, PrimitiveType.STRING ),
+    BOOL_LITERAL( Symbol.t_BoolLiteral, PrimitiveType.BOOL ),
     TYPE_DECL( Symbol.t_Type_Declare ),
     TYPE_INT( Symbol.t_Type_Int, PrimitiveType.INT ),
-    TYPE_DOUBLE( Symbol.t_Type_Double, PrimitiveType.DOUBLE );
+    TYPE_DOUBLE( Symbol.t_Type_Double, PrimitiveType.DOUBLE ),
+    TYPE_BOOL( Symbol.t_Type_Bool, PrimitiveType.BOOL ),
+    TYPE_STRING( Symbol.t_Type_String, PrimitiveType.STRING );
 
 
     public Term symbol;

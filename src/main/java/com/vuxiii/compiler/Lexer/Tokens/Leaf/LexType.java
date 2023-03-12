@@ -5,7 +5,6 @@ import com.vuxiii.DFANFA.MatchInfo;
 import com.vuxiii.compiler.Lexer.Tokens.PrimitiveType;
 import com.vuxiii.compiler.Lexer.Tokens.TokenType;
 import com.vuxiii.compiler.Parser.Nodes.Types.Type;
-import com.vuxiii.compiler.VisitorPattern.ASTNode;
 import com.vuxiii.compiler.VisitorPattern.Annotations.VisitLeaf;
 
 @VisitLeaf

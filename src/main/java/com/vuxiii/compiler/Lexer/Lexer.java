@@ -28,9 +28,12 @@ public class Lexer {
         reg = new Regex<>(PrimitiveType.INT.name,         matchInfo -> TokenConstructor.construct( matchInfo, TokenType.TYPE_INT ) );
 
         reg.addRegex( PrimitiveType.DOUBLE.name,          matchInfo -> TokenConstructor.construct( matchInfo, TokenType.TYPE_DOUBLE ) );
-        reg.addRegex( '"' + "(.| |\n)*" + '"',                   matchInfo -> TokenConstructor.construct( matchInfo, TokenType.STRING_LITERAL ) );
+        reg.addRegex( PrimitiveType.BOOL.name,            matchInfo -> TokenConstructor.construct( matchInfo, TokenType.TYPE_BOOL ) );
+        reg.addRegex( '"' + "(.| |\n)*" + '"',            matchInfo -> TokenConstructor.construct( matchInfo, TokenType.STRING_LITERAL ) );
         reg.addRegex( "[:digit:][:digit:]*",              matchInfo -> TokenConstructor.construct( matchInfo, TokenType.INT_LITERAL ) );
         reg.addRegex( "[:digit:][:digit:]*\\.[:digit:]*", matchInfo -> TokenConstructor.construct( matchInfo, TokenType.DOUBLE_LITERAL ) );
+        reg.addRegex( "true",                             matchInfo -> TokenConstructor.construct( matchInfo, TokenType.BOOL_LITERAL ) );
+        reg.addRegex( "false",                            matchInfo -> TokenConstructor.construct( matchInfo, TokenType.BOOL_LITERAL ) );
         reg.addRegex( ";",                                matchInfo -> TokenConstructor.construct( matchInfo, TokenType.SEMICOLON ) );
         reg.addRegex( ":",                                matchInfo -> TokenConstructor.construct( matchInfo, TokenType.COLON ) );
         reg.addRegex( "=",                                matchInfo -> TokenConstructor.construct( matchInfo, TokenType.EQUAL ) );

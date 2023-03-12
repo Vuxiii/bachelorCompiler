@@ -33,10 +33,10 @@ public class TokenConstructor {
             case IDENTIFIER: {
                 return new LexIdent( matchInfo, type );
             }
-            case INT_LITERAL: case DOUBLE_LITERAL: {
+            case INT_LITERAL: case DOUBLE_LITERAL: case BOOL_LITERAL: case STRING_LITERAL: {
                 return new LexLiteral( matchInfo, type );
             }
-            case TYPE_INT: case TYPE_DOUBLE: {
+            case TYPE_INT: case TYPE_DOUBLE: case TYPE_BOOL: case TYPE_STRING: {
                 return new LexType( matchInfo, type );
             }
             case LEFT_PARENTHESIS: {
@@ -84,9 +84,6 @@ public class TokenConstructor {
             case ARROW_RIGHT: {
                 return new LexArrowRight( matchInfo, type );
             }
-            case STRING_LITERAL: {
-                return new LexLiteral( matchInfo, type );
-            }
             case IF: {
                 return new LexIf( matchInfo, type );
             }
@@ -95,7 +92,7 @@ public class TokenConstructor {
             }
             default: {
                 // Unkown. Not implemented yet. Throw error
-                System.out.println( "\u001B[41m\u001B[37m--[[ Tokenization Error ]]--\u001B[0m\nFound un-recognized token:\n\n " + matchInfo.toString() + "\nMaybe you forgot to implement this token?\n" );
+                System.out.println( "\u001B[41m\u001B[37m--[[ Tokenization Error ]]--\u001B[0m\nFound un-recognized token:\n\n\t" + matchInfo.toString() + "\nMaybe you forgot to implement this token?\n" );
 
                 System.exit(-1);
 

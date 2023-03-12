@@ -6,8 +6,9 @@ package com.vuxiii.compiler.Lexer.Tokens;
 public enum PrimitiveType {
     INT("int"),
     DOUBLE("double"),
-    STRING("string");
-    
+    STRING("string"),
+    BOOL("boolean");
+
     public String name;
 
     private PrimitiveType( String name ) {
