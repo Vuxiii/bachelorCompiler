@@ -14,9 +14,11 @@ import com.vuxiii.compiler.Parser.Nodes.Assignment;
 import com.vuxiii.compiler.Parser.Nodes.BinaryOperation;
 import com.vuxiii.compiler.Parser.Nodes.Expression;
 import com.vuxiii.compiler.Parser.Nodes.FunctionCall;
+import com.vuxiii.compiler.Parser.Nodes.IfElseNode;
 import com.vuxiii.compiler.Parser.Nodes.IfNode;
 import com.vuxiii.compiler.Parser.Nodes.Print;
 import com.vuxiii.compiler.Parser.Nodes.PrintKind;
+import com.vuxiii.compiler.Parser.Nodes.Statement;
 import com.vuxiii.compiler.Parser.Nodes.Types.FunctionType;
 import com.vuxiii.compiler.VisitorPattern.ASTNode;
 import com.vuxiii.compiler.VisitorPattern.Visitor;
@@ -38,7 +40,6 @@ public class AST_StackMachine extends Visitor {
     private int function_depth = 0;
 
     private IfState if_state = IfState.NONE;
-    private boolean setup_if_jump = false;
 
     Set<String> parameters = new HashSet<>();
 
@@ -110,6 +111,12 @@ public class AST_StackMachine extends Visitor {
 
     }
 
+    @VisitorPattern( when = VisitOrder.EXIT_NODE )
+    public void if_else_statement( IfNode if_else_node ) {
+        // push( new Instruction( Opcode.JUMP, Arguments.from_label( if_else_node.label_exit ) ) );
+
+    }
+
     @VisitorPattern( when = VisitOrder.ENTER_NODE )
     public void if_statement( IfNode if_node ) {
         if_state = IfState.ENTER_GUARD;
@@ -131,7 +138,6 @@ public class AST_StackMachine extends Visitor {
                 push( new Instruction( Opcode.JUMP_NOT_EQUAL, Arguments.from_label( if_node.label_exit ) ) );
                 if_state = IfState.ENTER_BODY;
             } break;
-        
             case NONE: {
                 if_state = IfState.ENTER_GUARD;
             } break;
@@ -146,7 +152,8 @@ public class AST_StackMachine extends Visitor {
                 if_state = IfState.NONE;
             } break;
             case EXIT_BODY: {
-                
+                push( new Instruction( Opcode.LABEL, Arguments.from_label( if_node.label_exit ) ) );
+                if_state = IfState.NONE;
             } break;
             case ENTER_GUARD: {
                 if_state = IfState.EXIT_GUARD;
@@ -159,12 +166,6 @@ public class AST_StackMachine extends Visitor {
                 if_state = IfState.ENTER_GUARD;
             } break;
         }
-    }
-
-    @VisitorPattern( when = VisitOrder.EXIT_NODE )
-    public void if_statement_leave( IfNode if_node ) {
-        push( new Instruction( Opcode.LABEL, Arguments.from_label( if_node.label_enter ) ) );
-        if_state = IfState.NONE;
     }
 
     @VisitorPattern( when = VisitOrder.ENTER_NODE )
@@ -187,10 +188,14 @@ public class AST_StackMachine extends Visitor {
     public void if_guard_leave( Expression guard ) {
         if ( if_state != IfState.ENTER_GUARD) return;
 
-
         push( new Instruction( Opcode.COMPARE, Arguments.compare( Register.RAX, 1 ) ) );
+    }
 
-        setup_if_jump = true;
+    @VisitorPattern( when = VisitOrder.EXIT_NODE )
+    public void if_body_leave( Statement body ) {
+        if ( if_state != IfState.ENTER_BODY) return;
+
+        if_state = IfState.EXIT_BODY;
     }
 
     @VisitorPattern( when = VisitOrder.EXIT_NODE )

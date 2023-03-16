@@ -165,7 +165,7 @@ public class Parser {
 
 
 
-        // init_scope_capture();
+        init_scope_capture();
 
         init_functions();
 

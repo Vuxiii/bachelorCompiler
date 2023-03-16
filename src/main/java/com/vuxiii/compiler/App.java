@@ -6,6 +6,7 @@ import com.vuxiii.compiler.Lexer.Lexer;
 import com.vuxiii.compiler.Parser.Parser;
 import com.vuxiii.compiler.Parser.Nodes.Assignment;
 import com.vuxiii.compiler.Parser.Nodes.Print;
+import com.vuxiii.compiler.Parser.Nodes.Statement;
 import com.vuxiii.compiler.VisitorPattern.Visitors.CodeGeneration.AST_StackMachine;
 import com.vuxiii.compiler.VisitorPattern.Visitors.CodeGeneration.FunctionBlock;
 import com.vuxiii.compiler.VisitorPattern.Visitors.CodeGeneration.Instruction;
@@ -16,6 +17,7 @@ import com.vuxiii.compiler.VisitorPattern.Visitors.SymbolCollection.AST_FixTypes
 import com.vuxiii.compiler.VisitorPattern.Visitors.SymbolCollection.AST_SymbolCollector;
 import com.vuxiii.compiler.VisitorPattern.Visitors.SymbolCollection.Scope;
 import com.vuxiii.compiler.VisitorPattern.Visitors.TreeCollaps.AST_Shrinker;
+import com.vuxiii.compiler.VisitorPattern.Visitors.TreeCollaps.AST_Shrinker_Statement;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -248,10 +250,11 @@ public final class App {
 
         if ( bas ) {
             bas = false;
-        } else {
+        } else if ( !bas ) {
             bas = true;
+        } else {
+            bas = false;
         };
-
         """;
 
         
@@ -288,6 +291,24 @@ public final class App {
         System.out.println( ast );
         ast.accept( cleaner );
         
+        line_break();
+        line_break();
+        AST_Shrinker_Statement cl = new AST_Shrinker_Statement();
+        ast.accept( cl );
+        for ( Statement s : cl.stmts.statements )
+            System.out.println( s.toString() );
+        
+        line_break();
+        line_break();
+        
+        AST_Printer prints = new AST_Printer();
+        cl.stmts.accept( prints );
+        System.out.println( prints.get_ascii() );
+        line_break();
+        line_break();
+        line_break();
+        line_break();
+
         line_break();
         
         printer = new AST_Printer();

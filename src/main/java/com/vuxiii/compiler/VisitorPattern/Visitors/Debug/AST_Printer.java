@@ -109,18 +109,20 @@ public class AST_Printer extends Visitor {
      * @param parent The parent
      */
     private void register_children( ASTNode parent ) {
-        Optional<ASTNode> maybeChild1 = parent.getChild1();
-        Optional<ASTNode> maybeChild2 = parent.getChild2();
-        Optional<ASTNode> maybeChild3 = parent.getChild3();
-        Optional<ASTNode> maybeChild4 = parent.getChild4();
-        if ( maybeChild1.isPresent() )
-            child_to_parent.put( maybeChild1.get(), parent );
-        if ( maybeChild2.isPresent() )
-            child_to_parent.put( maybeChild2.get(), parent );
-        if ( maybeChild3.isPresent() )
-            child_to_parent.put( maybeChild3.get(), parent );
-        if ( maybeChild4.isPresent() )
-            child_to_parent.put( maybeChild4.get(), parent );
+        for ( ASTNode child : parent.getChildren() )
+            child_to_parent.put( child, parent );
+        // Optional<ASTNode> maybeChild1 = parent.getChild1();
+        // Optional<ASTNode> maybeChild2 = parent.getChild2();
+        // Optional<ASTNode> maybeChild3 = parent.getChild3();
+        // Optional<ASTNode> maybeChild4 = parent.getChild4();
+        // if ( maybeChild1.isPresent() )
+        //     child_to_parent.put( maybeChild1.get(), parent );
+        // if ( maybeChild2.isPresent() )
+        //     child_to_parent.put( maybeChild2.get(), parent );
+        // if ( maybeChild3.isPresent() )
+        //     child_to_parent.put( maybeChild3.get(), parent );
+        // if ( maybeChild4.isPresent() )
+        //     child_to_parent.put( maybeChild4.get(), parent );
     }
 
     /**

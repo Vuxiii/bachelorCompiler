@@ -26,9 +26,21 @@ _start:
     # [[ Storing variable bas ]] 
     # [[ offset is 1 ]] 
     movq %rax, -8(%rbp)
-    jmp IfLabelExit1
-IfLabelEnter1:
+IfLabelExit1:
+    
+    # [[ Loading variable bas ]] 
+    # [[ offset is 1 ]] 
+    movq -8(%rbp), %rax
+    cmpq %rax, $1
+    jne IfLabelExit2
     push $1
+    pop %rax
+    
+    # [[ Storing variable bas ]] 
+    # [[ offset is 1 ]] 
+    movq %rax, -8(%rbp)
+IfLabelExit2:
+    push $0
     pop %rax
     
     # [[ Storing variable bas ]] 

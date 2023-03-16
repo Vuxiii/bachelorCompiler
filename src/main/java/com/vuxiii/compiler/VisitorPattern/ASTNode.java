@@ -3,7 +3,9 @@ package com.vuxiii.compiler.VisitorPattern;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Optional;
 import java.util.TreeSet;
 
@@ -21,10 +23,9 @@ public abstract class ASTNode implements ASTToken {
     private final TreeSet<Field> ASTNodeQueue = new TreeSet<>( Comparator.comparing( field -> field.getAnnotation( VisitNumber.class ).number(), Comparator.naturalOrder() ) );
     
     private int children_count;
-
+    
     public ASTNode( Term term ) {
         this.term = term;
-        // setup_ASTNodeQueue();
     }
 
     /**
@@ -96,6 +97,27 @@ public abstract class ASTNode implements ASTToken {
     @Override
     public Term getTerm() {
         return term;
+    }
+
+    public List<ASTNode> getChildren() {
+        List<ASTNode> children = new ArrayList<>();
+        try {
+            for ( Field field : ASTNodeQueue ) {
+                if ( field.getType().equals( Optional.class ) )
+                    children.add( (ASTNode) ((Optional<?>) field.get( this )).get() ); // We are garuanteed that this optional is filled by (*)
+                else if ( field.getType().equals( List.class ) ) {
+                    List<?> chils = (List<?>) field.get( this ); // There are no types at runtime....
+                    for ( Object c : chils ) 
+                        children.add( (ASTNode) c ); // Hacky solution to make compiler happy. Not good code (No type safety).
+                } else
+                    children.add( (ASTNode) field.get(this) );
+            }
+        } catch (IllegalAccessException e) {
+            System.out.println( "\u001B[41m\u001B[37m--[[ Visitor Error! ]]--\u001B[0m\nIn class '" + this.getClass().getSimpleName() + "', but failed for some reason.\nExiting!" );
+            e.printStackTrace();
+            System.exit(-1);
+        }
+        return children;
     }
 
     /**
@@ -203,21 +225,23 @@ public abstract class ASTNode implements ASTToken {
 
             for ( Field field : ASTNodeQueue ) {
                 fieldFailure = field;
-                ASTNode child;
+                List<ASTNode> children = new ArrayList<>();
                 if ( field.getType().equals( Optional.class ) )
-                    child = (ASTNode) ((Optional<?>) field.get( this )).get(); // We are garuanteed that this optional is filled by (*)
-                else
-                    child = (ASTNode) field.get(this);
+                    children.add( (ASTNode) ((Optional<?>) field.get( this )).get() ); // We are garuanteed that this optional is filled by (*)
+                else if ( field.getType().equals( List.class ) ) {
+                    List<?> chils = (List<?>) field.get( this ); // There are no types at runtime....
+                    for ( Object c : chils ) 
+                        children.add( (ASTNode) c ); // Hacky solution to make compiler happy. Not good code (No type safety).
+                } else
+                    children.add( (ASTNode) field.get(this) );
                 // Run all methods that are annotated to be run before visiting a child
                 for ( Method method : beforeMethodQueue ) {
                     // System.out.println( "Before: Invoking '" + method.getName() + "' on visitor '" + visitor.getClass().getSimpleName() + "' with node-parameter '" + this.getPrintableName() + "'" );
-                    
                     methodFailure = method;
                     method.invoke( visitor, this );
                 }
-                
 
-                child.accept( visitor );
+                children.forEach( child -> child.accept( visitor ) );
                 
 
                 // Run all methods that are annotated to be run after visiting a child
