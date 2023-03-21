@@ -265,6 +265,7 @@ public abstract class ASTNode implements ASTToken {
 
             for ( Field field : ASTNodeQueue ) {
                 fieldFailure = field;
+                // Collect the children
                 List<ASTNode> children = new ArrayList<>();
                 if ( field.getType().equals( Optional.class ) )
                     children.add( (ASTNode) ((Optional<?>) field.get( this )).get() ); // We are garuanteed that this optional is filled by (*)
@@ -274,23 +275,26 @@ public abstract class ASTNode implements ASTToken {
                         children.add( (ASTNode) c ); // Hacky solution to make compiler happy. Not good code (No type safety).
                 } else
                     children.add( (ASTNode) field.get(this) );
-                // Run all methods that are annotated to be run before visiting a child
-                for ( Method method : beforeMethodQueue ) {
-                    // System.out.println( "Before: Invoking '" + method.getName() + "' on visitor '" + visitor.getClass().getSimpleName() + "' with node-parameter '" + this.getPrintableName() + "'" );
-                    methodFailure = method;
-                    method.invoke( visitor, this );
-                }
-
-                children.forEach( child -> child.accept( visitor ) );
                 
+                for ( ASTNode child : children ) {
+                    // Run all methods that are annotated to be run before visiting a child
+                    for ( Method method : beforeMethodQueue ) {
+                        // System.out.println( "Before: Invoking '" + method.getName() + "' on visitor '" + visitor.getClass().getSimpleName() + "' with node-parameter '" + this.getPrintableName() + "'" );
+                        methodFailure = method;
+                        method.invoke( visitor, this );
+                    }
 
-                // Run all methods that are annotated to be run after visiting a child
-                for ( Method method : afterMethodQueue ) {     
-                    
-                    // System.out.println( "After: Invoking '" + method.getName() + "' on visitor '" + visitor.getClass().getSimpleName() + "' with node-parameter '" + this.getPrintableName() + "'" );
-                    methodFailure = method;
-                    method.invoke( visitor, this );
-                } 
+                    child.accept( visitor );
+
+                    // Run all methods that are annotated to be run after visiting a child
+                    for ( Method method : afterMethodQueue ) {     
+                        
+                        // System.out.println( "After: Invoking '" + method.getName() + "' on visitor '" + visitor.getClass().getSimpleName() + "' with node-parameter '" + this.getPrintableName() + "'" );
+                        methodFailure = method;
+                        method.invoke( visitor, this );
+                    } 
+                }
+                
             } 
 
             // Run all methods that are annotated to be run when exiting a node.
