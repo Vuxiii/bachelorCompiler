@@ -1,13 +1,9 @@
 package com.vuxiii.compiler.VisitorPattern.Visitors.TreeCollaps;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
 
 import com.vuxiii.Visitor.VisitorBase;
-import com.vuxiii.compiler.Parser.Symbol;
 import com.vuxiii.compiler.Parser.Nodes.Statement;
 import com.vuxiii.compiler.Parser.Nodes.StatementList;
 import com.vuxiii.compiler.VisitorPattern.ASTNode;

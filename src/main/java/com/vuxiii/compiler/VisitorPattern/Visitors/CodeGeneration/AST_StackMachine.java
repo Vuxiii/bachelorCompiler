@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.vuxiii.compiler.Lexer.Tokens.PrimitiveType;
 import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexIdent;
 import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexLiteral;
 import com.vuxiii.compiler.Parser.Nodes.Argument;
@@ -15,6 +16,7 @@ import com.vuxiii.compiler.Parser.Nodes.BinaryOperation;
 import com.vuxiii.compiler.Parser.Nodes.Expression;
 import com.vuxiii.compiler.Parser.Nodes.FunctionCall;
 import com.vuxiii.compiler.Parser.Nodes.IfElseNode;
+import com.vuxiii.compiler.Parser.Nodes.IfList;
 import com.vuxiii.compiler.Parser.Nodes.IfNode;
 import com.vuxiii.compiler.Parser.Nodes.Print;
 import com.vuxiii.compiler.Parser.Nodes.PrintKind;
@@ -44,6 +46,8 @@ public class AST_StackMachine extends Visitor {
     Set<String> parameters = new HashSet<>();
 
     Scope current_scope = new Scope();
+
+    private String end_of_body_label = "";
 
     public AST_StackMachine( List<Assignment> functions, Map<String, Scope> scopes, Map<Print, StringNode> strings ) {
         this.strings = strings;
@@ -106,15 +110,23 @@ public class AST_StackMachine extends Visitor {
     @VisitorPattern( when = VisitOrder.ENTER_NODE )
     public void literal( LexLiteral leaf_literal ) {
         if ( function_depth != 0 ) return;
+        if ( leaf_literal.literal_type == PrimitiveType.STRING ) return;
 
         push( new Instruction( Opcode.PUSH, Arguments.from_literal( leaf_literal ), new Comment( "Pushing value " + leaf_literal.val ) ) );
 
     }
 
-    @VisitorPattern( when = VisitOrder.EXIT_NODE )
-    public void if_else_statement( IfNode if_else_node ) {
-        // push( new Instruction( Opcode.JUMP, Arguments.from_label( if_else_node.label_exit ) ) );
+    @VisitorPattern( when = VisitOrder.AFTER_CHILD )
+    public void if_list_insert_jumps( IfList if_list ) {
+        push( new Instruction( Opcode.JUMP, Arguments.from_label( if_list.end_of_ifs ) ) );
+        if ( end_of_body_label.length() == 0 ) return;
+        push( new Instruction( Opcode.LABEL, Arguments.from_label( end_of_body_label ) ) );
+        end_of_body_label = "";
+    }
 
+    @VisitorPattern( when = VisitOrder.EXIT_NODE )
+    public void if_list_insert_label( IfList if_list ) {
+        push( new Instruction( Opcode.LABEL, Arguments.from_label( if_list.end_of_ifs ) ) );
     }
 
     @VisitorPattern( when = VisitOrder.ENTER_NODE )
@@ -135,7 +147,7 @@ public class AST_StackMachine extends Visitor {
 
             } break;
             case EXIT_GUARD: {
-                push( new Instruction( Opcode.JUMP_NOT_EQUAL, Arguments.from_label( if_node.label_exit ) ) );
+                push( new Instruction( Opcode.JUMP_NOT_EQUAL, Arguments.from_label( if_node.end_of_body ) ) );
                 if_state = IfState.ENTER_BODY;
             } break;
             case NONE: {
@@ -148,11 +160,11 @@ public class AST_StackMachine extends Visitor {
     public void if_statement_after_child( IfNode if_node ) {
         switch (if_state) {
             case ENTER_BODY: {
-                push( new Instruction( Opcode.JUMP, Arguments.from_label( if_node.label_exit ) ) );
+                push( new Instruction( Opcode.JUMP, Arguments.from_label( if_node.end_of_body ) ) );
                 if_state = IfState.NONE;
             } break;
             case EXIT_BODY: {
-                push( new Instruction( Opcode.LABEL, Arguments.from_label( if_node.label_exit ) ) );
+                end_of_body_label = if_node.end_of_body;
                 if_state = IfState.NONE;
             } break;
             case ENTER_GUARD: {
@@ -289,6 +301,7 @@ public class AST_StackMachine extends Visitor {
                                 new Comment( "Store in variable " + assignment_node.id.name ) ) );
         
     }
+
     @VisitorPattern( when = VisitOrder.ENTER_NODE )
     public void increase_function_depth( Assignment function_def ) {
         if ( function_def.value instanceof FunctionType ) 
@@ -401,7 +414,7 @@ public class AST_StackMachine extends Visitor {
     }
 
     /**
-     * This method loads the given variable into rax.
+     * This method loads the given variable
      * @param id
      */
     private void _load_var( LexIdent id, Operand target ) {

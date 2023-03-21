@@ -257,7 +257,7 @@ public class X86Emitter {
                     Operand left = instruction.args.get().operand_1.get();
                     Operand right = instruction.args.get().operand_2.get();
 
-                    push_code( "cmpq " + ope_string( left ) + ", " + ope_string(right) );
+                    push_code( "cmp " + ope_string( right ) + ", " + ope_string( left ) );
 
                 } break;
                 case JUMP_NOT_EQUAL: {

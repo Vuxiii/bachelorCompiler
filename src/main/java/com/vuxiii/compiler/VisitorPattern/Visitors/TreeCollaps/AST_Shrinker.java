@@ -1,14 +1,12 @@
 package com.vuxiii.compiler.VisitorPattern.Visitors.TreeCollaps;
 
 import com.vuxiii.Visitor.VisitorBase;
-import com.vuxiii.compiler.Parser.Symbol;
 import com.vuxiii.compiler.Parser.Nodes.Argument;
 import com.vuxiii.compiler.Parser.Nodes.Assignment;
 import com.vuxiii.compiler.Parser.Nodes.BinaryOperation;
 import com.vuxiii.compiler.Parser.Nodes.Expression;
 import com.vuxiii.compiler.Parser.Nodes.Print;
 import com.vuxiii.compiler.Parser.Nodes.Root;
-import com.vuxiii.compiler.Parser.Nodes.StatementList;
 import com.vuxiii.compiler.Parser.Nodes.Types.FunctionType;
 import com.vuxiii.compiler.VisitorPattern.ASTNode;
 import com.vuxiii.compiler.VisitorPattern.Annotations.VisitOrder;
@@ -17,7 +15,6 @@ import com.vuxiii.compiler.VisitorPattern.Annotations.VisitorPattern;
 public class AST_Shrinker extends VisitorBase {
     
     private ASTNode current = null;
-
 
     @VisitorPattern( when = VisitOrder.EXIT_NODE )
     public void call_other_shrinkers( Root root ) {
@@ -32,7 +29,6 @@ public class AST_Shrinker extends VisitorBase {
         AST_Shrinker_If collaps_if = new AST_Shrinker_If( if_collec.mapper );
         root.accept( collaps_if );
     }
-
 
     @VisitorPattern( when = VisitOrder.EXIT_NODE, order = 3 )
     public void cleanup_expression_arithmetic( Expression exp ) {
@@ -78,5 +74,4 @@ public class AST_Shrinker extends VisitorBase {
         if ( !(print_node.value instanceof Expression) ) return;
         print_node.value = print_node.value.getChild1().get();
     }
-
 }

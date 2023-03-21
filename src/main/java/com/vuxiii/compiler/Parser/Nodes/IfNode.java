@@ -15,7 +15,7 @@ public class IfNode extends ASTNode {
     @VisitNumber( number = 2 ) public ASTNode body;
 
     public final String label_enter;
-    public final String label_exit;
+    public final String end_of_body;
 
     public IfNode( Term term, Expression guard, Statement body ) {
         super( term ); 
@@ -23,7 +23,7 @@ public class IfNode extends ASTNode {
         this.body = body;
 
         this.label_enter = "IfLabelEnter" + (++if_node_counter);
-        this.label_exit = "IfLabelExit" + (if_node_counter);
+        this.end_of_body = "IfEndOfBody" + (if_node_counter);
 
         super.setup_ASTNodeQueue();
     }

@@ -249,28 +249,38 @@ public final class App {
         input = """
 
         let bas: boolean;
-        bas = true;
+        bas = false;
+        let a: int;
 
-        if ( bas ) {
-            bas = false;
-        };
-
-        if ( bas ) {
-            bas = false;
+        if ( true ) {
+            a = 1;
+        } else if (false) {
+            a = 2;
         } else {
-            bas = true;
+            a = 3;
         };
 
-        if ( bas ) {
-            bas = false;
-            bas = false;
-        } else if ( !bas ) {
-            bas = true;
+        print( " %\\n", a );
+
+        if ( false ) {
+            a = 1;
+        } else if (true) {
+            a = 2;
         } else {
-            bas = false;
+            a = 3;
         };
 
-        bas = true;
+        print( " %\\n", a );
+
+        if ( false ) {
+            a = 1;
+        } else if (false) {
+            a = 2;
+        } else {
+            a = 3;
+        };
+
+        print( " %\\n", a );
         """;
 
         
