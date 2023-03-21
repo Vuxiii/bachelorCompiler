@@ -32,7 +32,8 @@ public abstract class ASTNode implements ASTToken {
      * This method looks through each field in this node, and stores those
      * that have been marked with the Visitor Pattern Annotation 'VisitNumber'.
      */
-    protected void setup_ASTNodeQueue() {
+    public void setup_ASTNodeQueue() {
+        ASTNodeQueue.clear();
         // Look for fields within 'this' that have the VisitNumber annotation.
         // And visit them in that order.
         
@@ -69,6 +70,45 @@ public abstract class ASTNode implements ASTToken {
         // System.out.print( "[ " );
         // ASTNodeQueue.forEach( node -> System.out.print( node.getName() + " " ) );
         // System.out.println( "]" );
+    }
+
+    public boolean replace_child_with( ASTNode child, ASTNode new_child ) {
+        Field failedField = null;
+        try {
+            for ( Field field : ASTNodeQueue ) {
+                failedField = field;
+                ASTNode maybe;
+                if ( field.getType().equals( Optional.class ) ) {
+                    maybe = (ASTNode) ((Optional<?>) field.get( this )).get(); // We are garuanteed that this optional is filled by (*)
+
+                    if ( maybe == child ) {
+                        field.set(this, new_child);
+                        return true;
+                    }
+
+                } else if ( field.getType().equals( List.class ) ) {
+                    List<?> chils = (List<?>) field.get( this ); // There are no types at runtime....
+                    for ( Object c : chils ) {
+                        maybe = (ASTNode) c; // Hacky solution to make compiler happy. Not good code (No type safety).
+                        if ( maybe == child ) {
+                            field.set(this, new_child);
+                            return true;
+                        }
+                    }
+                } else {
+                    maybe = (ASTNode) field.get(this);
+                    if ( maybe == child ) {
+                        field.set(this, new_child);
+                        return true;
+                    }
+                }
+            }
+        } catch (IllegalAccessException e) {
+            System.out.println( "\u001B[41m\u001B[37m--[[ Visitor Error! ]]--\u001B[0m\nIn class '" + this.getClass().getSimpleName() + "', but failed while trying to set field: [" + failedField.getName() + "] to " + new_child.getPrintableName() + ".\nExiting!" );
+            e.printStackTrace();
+            System.exit(-1);
+        }
+        return false;
     }
 
     /**

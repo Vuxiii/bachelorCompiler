@@ -8,9 +8,9 @@ import com.vuxiii.compiler.VisitorPattern.Annotations.VisitNumber;
 
 public class Statement extends ASTNode {
 
-    @VisitNumber( number = 1 ) public final ASTNode node;
+    @VisitNumber( number = 1 ) public ASTNode node;
 
-    @VisitNumber( number = 2 ) public final Optional<Statement> next;
+    @VisitNumber( number = 2 ) public Optional<Statement> next;
 
     public final StatementKind kind;
 

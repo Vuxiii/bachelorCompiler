@@ -9,7 +9,7 @@ import com.vuxiii.compiler.VisitorPattern.Annotations.VisitNumber;
 public class ElseNode extends ASTNode {
     private static int else_node_counter = 0;
 
-    @VisitNumber( number = 1 ) public final Statement body;
+    @VisitNumber( number = 1 ) public ASTNode body;
 
     public final String label_enter;
     public final String label_exit;

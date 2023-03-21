@@ -6,6 +6,8 @@ import com.vuxiii.LR.Records.Terminal;
 public class Symbol {
     
     // Used under parsing.
+    public static final NonTerminal n_Root = new NonTerminal( "ROOT" );
+
     public static final NonTerminal n_Start = new NonTerminal( "START", true );
     
     public static final NonTerminal n_Expression = new NonTerminal( "EXPRESSION" );
@@ -106,6 +108,7 @@ public class Symbol {
 
     public static final Terminal t_Let = new Terminal( "let" );
     public static final Terminal t_Arrow_Right = new Terminal( "'->'" );
+
 
 
 

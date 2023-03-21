@@ -1,32 +1,41 @@
 package com.vuxiii.compiler.VisitorPattern.Visitors.TreeCollaps;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.concurrent.LinkedBlockingDeque;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
 import com.vuxiii.Visitor.VisitorBase;
 import com.vuxiii.compiler.Parser.Symbol;
-import com.vuxiii.compiler.Parser.Nodes.Argument;
-import com.vuxiii.compiler.Parser.Nodes.Assignment;
-import com.vuxiii.compiler.Parser.Nodes.BinaryOperation;
-import com.vuxiii.compiler.Parser.Nodes.Expression;
-import com.vuxiii.compiler.Parser.Nodes.Print;
 import com.vuxiii.compiler.Parser.Nodes.Statement;
 import com.vuxiii.compiler.Parser.Nodes.StatementList;
-import com.vuxiii.compiler.Parser.Nodes.Types.FunctionType;
 import com.vuxiii.compiler.VisitorPattern.ASTNode;
 import com.vuxiii.compiler.VisitorPattern.Annotations.VisitOrder;
 import com.vuxiii.compiler.VisitorPattern.Annotations.VisitorPattern;
 
 public class AST_Shrinker_Statement extends VisitorBase {
     
-    public StatementList stmts = new StatementList( Symbol.n_StatementList );
+    private Map<Statement, StatementList> mapper = new HashMap<>();
 
-    @VisitorPattern( when = VisitOrder.ENTER_NODE )
-    public void collaps_statementlist( Statement stmt ) {
-        if ( stmt.next.isEmpty()) return;
+    private Statement prev = null;
 
-        stmts.push( stmt );
+    public AST_Shrinker_Statement( Map<Statement, StatementList> mapper ) {
+        this.mapper = mapper;
+    }
+
+    @VisitorPattern( when = VisitOrder.AFTER_CHILD )
+    public void set_new_child_statement( ASTNode node ) {
+        if ( !mapper.containsKey( prev ) ) return;
+
+        node.replace_child_with( prev, mapper.get(prev) );
 
     }
+
+    @VisitorPattern( when = VisitOrder.EXIT_NODE )
+    public void reset( Statement stmt ) {
+        prev = stmt;
+    }
+
+
 }

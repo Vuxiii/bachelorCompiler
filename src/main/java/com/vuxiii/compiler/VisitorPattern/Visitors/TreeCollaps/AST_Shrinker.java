@@ -7,6 +7,7 @@ import com.vuxiii.compiler.Parser.Nodes.Assignment;
 import com.vuxiii.compiler.Parser.Nodes.BinaryOperation;
 import com.vuxiii.compiler.Parser.Nodes.Expression;
 import com.vuxiii.compiler.Parser.Nodes.Print;
+import com.vuxiii.compiler.Parser.Nodes.Root;
 import com.vuxiii.compiler.Parser.Nodes.StatementList;
 import com.vuxiii.compiler.Parser.Nodes.Types.FunctionType;
 import com.vuxiii.compiler.VisitorPattern.ASTNode;
@@ -16,6 +17,17 @@ import com.vuxiii.compiler.VisitorPattern.Annotations.VisitorPattern;
 public class AST_Shrinker extends VisitorBase {
     
     private ASTNode current = null;
+
+
+    @VisitorPattern( when = VisitOrder.EXIT_NODE )
+    public void call_other_shrinkers( Root root ) {
+        AST_Shrinker_Statement_Collector collector = new AST_Shrinker_Statement_Collector();
+        root.accept(collector);
+        AST_Shrinker_Statement collaps_statement = new AST_Shrinker_Statement( collector.mapper );
+        root.accept( collaps_statement );
+        collector.cleanup();
+    }
+
 
     @VisitorPattern( when = VisitOrder.EXIT_NODE, order = 3 )
     public void cleanup_expression_arithmetic( Expression exp ) {

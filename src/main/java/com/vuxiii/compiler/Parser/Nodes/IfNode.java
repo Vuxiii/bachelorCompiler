@@ -12,7 +12,7 @@ public class IfNode extends ASTNode {
 
     @VisitNumber( number = 1 ) public final Expression guard;
 
-    @VisitNumber( number = 2 ) public final Statement body;
+    @VisitNumber( number = 2 ) public ASTNode body;
 
     public final String label_enter;
     public final String label_exit;

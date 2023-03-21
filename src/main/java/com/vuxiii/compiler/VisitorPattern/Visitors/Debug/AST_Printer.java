@@ -49,7 +49,7 @@ public class AST_Printer extends Visitor {
             ASTNode parent = maybeParent.get();
             decrease_children_left(parent);
         }
-        parents_remaining_children.put( token, token.getChildrenCount() );
+        parents_remaining_children.put( token, token.getChildren().size() );
 
         register_children(token);
         set_prefix_for_children( token );

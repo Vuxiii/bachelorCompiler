@@ -28,6 +28,7 @@ import com.vuxiii.compiler.Parser.Nodes.DeclarationKind;
 import com.vuxiii.compiler.Parser.Nodes.ElseNode;
 import com.vuxiii.compiler.Parser.Nodes.Expression;
 import com.vuxiii.compiler.Parser.Nodes.Print;
+import com.vuxiii.compiler.Parser.Nodes.Root;
 import com.vuxiii.compiler.Parser.Nodes.ScopeNode;
 import com.vuxiii.compiler.Parser.Nodes.Statement;
 import com.vuxiii.compiler.Parser.Nodes.StatementKind;
@@ -70,7 +71,7 @@ public class Parser {
 
         try {
             ASTNode ast = (ASTNode)LRParser.parse( table, tokens );
-            return ast;
+            return new Root( Symbol.n_Root, ast );
 
         } catch (ParserException e) {
             // TODO Auto-generated catch block

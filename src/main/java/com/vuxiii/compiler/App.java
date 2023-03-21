@@ -7,6 +7,8 @@ import com.vuxiii.compiler.Parser.Parser;
 import com.vuxiii.compiler.Parser.Nodes.Assignment;
 import com.vuxiii.compiler.Parser.Nodes.Print;
 import com.vuxiii.compiler.Parser.Nodes.Statement;
+import com.vuxiii.compiler.Parser.Nodes.StatementKind;
+import com.vuxiii.compiler.VisitorPattern.ASTNode;
 import com.vuxiii.compiler.VisitorPattern.Visitors.CodeGeneration.AST_StackMachine;
 import com.vuxiii.compiler.VisitorPattern.Visitors.CodeGeneration.FunctionBlock;
 import com.vuxiii.compiler.VisitorPattern.Visitors.CodeGeneration.Instruction;
@@ -18,6 +20,7 @@ import com.vuxiii.compiler.VisitorPattern.Visitors.SymbolCollection.AST_SymbolCo
 import com.vuxiii.compiler.VisitorPattern.Visitors.SymbolCollection.Scope;
 import com.vuxiii.compiler.VisitorPattern.Visitors.TreeCollaps.AST_Shrinker;
 import com.vuxiii.compiler.VisitorPattern.Visitors.TreeCollaps.AST_Shrinker_Statement;
+import com.vuxiii.compiler.VisitorPattern.Visitors.TreeCollaps.AST_Shrinker_Statement_Collector;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -250,11 +253,14 @@ public final class App {
 
         if ( bas ) {
             bas = false;
+            bas = false;
         } else if ( !bas ) {
             bas = true;
         } else {
             bas = false;
         };
+
+        bas = true;
         """;
 
         
@@ -275,7 +281,7 @@ public final class App {
         Settings.showParsingTable = false;
         // [[ Parser ]]
         
-        ASTToken ast = Parser.getAST( tokens );
+        ASTNode ast = Parser.getAST( tokens );
         System.out.println( ast );
         
         line_break();
@@ -293,23 +299,8 @@ public final class App {
         
         line_break();
         line_break();
-        AST_Shrinker_Statement cl = new AST_Shrinker_Statement();
-        ast.accept( cl );
-        for ( Statement s : cl.stmts.statements )
-            System.out.println( s.toString() );
-        
-        line_break();
-        line_break();
-        
-        AST_Printer prints = new AST_Printer();
-        cl.stmts.accept( prints );
-        System.out.println( prints.get_ascii() );
-        line_break();
-        line_break();
-        line_break();
-        line_break();
 
-        line_break();
+        
         
         printer = new AST_Printer();
         ast.accept( printer );
