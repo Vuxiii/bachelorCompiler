@@ -26,12 +26,6 @@ _start:
     # [[ Storing variable bas ]] 
     # [[ offset is 1 ]] 
     movq %rax, -8(%rbp)
-    push $0
-    pop %rax
-    
-    # [[ Storing variable bas ]] 
-    # [[ offset is 1 ]] 
-    movq %rax, -8(%rbp)
 IfLabelExit1:
     
     # [[ Loading variable bas ]] 
@@ -39,13 +33,51 @@ IfLabelExit1:
     movq -8(%rbp), %rax
     cmpq %rax, $1
     jne IfLabelExit2
-    push $1
+    push $0
     pop %rax
     
     # [[ Storing variable bas ]] 
     # [[ offset is 1 ]] 
     movq %rax, -8(%rbp)
 IfLabelExit2:
+    push $1
+    pop %rax
+    
+    # [[ Storing variable bas ]] 
+    # [[ offset is 1 ]] 
+    movq %rax, -8(%rbp)
+    
+    # [[ Loading variable bas ]] 
+    # [[ offset is 1 ]] 
+    movq -8(%rbp), %rax
+    cmpq %rax, $1
+    jne IfLabelExit3
+    push $0
+    pop %rax
+    
+    # [[ Storing variable bas ]] 
+    # [[ offset is 1 ]] 
+    movq %rax, -8(%rbp)
+    push $0
+    pop %rax
+    
+    # [[ Storing variable bas ]] 
+    # [[ offset is 1 ]] 
+    movq %rax, -8(%rbp)
+IfLabelExit3:
+    
+    # [[ Loading variable bas ]] 
+    # [[ offset is 1 ]] 
+    movq -8(%rbp), %rax
+    cmpq %rax, $1
+    jne IfLabelExit4
+    push $1
+    pop %rax
+    
+    # [[ Storing variable bas ]] 
+    # [[ offset is 1 ]] 
+    movq %rax, -8(%rbp)
+IfLabelExit4:
     push $0
     pop %rax
     

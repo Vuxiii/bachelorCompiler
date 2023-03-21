@@ -253,6 +253,16 @@ public final class App {
 
         if ( bas ) {
             bas = false;
+        };
+
+        if ( bas ) {
+            bas = false;
+        } else {
+            bas = true;
+        };
+
+        if ( bas ) {
+            bas = false;
             bas = false;
         } else if ( !bas ) {
             bas = true;

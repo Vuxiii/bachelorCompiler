@@ -26,6 +26,11 @@ public class AST_Shrinker extends VisitorBase {
         AST_Shrinker_Statement collaps_statement = new AST_Shrinker_Statement( collector.mapper );
         root.accept( collaps_statement );
         collector.cleanup();
+
+        AST_Shrinker_If_Collector if_collec = new AST_Shrinker_If_Collector();
+        root.accept( if_collec );
+        AST_Shrinker_If collaps_if = new AST_Shrinker_If( if_collec.mapper );
+        root.accept( collaps_if );
     }
 
 

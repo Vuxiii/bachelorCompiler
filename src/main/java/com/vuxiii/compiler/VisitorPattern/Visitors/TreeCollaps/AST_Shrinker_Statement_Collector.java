@@ -10,7 +10,6 @@ import com.vuxiii.Visitor.VisitorBase;
 import com.vuxiii.compiler.Parser.Symbol;
 import com.vuxiii.compiler.Parser.Nodes.Statement;
 import com.vuxiii.compiler.Parser.Nodes.StatementList;
-import com.vuxiii.compiler.VisitorPattern.ASTNode;
 import com.vuxiii.compiler.VisitorPattern.Annotations.VisitOrder;
 import com.vuxiii.compiler.VisitorPattern.Annotations.VisitorPattern;
 
@@ -23,7 +22,7 @@ public class AST_Shrinker_Statement_Collector extends VisitorBase {
     public Map<Statement, StatementList> mapper = new HashMap<>();
 
     @VisitorPattern( when = VisitOrder.ENTER_NODE )
-    public void reset( Statement stmt ) {
+    public void collect( Statement stmt ) {
         if ( visited.contains( stmt ) ) return;
         if ( stmt.next.isEmpty() ) return;
 
