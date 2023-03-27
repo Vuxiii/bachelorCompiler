@@ -11,52 +11,21 @@ main:
     subq $32, %rsp          # -8(%rbp) -> scope pointer
 
     callq initialize_heap
+    
+    movq $1, %rdi           # How many bit fields does this require
+    leaq -8(%rbp), %rsi     # Where to store scope header
+    callq new_scope_header  # Create scope header
 
-    leaq -8(%rbp), %rdi
-    callq register_pointer_layout
+    movq -8(%rbp), %rax     # Read scope header
+    movq $2, (%rax)         # bit_field into scope header
 
-    movq $3, -8(%rbp) # size
-    movq $2, -16(%rbp) # bit_field
+    movq $1, %rdi
+    callq new_ptr_size      # Create ptr
 
-    movq $2, %rdi
-    callq new_ptr_size 
-
-    movq %rax, -24(%rbp) # pointer
-
-    movq $42, 8(%rax)
-
-    callq print_scopes
-
-    push %rbp   
-    movq %rsp, %rbp
-
-    subq $32, %rsp          # -8(%rbp) -> scope pointer
-
-    leaq -8(%rbp), %rdi
-    callq register_pointer_layout
-
-    movq $4, -8(%rbp) # size
-    movq $6, -16(%rbp) # bit_field
-
-    movq $2, %rdi
-    callq new_ptr_size 
-
-    movq %rax, -24(%rbp) # pointer
-    movq $42, 8(%rax)
-
-
-    movq $2, %rdi
-    callq new_ptr_size 
-
-    movq %rax, -32(%rbp) # pointer
+    movq %rax, -16(%rbp)    # Store ptr
     movq $69, 8(%rax)
 
-
     callq print_scopes
-
-    movq %rbp, %rsp         # Restore stackpointer
-    pop %rbp
-
     movq %rbp, %rsp         # Restore stackpointer
     pop %rbp
     

@@ -11,7 +11,7 @@ static size_t *to_heap;
 
 static size_t pointer_offset = 0;
 
-static size_t **scope_pointers;
+static size_t ***scope_pointers;
 static size_t scope_size = 100;
 static size_t scope_offset = 0;
 
@@ -28,32 +28,17 @@ void initialize_heap() {
     printf( "Start of new heap: %p\n", heap );
 }
 
-void register_pointer_layout( size_t *pointer_to_stack ) {
-
-    if ( scope_offset == scope_size ) {
-        scope_size *= 2;
-        scope_pointers = realloc( scope_pointers, sizeof( size_t *) * scope_size );
-        if ( scope_pointers == NULL ) {
-            printf( "Some error realloc scope_pointers!\nExiting!\n" );
-            exit(-1);
-        }
-    }
-    printf( "Storing scope with pointer: %p\n", pointer_to_stack );
-    *(scope_pointers + scope_offset) = pointer_to_stack;
-    scope_offset++;
-}
-
 int get_bit( size_t bit_field, int offset ) {
     uint64_t mask = 1ULL << offset;
     return mask & bit_field ? 1 : 0;
 }
 
 size_t get_size_of_record( size_t *record ) {
-    return *record; // First field is the size of the memory block
+    return *(record + 1); // Second field is the size of the memory block
 }
 
 size_t get_bit_field( size_t *pointer ) {
-    return *(pointer - (size_t)1);
+    return *pointer;
 }
 
 size_t *locate_end_of_header( size_t *scope ) {
@@ -116,7 +101,7 @@ void swap_heap_buffers() {
     pointer_offset = 0;
 
     for ( size_t i = 0; i < scope_offset; ++i ) {
-        size_t *scope = scope_pointers[i];
+        size_t *scope = *scope_pointers[i];
         size_t bit_field = get_bit_field(scope);
         
         if ( bit_field == 0 ) {
@@ -137,7 +122,7 @@ void swap_heap_buffers() {
 
 size_t *new_ptr_size( size_t size ) {
     // Check if heap_pointer + size > heap_size
-    if ( pointer_offset + size + sizeof(size_t) >= heap_size ) {
+    if ( pointer_offset + size + 1 >= heap_size ) {
         // We need to move our heap to to_heap, and swap the two pointers
         // If the new heap cannot contain the requested size, increase the size of the heap.
             // Might be bad for performance. Double work
@@ -145,13 +130,38 @@ size_t *new_ptr_size( size_t size ) {
     }
 
     size_t *p = heap + pointer_offset;
-    pointer_offset += size + sizeof(size_t);
+    pointer_offset += size + 1;
 
-    *p = size;
+    *p = size + 1;
 
     printf( "Allocating new pointer: %p\n", p );
+    printf( "Offset for heap_ptr is: 8 bytes * %ld\n", pointer_offset );
 
     return p;
+}
+
+size_t *new_scope_header( size_t size, size_t **pointer_to_stack ) {
+
+    *pointer_to_stack = malloc( sizeof( size_t ) * size );
+
+    if ( pointer_to_stack == NULL ) {
+        printf( "Failed trying to allocate memory for scope header!\nExiting..!\n" );
+        exit(-1);
+    }
+
+    printf( "Allocating new scope header:  %p of size: %ld\n", *pointer_to_stack, size );
+    printf( "Which was stored at location: %p\n", pointer_to_stack );
+
+    if ( scope_offset == scope_size ) {
+        scope_size *= 2;
+        scope_pointers = realloc( scope_pointers, sizeof( size_t *) * scope_size );
+        if ( scope_pointers == NULL ) {
+            printf( "Some error realloc scope_pointers!\nExiting!\n" );
+            exit(-1);
+        }
+    }
+    scope_pointers[scope_offset] = pointer_to_stack;
+    scope_offset++;
 }
 
 void free_ptr( size_t *p ) {
@@ -208,36 +218,43 @@ void print_block( size_t *block ) {
     }
 }
 
+
 void print_scopes() {
     printf( "Amount of scopes: %ld\n", scope_offset );
     for ( size_t i = 0; i < scope_offset; ++i ) {
-        size_t *scope = scope_pointers[i];
-        size_t size = *scope;
-        printf("Visiting scope: %p with size: %ld\n", scope, size );
+        size_t *stack = (size_t *)scope_pointers[i];
+        size_t *scope_layout = *scope_pointers[i];
+        printf("Visiting scope: %p\n", scope_pointers[i] );
         
-        size_t bit_field = get_bit_field( scope );
-        size_t *end_of_header = locate_end_of_header( scope );
+        size_t *end_of_header = locate_end_of_header( scope_layout );
         
         // print header
-        printf( "\tElement[0] = %ld\n", *scope );
-        size_t j = 1;
+        size_t j = 0;
         do {
-            size_t bit_field = get_bit_field( scope - (j-1) );
-            printf( "\tElement[%ld] = ", j );
+            size_t bit_field = get_bit_field( scope_layout - j );
+            printf( "\tBitfield[%ld] = ", j );
             print_bit_field( bit_field );
             j++;
-        } while( scope + (j-1) != end_of_header );
+        } while( scope_layout + j != end_of_header );
+
+
 
         // print body
+        j = 0;
+        do {
+            size_t bit_field = get_bit_field( scope_layout - j );
+            for ( size_t z = 1; z < 64; ++z ) {
+                if ( get_bit( bit_field, z ) == 1 ) {
+                    size_t offset = j*64UL + z;
+                    size_t *p = get_pointer_from_stack_at_offset( stack, offset );
+                    printf( "\t Pointer[%ld] = %p\n", j*64 + z, p  );
 
-        for ( size_t j = (end_of_header + 1) - scope; j < size; ++j ) {
-            if ( get_bit( bit_field, j-1 ) == 1 ) {
-                // size_t **p = (size_t**)scope - j;
-                printf( "\tPointer[%ld] = %p\n", j, get_pointer_from_stack_at_offset( scope, j ));
-                print_block( get_pointer_from_stack_at_offset( scope, j ) );
-            } else {
-                printf( "\tElement[%ld] = %ld\n", j, *(scope - j));
+                    size_t size = *p;
+                    for ( size_t x = 0; x < size; ++x ) 
+                        printf( "\t*Pointer[%ld][%ld] = %ld\n", j*64 + z, x, p[x] );
+                }
             }
-        }
+            j++;
+        } while( scope_layout + j != end_of_header );
     }
 }
