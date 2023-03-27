@@ -1,0 +1,15 @@
+{
+    "files.associations": {
+        "stdio.h": "c",
+        "*.tcc": "c",
+        "compare": "c",
+        "fstream": "c",
+        "functional": "c",
+        "memory": "c",
+        "sstream": "c",
+        "streambuf": "c",
+        "typeinfo": "c",
+        "variant": "c",
+        "*.inc": "c"
+    }
+}
