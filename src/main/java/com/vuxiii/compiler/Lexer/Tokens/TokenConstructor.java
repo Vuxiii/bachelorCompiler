@@ -20,6 +20,7 @@ import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexPrint;
 import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexRBracket;
 import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexRCurly;
 import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexRParen;
+import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexReturn;
 import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexSemicolon;
 import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexType;
 import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexTypeDecl;
@@ -89,6 +90,9 @@ public class TokenConstructor {
             }
             case ELSE: {
                 return new LexElse( matchInfo, type );
+            }
+            case RETURN: {
+                return new LexReturn( matchInfo, type );
             }
             default: {
                 // Unkown. Not implemented yet. Throw error

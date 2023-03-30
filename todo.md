@@ -7,11 +7,6 @@ Note for jump instructions
     The fall-through path is often faster than the taken path (Engineering a COmpiler p. 176)
     That is not taking the jump is faster.
 
-Husk at tjekke om en variable bliver brugt inden den er blevet assignet noget!!!!
-
-
-
-Lmao. Har glemt at gøre plads til lokale variabler i main. Åbenbart.....
 
 Print funktion i assembly:
     For hvert et print skal jeg angive:

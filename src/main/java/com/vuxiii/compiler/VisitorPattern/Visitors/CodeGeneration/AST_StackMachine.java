@@ -21,6 +21,7 @@ import com.vuxiii.compiler.Parser.Nodes.IfNode;
 import com.vuxiii.compiler.Parser.Nodes.Print;
 import com.vuxiii.compiler.Parser.Nodes.PrintKind;
 import com.vuxiii.compiler.Parser.Nodes.Statement;
+import com.vuxiii.compiler.Parser.Nodes.StatementKind;
 import com.vuxiii.compiler.Parser.Nodes.Types.FunctionType;
 import com.vuxiii.compiler.VisitorPattern.ASTNode;
 import com.vuxiii.compiler.VisitorPattern.Visitor;
@@ -74,6 +75,7 @@ public class AST_StackMachine extends Visitor {
     }
 
     public AST_StackMachine( Scope scope, Map<Print, StringNode> strings ) {
+        this.strings = strings;
         this.parameters = scope.get_parameters();
         this.current_scope = scope;
     }
@@ -211,12 +213,30 @@ public class AST_StackMachine extends Visitor {
     }
 
     @VisitorPattern( when = VisitOrder.EXIT_NODE )
-    public void function_call( FunctionCall call ) {
+    public void setup_function_arguments( Argument arg ) {
         if ( function_depth != 0 ) return;
         
 
-        // Setup arguments here.
+        if ( arg.node instanceof LexIdent ) {
+
+            _load_var((LexIdent)arg.node, new Operand( Register.RAX, AddressingMode.REGISER ) );
+            push( new Instruction( Opcode.PUSH, Arguments.from_register( Register.RAX ) ) );
+        }
+    }
+
+    @VisitorPattern( when = VisitOrder.EXIT_NODE )
+    public void function_call( FunctionCall call ) {
+        if ( function_depth != 0 ) return; // Wtf
+
         push( new Instruction( Opcode.CALL, Arguments.from_label( call.func_name.name ), new Comment( "Calling function " + call.func_name.name ) ) );
+
+    }
+
+    @VisitorPattern( when = VisitOrder.EXIT_NODE )
+    public void function_return( Statement return_node ) {
+        if ( return_node.kind != StatementKind.RETURN ) return;
+
+        
 
     }
 

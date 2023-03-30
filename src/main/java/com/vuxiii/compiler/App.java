@@ -9,6 +9,7 @@ import com.vuxiii.compiler.Parser.Nodes.Print;
 import com.vuxiii.compiler.Parser.Nodes.Statement;
 import com.vuxiii.compiler.Parser.Nodes.StatementKind;
 import com.vuxiii.compiler.VisitorPattern.ASTNode;
+import com.vuxiii.compiler.VisitorPattern.Visitors.AST_Setup_Parents;
 import com.vuxiii.compiler.VisitorPattern.Visitors.CodeGeneration.AST_StackMachine;
 import com.vuxiii.compiler.VisitorPattern.Visitors.CodeGeneration.FunctionBlock;
 import com.vuxiii.compiler.VisitorPattern.Visitors.CodeGeneration.Instruction;
@@ -283,6 +284,50 @@ public final class App {
         print( " %\\n", a );
         """;
 
+        input = """
+        let a: (c:int) -> int;
+        a = (c: int) -> int {
+            let b: (d:int) -> int;
+            b = (d:int) -> int {
+                print( " %\\n", d );
+            };
+            b(c);
+            print( " %\\n", 3 );
+        };
+
+        let first: int;
+        first = 7;
+        a(first);
+        """;
+
+        input = """
+        let a: (c:int) -> int;
+        a = (b: int) -> int {
+            let c: (d:int) -> int;
+            c = (d: int) -> int {
+                return d + 7;
+            };
+            return c(b) + 2;
+        };
+
+        let first: int;
+        first = 7;
+        print( " %\\n", a(first) );
+        """;
+        input = """
+        let a: int;
+        a = 42;
+        let b: int;
+        b = 69;
+        let f1: ();
+        f1 = () {
+            let a: int;
+            a = 1;
+            let b: int;
+            b = 2;
+        };
+        
+        """;
         
 
         System.out.println( input );
@@ -302,6 +347,9 @@ public final class App {
         // [[ Parser ]]
         
         ASTNode ast = Parser.getAST( tokens );
+
+
+
         System.out.println( ast );
         
         line_break();
@@ -320,6 +368,8 @@ public final class App {
         line_break();
         line_break();
 
+        AST_Setup_Parents setup_parents = new AST_Setup_Parents();
+        ast.accept(setup_parents);
         
         
         printer = new AST_Printer();

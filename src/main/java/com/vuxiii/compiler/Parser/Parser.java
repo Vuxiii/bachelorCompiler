@@ -244,10 +244,12 @@ public class Parser {
             return new Assignment( Symbol.n_Assignment, (LexIdent)t.get(0), (ASTNode)t.get(2)  );
         });
         
-        // n_Assignment -> t_Identifier t_Equals n_Literal
-        g.addRuleWithReduceFunction( Symbol.n_Assignment, List.of( Symbol.t_Identifier, Symbol.t_Equals, Symbol.n_Literal ), t -> {
-            return new Assignment( Symbol.n_Assignment, (LexIdent)t.get(0), (ASTNode)t.get(2)  );
-        });
+
+        // This is included in the above!
+        // // n_Assignment -> t_Identifier t_Equals n_Literal
+        // g.addRuleWithReduceFunction( Symbol.n_Assignment, List.of( Symbol.t_Identifier, Symbol.t_Equals, Symbol.n_Literal ), t -> {
+        //     return new Assignment( Symbol.n_Assignment, (LexIdent)t.get(0), (ASTNode)t.get(2)  );
+        // });
 
         // n_Assignment -> t_Identifier t_Equals n_Assignment_Function
         g.addRuleWithReduceFunction( Symbol.n_Assignment, List.of( Symbol.t_Identifier, Symbol.t_Equals, Symbol.n_Assignment_Function ), t -> {
@@ -263,10 +265,12 @@ public class Parser {
         g.addRuleWithReduceFunction( Symbol.n_Print, List.of( Symbol.t_Print, Symbol.t_LParen, Symbol.t_StringLiteral, Symbol.t_Comma, Symbol.n_Arg_List, Symbol.t_RParen ), t -> {
             return new Print( Symbol.n_Print, (ASTNode)t.get(2), (Argument)t.get(4) );
         });
-        // n_Print -> t_Print t_LParen t_StringLiteral t_RParen
-        g.addRuleWithReduceFunction( Symbol.n_Print, List.of( Symbol.t_Print, Symbol.t_LParen, Symbol.t_StringLiteral, Symbol.t_RParen ), t -> {
-            return new Print( Symbol.n_Print, (ASTNode)t.get(2) );
-        });
+
+        // This is included in expression -> Literal -> string_literal
+        // // n_Print -> t_Print t_LParen t_StringLiteral t_RParen
+        // g.addRuleWithReduceFunction( Symbol.n_Print, List.of( Symbol.t_Print, Symbol.t_LParen, Symbol.t_StringLiteral, Symbol.t_RParen ), t -> {
+        //     return new Print( Symbol.n_Print, (ASTNode)t.get(2) );
+        // });
         
     }
 
@@ -594,6 +598,18 @@ public class Parser {
     private static void init_functions() {
         // --[[ Functions ]]--
         
+        // n_Statement -> t_Return n_Expression t_Semicolon
+        g.addRuleWithReduceFunction( Symbol.n_Statement, List.of( Symbol.t_Return, Symbol.n_Expression, Symbol.t_Semicolon ), t -> {
+            Expression ret = (Expression)t.get(1);
+            return new Statement( Symbol.n_Statement, ret, StatementKind.RETURN );
+        });
+
+        // n_Factor -> n_Function_Call
+        g.addRuleWithReduceFunction( Symbol.n_Factor, List.of( Symbol.n_Function_Call ), t -> {
+            FunctionCall function_name = (FunctionCall)t.get(0);
+            return new Expression( Symbol.n_Factor, function_name );
+        });
+
         // n_Statement -> t_Identifier t_LParen t_RParen t_Semicolon
         g.addRuleWithReduceFunction( Symbol.n_Statement, List.of( Symbol.n_Function_Call, Symbol.t_Semicolon ), t -> {
             FunctionCall function_name = (FunctionCall)t.get(0);
@@ -627,9 +643,9 @@ public class Parser {
         });
 
         // n_Arg -> t_Identifier
-        g.addRuleWithReduceFunction( Symbol.n_Arg, List.of( Symbol.t_Identifier ), t -> {
-            return new Argument( Symbol.n_Arg, (ASTNode)t.get(0), ArgumentKind.IDENTIFIER );
-        });
+        // g.addRuleWithReduceFunction( Symbol.n_Arg, List.of( Symbol.t_Identifier ), t -> {
+        //     return new Argument( Symbol.n_Arg, (ASTNode)t.get(0), ArgumentKind.IDENTIFIER );
+        // });
 
         //TODO: Fix me. 
         // n_Arg -> t_Literal

@@ -10,5 +10,6 @@ public enum StatementKind {
     ELSE,
     IF_ELSE, 
     IF_ELSE_IF, 
+    RETURN, 
 
 }

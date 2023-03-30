@@ -106,6 +106,7 @@ public class Symbol {
 
     public static final Terminal t_StringLiteral = new Terminal( "\"string_literal\"" );
 
+    public static final Terminal t_Return = new Terminal( "return" );
     public static final Terminal t_Let = new Terminal( "let" );
     public static final Terminal t_Arrow_Right = new Terminal( "'->'" );
 

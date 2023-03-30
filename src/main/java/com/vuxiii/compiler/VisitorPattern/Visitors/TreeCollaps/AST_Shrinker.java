@@ -51,7 +51,7 @@ public class AST_Shrinker extends VisitorBase {
 
     @VisitorPattern( when = VisitOrder.EXIT_NODE, order = 4 )
     public void cleanup_expression_arithmetic( ASTNode exp ) {
-        if ( exp.isLeaf() ) {
+        if ( !(exp instanceof Expression) ) {
             current = exp;
         }
     }
@@ -66,7 +66,7 @@ public class AST_Shrinker extends VisitorBase {
     public void cleanup_argument( Argument argument ) {
         if ( !(argument.node instanceof Expression) ) return;
 
-        argument.node = ((Expression)argument.node).node;
+        // argument.node = ((Expression)argument.node).node;
     }
 
     @VisitorPattern( when = VisitOrder.EXIT_NODE, order = 2 )

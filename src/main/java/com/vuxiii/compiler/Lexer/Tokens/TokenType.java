@@ -28,6 +28,8 @@ public enum TokenType {
     COMMA( Symbol.t_Comma ),
     DOT( Symbol.t_Dot ),
 
+    RETURN( Symbol.t_Return ),
+
     LET( Symbol.t_Let ),
     IF( Symbol.t_If ),
     ELSE( Symbol.t_Else ),

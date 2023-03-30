@@ -54,8 +54,8 @@ public class AST_SymbolCollector extends VisitorBase {
 
         prev_scope_name = current_scope_name;
         current_scope_name = decl_node.id.name;
-
     }
+
     @VisitorPattern( when = VisitOrder.EXIT_NODE, order = 4 )
     public void exit_parameter_mode( Declaration decl_node ) {
         if ( decl_node.kind != DeclarationKind.FUNCTION && decl_node.kind != DeclarationKind.NEW_FUNCTION_TYPE ) return;
@@ -108,14 +108,13 @@ public class AST_SymbolCollector extends VisitorBase {
         LexIdent node = (LexIdent) arg.node;
         
         if ( parent_scope().can_access( node.name ) == true ) return;
-
+        if ( current_scope().can_access( node.name ) == true ) return;
         // If above fails, return Error
         System.out.println( new Error( "Symbol Collection Error", "Tried to access illegal variable '" + node.name + "' on line " + node.matchInfo.lineNumber() + " column " + node.matchInfo.columnNumber() ));
         System.out.println( "Current Scope: " + current_scope_name );
         System.out.println( scope_map.get( current_scope_name ) );
         System.exit(-1);
     }
-
 
     @VisitorPattern( when = VisitOrder.ENTER_NODE, order = 2 )
     public void collect_variable( Declaration declaration_node ) {
