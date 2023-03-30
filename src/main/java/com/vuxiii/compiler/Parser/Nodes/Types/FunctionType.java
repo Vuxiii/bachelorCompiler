@@ -1,8 +1,10 @@
 package com.vuxiii.compiler.Parser.Nodes.Types;
 
 import java.util.Optional;
+import java.util.function.Function;
 
 import com.vuxiii.LR.Records.Term;
+import com.vuxiii.compiler.Lexer.Tokens.PrimitiveType;
 import com.vuxiii.compiler.Parser.Nodes.Parameter;
 import com.vuxiii.compiler.Parser.Nodes.Statement;
 import com.vuxiii.compiler.VisitorPattern.ASTNode;
@@ -23,25 +25,64 @@ public class FunctionType extends Type {
         super.setup_ASTNodeQueue();
     }
 
-    
-    // @Override
-    // public Optional<ASTNode> getChild1() {
-    //     if ( parameters.isPresent() )
-    //         return Optional.of( parameters.get() );
-    //     return Optional.empty();
-    // }
-    // @Override
-    // public Optional<ASTNode> getChild2() {
-    //     if ( return_type.isPresent() )
-    //         return Optional.of( return_type.get() );
-    //     return Optional.empty();
-    // }
-    // @Override
-    // public Optional<ASTNode> getChild3() {
-    //     if ( body.isPresent() )
-    //         return Optional.of( body.get() );
-    //     return Optional.empty();
-    // }
+    @Override
+    public int hashCode() {
+        int out = 0;
+        Parameter current_param = null;
+        int i = 1;
+        if ( parameters.isPresent() ) {
+            current_param = parameters.get();
+            while ( current_param != null ) {
+                out += i * 37 * current_param.hashCode();
+                ++i;
+
+                current_param = current_param.next.isPresent() ? current_param.next.get() : null;
+            }
+        }
+        if ( return_type.isPresent() ) {
+            out += i * 37 * return_type.get().hashCode();
+        } else {
+            out += i * 37 * PrimitiveType.VOID.hashCode();
+        }
+        return out;
+    }
+
+    @Override
+    public boolean equals( Object other ) {
+        if ( other == null ) return false;
+        if ( !(other instanceof FunctionType) ) return false;
+        FunctionType o = (FunctionType) other;
+
+        if ( parameters.isPresent() ) {
+            if ( o.parameters.isPresent() ) {
+                if ( parameters.get().equals( o.parameters.get() ) == false ) return false;
+            } else {
+                return false;
+            }
+        } else if ( o.parameters.isPresent() ) {
+            return false;
+        }
+
+        if ( return_type.isPresent() ) {
+            if ( o.return_type.isPresent() ) {
+                if ( return_type.get().equals( o.return_type.get() ) == false ) return false;
+            } else {
+                if ( (return_type.get() instanceof StandardType) && ((StandardType)return_type.get()).type.type.equals( PrimitiveType.VOID ) ) {
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+        } else {
+            if ( o.return_type.isPresent() ) {
+                if ( !o.return_type.get().equals( PrimitiveType.VOID ) ) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
 
     public String toString() {
         return "FunctionType";

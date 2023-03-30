@@ -20,6 +20,16 @@ public class LexType extends Type {
         super.setup_ASTNodeQueue();
     }
 
+    public boolean equals( Object other ) {
+        if ( other == null ) return false;
+        if ( other instanceof LexType ) {
+            return type.equals( ((LexType)other).type );
+        } else if ( other instanceof PrimitiveType ) {
+            return type.equals(other);
+        }
+        return false;
+    }
+
     public String toString() {
         return "ASTTokenType: " + type;
     }

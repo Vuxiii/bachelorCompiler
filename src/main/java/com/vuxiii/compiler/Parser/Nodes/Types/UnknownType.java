@@ -1,11 +1,7 @@
 package com.vuxiii.compiler.Parser.Nodes.Types;
 
-import java.util.Optional;
-
-import com.vuxiii.DFANFA.MatchInfo;
 import com.vuxiii.LR.Records.Term;
 import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexIdent;
-import com.vuxiii.compiler.VisitorPattern.ASTNode;
 import com.vuxiii.compiler.VisitorPattern.Annotations.VisitNumber;
 
 
@@ -22,8 +18,8 @@ public class UnknownType extends Type  {
     }
 
     @Override
-    public Optional<ASTNode> getChild1() {
-        return Optional.of( unknown_type );
+    public boolean equals( Object other ) {
+        return false;
     }
 
     public String toString() {

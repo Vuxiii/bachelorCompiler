@@ -3,6 +3,7 @@ package com.vuxiii.compiler.Parser.Nodes.Types;
 import java.util.Optional;
 
 import com.vuxiii.LR.Records.Term;
+import com.vuxiii.compiler.Lexer.Tokens.PrimitiveType;
 import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexIdent;
 import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexType;
 import com.vuxiii.compiler.VisitorPattern.ASTNode;
@@ -21,8 +22,26 @@ public class StandardType extends Type  {
     }
 
     @Override
-    public Optional<ASTNode> getChild1() {
-        return Optional.of( type );
+    public boolean equals( Object other ) {
+        if ( other == null ) return false;
+        if ( other instanceof PrimitiveType ) {
+            return type.type.equals(other);
+        } else if ( other instanceof Type ) {
+            if ( other instanceof StandardType ) {
+                StandardType o = (StandardType)other;
+                return type.equals(o.type);
+            } else if ( other instanceof FunctionType ) {
+                return false;
+            } else if ( other instanceof AliasType ) {
+                AliasType o = (AliasType)other;
+                return equals(o.alias_type);
+            } else if ( other instanceof UnknownType ) {
+                return false;
+            } else if ( other instanceof UserType ) {
+                return false;
+            }
+        }
+        return false;
     }
 
     public String toString() {

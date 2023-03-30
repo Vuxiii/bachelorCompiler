@@ -7,8 +7,9 @@ public enum PrimitiveType {
     INT("int"),
     DOUBLE("double"),
     STRING("string"),
-    BOOL("boolean");
-
+    BOOL("boolean"),
+    VOID("void");
+    
     public String name;
 
     private PrimitiveType( String name ) {

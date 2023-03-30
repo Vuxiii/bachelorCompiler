@@ -1,13 +1,8 @@
 package com.vuxiii.compiler.Parser.Nodes;
 
-import java.util.Optional;
-
 import com.vuxiii.LR.Records.Term;
 import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexIdent;
-import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexType;
-import com.vuxiii.compiler.Parser.Nodes.Types.AliasType;
 import com.vuxiii.compiler.Parser.Nodes.Types.Type;
-import com.vuxiii.compiler.Parser.Nodes.Types.UserType;
 import com.vuxiii.compiler.VisitorPattern.ASTNode;
 import com.vuxiii.compiler.VisitorPattern.Annotations.VisitNumber;
 
@@ -40,16 +35,6 @@ public class Declaration extends ASTNode {
 
     public String toString() {
         return kind + " " + id.name + ": " + type;
-    }
-
-    @Override
-    public Optional<ASTNode> getChild1() {
-        return Optional.of(id);
-    }
-
-    @Override
-    public Optional<ASTNode> getChild2() {
-        return Optional.of( type );
     }
 
     @Override

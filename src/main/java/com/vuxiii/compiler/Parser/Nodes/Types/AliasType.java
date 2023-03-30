@@ -4,6 +4,7 @@ import java.util.Optional;
 
 import com.vuxiii.DFANFA.MatchInfo;
 import com.vuxiii.LR.Records.Term;
+import com.vuxiii.compiler.Lexer.Tokens.PrimitiveType;
 import com.vuxiii.compiler.VisitorPattern.ASTNode;
 import com.vuxiii.compiler.VisitorPattern.Annotations.VisitNumber;
 
@@ -22,9 +23,16 @@ public class AliasType extends Type  {
     }
 
     @Override
-    public Optional<ASTNode> getChild1() {
-        return Optional.of( alias_type );
+    public boolean equals( Object other ) {
+        if ( other == null ) return false;
+        if ( other instanceof Type ) {
+            alias_type.equals( other );
+        } else if ( other instanceof PrimitiveType ) {
+            return alias_type.equals(other);
+        }
+        return false;
     }
+
 
     public String toString() {
         return "AliasType";

@@ -18,6 +18,7 @@ import com.vuxiii.compiler.VisitorPattern.Visitors.CodeGeneration.StringCollecti
 import com.vuxiii.compiler.VisitorPattern.Visitors.Debug.AST_Printer;
 import com.vuxiii.compiler.VisitorPattern.Visitors.SymbolCollection.AST_FixTypes;
 import com.vuxiii.compiler.VisitorPattern.Visitors.SymbolCollection.AST_SymbolCollector;
+import com.vuxiii.compiler.VisitorPattern.Visitors.SymbolCollection.AST_SymbolCollectorv2;
 import com.vuxiii.compiler.VisitorPattern.Visitors.SymbolCollection.Scope;
 import com.vuxiii.compiler.VisitorPattern.Visitors.TreeCollaps.AST_Shrinker;
 import com.vuxiii.compiler.VisitorPattern.Visitors.TreeCollaps.AST_Shrinker_Statement;
@@ -319,14 +320,17 @@ public final class App {
         a = 42;
         let b: int;
         b = 69;
-        let f1: ();
-        f1 = () {
+        let f1: (param: int);
+        f1 = (param: int) {
+            param = 0;
             let a: int;
             a = 1;
             let b: int;
             b = 2;
         };
-        
+
+        print( " %\\n", 2 + 3*5 );
+
         """;
         
 
@@ -414,6 +418,15 @@ public final class App {
         line_break();
         System.out.println( "Symbol collector" );
         line_break();
+        
+        AST_SymbolCollectorv2 v2 = new AST_SymbolCollectorv2();
+        ast.accept(v2);
+        
+        printer = new AST_Printer();
+        ast.accept( printer );
+        System.out.println( printer.get_ascii() );
+
+
         AST_SymbolCollector symbolCollector = new AST_SymbolCollector();
         ast.accept( symbolCollector );
 

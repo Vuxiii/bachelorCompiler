@@ -23,16 +23,6 @@ public class UserType extends Type {
     }
 
     @Override
-    public Optional<ASTNode> getChild1() {
-        return Optional.of( identifier );
-    }
-
-    @Override
-    public Optional<ASTNode> getChild2() {
-        return Optional.of( fields );
-    }
-
-    @Override
     public String getPrintableName() {
         return "User_Type";
     }
