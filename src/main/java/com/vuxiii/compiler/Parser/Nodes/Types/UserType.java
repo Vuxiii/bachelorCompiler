@@ -32,4 +32,10 @@ public class UserType extends Type {
         return identifier.name;
     }
 
+    @Override
+    public int physical_size() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'physical_size'");
+    }
+
 }

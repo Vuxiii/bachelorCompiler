@@ -35,5 +35,11 @@ public class UnknownType extends Type  {
     public String simple_type_name() {
         return unknown_type.name;
     }
+
+    @Override
+    public int physical_size() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'physical_size'");
+    }
     
 }

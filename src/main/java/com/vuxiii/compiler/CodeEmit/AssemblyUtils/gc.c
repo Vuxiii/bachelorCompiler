@@ -355,3 +355,17 @@ void print_scopes() {
         print_block( scope_layout, stack, 1 );
     }
 }
+
+void print_stack( size_t *rbp, size_t *rsp ) {
+    size_t offset = 0;
+    printf( "======================\nrsp:\t%p\n\n", rsp );
+    while ( rsp + offset < rbp ) {
+        if ( rsp[offset] < 9999999 ) {
+            printf( "rbp %ld\t%ld\n", 8* (rsp + offset - rbp), rsp[offset] );
+        } else {
+            printf( "rbp %ld\t%p\n", 8 * (rsp + offset - rbp), rsp[offset] );
+        }
+        offset++;
+    }
+    printf( "\nrbp:\t%p\n======================\n\n", rbp );
+}

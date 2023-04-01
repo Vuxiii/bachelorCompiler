@@ -43,4 +43,16 @@ public class LexType extends Type {
     public String simple_type_name() {
         return type.name;
     }
+
+    @Override
+    public int physical_size() {
+        switch (type) {
+            case VOID:
+                return 0;
+            case STRING:
+                return matchInfo.str().length()-2; // Maybe not -2 for the '"'
+            default:
+                return 8;
+        }
+    }
 }

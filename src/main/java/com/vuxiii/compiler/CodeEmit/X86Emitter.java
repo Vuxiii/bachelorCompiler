@@ -69,8 +69,8 @@ public class X86Emitter {
         
         push_no_offset( ".section .data" );
         push_no_offset( ".section .text" );
-        push_no_offset( ".global _start" );
-        push_no_offset( "_start:" );
+        push_no_offset( ".global main" );
+        push_no_offset( "main:" );
     }
 
     private void file_footer() {
@@ -127,7 +127,7 @@ public class X86Emitter {
     private void _run( List<Instruction> instructions, Scope current_scope ) {
         
         for ( String var : current_scope.get_variables() ) {
-            var_offsets.put( var, current_scope.get_variable_offset(var) ); // Capture missing
+            var_offsets.put( var, -current_scope.get_variable_offset(var) ); // Capture missing
         }
 
         for ( String var : current_scope.get_parameters() ) {
@@ -175,12 +175,12 @@ public class X86Emitter {
                     Operand target = instruction.args.get().target.get();
                     
                     int offset = var_offsets.get( var.get_string() );
-                    int sign = instruction.target_is_parameter ? 1 : -1;
 
                     push_code ( "" );
                     push_code ("# [[ Loading variable " + var + " ]] " );
                     push_code ("# [[ offset is " + offset + " ]] " );
-                    push_code( "movq " + (sign*offset*8) + "(%rbp), " + ope_string(target) ); // What offset is the variable stored at
+                    push_code( "movq " + (offset*8) + "(%rbp), " + ope_string(target) ); // What offset is the variable stored at
+                    push_code ( "" );
                     
                 } break;
 
@@ -189,24 +189,22 @@ public class X86Emitter {
                     Operand src_1 = instruction.args.get().target.get();
 
                     int offset = var_offsets.get( var );
-                    int sign = instruction.target_is_parameter ? 1 : -1;
 
                     push_code ( "" );
                     push_code ("# [[ Storing variable " + var + " ]] " );
                     push_code ("# [[ offset is " + offset + " ]] " );
-                    push_code( "movq " + ope_string(src_1) + ", " + (sign*offset*8) + "(" + ope_string(rbp) + ")" );
-                    // push_code( "movq $" + offset + ", " + getReg( Register.RCX ) );
-                    // push_code( "movq " + getReg(src_1) + ", -8(" + getReg(Register.RBP) + ", " + getReg(Register.RCX) + ", 8)" );
+                    push_code( "movq " + ope_string(src_1) + ", " + (offset*8) + "(" + ope_string(rbp) + ")" );
+                    push_code ( "" );
+
                 } break;
                 
                 
                 case PUSH: {
-                    // if ( instruction.args.get().kind == ArgumentKind.ONE_REG )
-                        push_code( "push " + ope_string(instruction.args.get().operand_1.get() ) );
+                    push_code( "pushq " + ope_string(instruction.args.get().operand_1.get() ) );
 
                 } break;
                 case POP: {
-                    push_code( "pop " + ope_string(instruction.args.get().operand_1.get()) );
+                    push_code( "popq " + ope_string(instruction.args.get().operand_1.get()) );
                 } break;
                 
                 case LABEL: {
@@ -224,13 +222,13 @@ public class X86Emitter {
                 } break;
 
                 case RETURN: {
-                    push_code( "ret" );
+                    push_code( "retq" );
                     push_code( "" );
                 } break;
 
                 case CALL: {
                     // Handle argument passing.
-                    push_code( "call " + instruction.args.get().operand_1.get().get_string() );
+                    push_code( "callq " + instruction.args.get().operand_1.get().get_string() );
                 } break;
                 case MOVE: {
                     Operand ope_1 = instruction.args.get().operand_1.get();
@@ -260,7 +258,7 @@ public class X86Emitter {
                     Operand left = instruction.args.get().operand_1.get();
                     Operand right = instruction.args.get().operand_2.get();
 
-                    push_code( "cmp " + ope_string( right ) + ", " + ope_string( left ) );
+                    push_code( "cmpq " + ope_string( right ) + ", " + ope_string( left ) );
 
                 } break;
                 case JUMP_NOT_EQUAL: {
@@ -281,7 +279,7 @@ public class X86Emitter {
 
 
     private void setup_stackpointer() {
-        push_code( "push " + ope_string( rbp ) );
+        push_code( "pushq " + ope_string( rbp ) );
         push_code( "movq " + ope_string( rsp ) + ", " 
                            + ope_string( rbp ) + " # Setup stackpointer" );
     }
@@ -289,7 +287,7 @@ public class X86Emitter {
     private void restore_stackpointer() {
         push_code( "movq " + ope_string( rbp ) + ", " 
                            + ope_string( rsp ) + " # Restore stackpointer" );
-        push_code( "pop %rbp" );
+        push_code( "popq %rbp" );
     }
 
     private String getReg( Register reg ) { 
@@ -315,7 +313,7 @@ public class X86Emitter {
                 System.exit(-1);
             } break;
             case DIRECT_OFFSET: {
-                if ( ope.offset > 0 )
+                if ( ope.offset != 0 )
                     out += ope.offset * 8;
                 out += "(%" + getReg( ope.get_reg() ) + ")";
             } break;

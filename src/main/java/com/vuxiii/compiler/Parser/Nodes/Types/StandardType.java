@@ -57,4 +57,16 @@ public class StandardType extends Type  {
     public String simple_type_name() {
         return type.type.name;
     }
+
+    @Override
+    public int physical_size() {
+        switch (type.type) {
+            case VOID:
+                return 0;
+            case STRING:
+                return type.matchInfo.str().length()-2; // Maybe not -2 for the '"'
+            default:
+                return 8;
+        }
+    }
 }

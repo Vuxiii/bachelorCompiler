@@ -30,6 +30,7 @@ import com.vuxiii.compiler.VisitorPattern.Visitor;
 import com.vuxiii.compiler.VisitorPattern.Annotations.VisitOrder;
 import com.vuxiii.compiler.VisitorPattern.Annotations.VisitorPattern;
 import com.vuxiii.compiler.VisitorPattern.Visitors.CodeGeneration.StringCollection.StringNode;
+import com.vuxiii.compiler.VisitorPattern.Visitors.SymbolCollection.AST_SymbolCollector;
 import com.vuxiii.compiler.VisitorPattern.Visitors.SymbolCollection.Scope;
 
 public class AST_StackMachine extends Visitor {
@@ -64,6 +65,14 @@ public class AST_StackMachine extends Visitor {
 
 
         fb.push( new Instruction( Opcode.LABEL, Arguments.from_label( label ) ) );
+
+        if ( ((FunctionType)function.value).return_type.isPresent() ) {
+            FunctionType func = (FunctionType)function.value;
+            push( new Instruction( Opcode.MINUS, new Arguments( 
+                                    Operand.from_int(func.return_type.get().physical_size(), AddressingMode.IMMEDIATE),
+                                    Operand.from_register(Register.RSP, AddressingMode.REGISER),
+                                    Operand.from_register(Register.RSP, AddressingMode.REGISER) ) ) );
+        }
 
         fb.push( new Instruction( Opcode.SETUP_STACK ) );
 
@@ -107,6 +116,22 @@ public class AST_StackMachine extends Visitor {
         push( ins );
 
     }   
+
+    @VisitorPattern( when = VisitOrder.EXIT_NODE ) 
+    public void add_return( Statement ret ) {
+        if ( ret.kind != StatementKind.RETURN ) return;
+
+        Scope scope = AST_SymbolCollector.current_scope(ret);
+
+        Operand target = Operand.from_register( Register.RBP, AddressingMode.DIRECT_OFFSET);
+        target.offset = scope.get_parameters().size() + 1;
+
+        push( new Instruction( Opcode.POP, Arguments.from_register( Register.RBX ) ) );
+        push( new Instruction( Opcode.MOVE, new Arguments( 
+                                Operand.from_register( Register.RBX, AddressingMode.REGISER), 
+                                target), new Comment( "Storing computed value into return spot" ) ) );
+
+    }
 
     @VisitorPattern( when = VisitOrder.ENTER_NODE )
     public void literal( LexLiteral leaf_literal ) {
@@ -386,8 +411,8 @@ public class AST_StackMachine extends Visitor {
                 Operand inter = new Operand( Register.RAX, AddressingMode.REGISER );
                 ASTNode current_node = str_node.substitutes.get(i);
                 System.out.println( "Current node in sub is " + current_node.getPrintableName() );
-                if ( current_node instanceof LexIdent ) {
-                    String var_name = ((LexIdent)current_node).name;
+                if ( current_node instanceof Expression && ((Expression)current_node).node instanceof LexIdent ) {
+                    String var_name = ((LexIdent)((Expression)current_node).node).name;
                     Operand var = new Operand( var_name, AddressingMode.IMMEDIATE );
                     Operand target = new Operand( Register.RAX, AddressingMode.REGISER );
                     boolean target_is_parameter = current_scope.get_parameters().contains( var_name );

@@ -47,7 +47,7 @@ public class AST_SymbolCollector extends VisitorBase {
     public void init_function_scopes( Declaration func_decl ) {
         if ( !(func_decl.kind == DeclarationKind.FUNCTION) ) return;
 
-        SymbolNode parent_scope = _current_symbol_node(func_decl);
+        SymbolNode parent_scope = current_symbol_node(func_decl);
 
         parent_scope.scope.add_variable( func_decl.id );
 
@@ -64,7 +64,7 @@ public class AST_SymbolCollector extends VisitorBase {
     public void init_function_scopes( Assignment func_assignment ) {
         if ( !(func_assignment.value instanceof FunctionType) ) return;
         
-        SymbolNode parent_scope = _current_symbol_node(func_assignment);
+        SymbolNode parent_scope = current_symbol_node(func_assignment);
         Scope new_scope = new Scope();
 
         new_scope.add_variable( func_assignment.id );
@@ -84,20 +84,20 @@ public class AST_SymbolCollector extends VisitorBase {
     @VisitorPattern( when = VisitOrder.ENTER_NODE, order = 1 )
     public void collect_var( Declaration decl ) {
         if ( decl.kind != DeclarationKind.VARIABLE ) return;
-        _current_scope( decl ).add_variable( decl.id );
-        System.out.println( "Adding " + decl.id + " to scope " + _current_scope(decl));
+        current_scope( decl ).add_variable( decl.id );
+        System.out.println( "Adding " + decl.id + " to scope " + current_scope(decl));
     }
 
     @VisitorPattern( when = VisitOrder.ENTER_NODE, order = 2 )
     public void collect_param( Declaration decl ) {
         if ( decl.kind != DeclarationKind.PARAMETER ) return;
-        _current_scope( decl ).add_parameter( decl.id );
+        current_scope( decl ).add_parameter( decl.id );
     }
 
     @VisitorPattern( when = VisitOrder.ENTER_NODE )
     public void check_use_before_decl( LexIdent ident ) {
         if ( ident.parent.get() instanceof Declaration ) return;
-        SymbolNode current_node = _current_symbol_node(ident);
+        SymbolNode current_node = current_symbol_node(ident);
 
         while( current_node.scope.can_access( ident.name ) == false ) {
             if ( current_node.parent_scope.isEmpty()) {
@@ -110,7 +110,7 @@ public class AST_SymbolCollector extends VisitorBase {
         }
     }
 
-    private SymbolNode _current_symbol_node( ASTNode current ) {
+    public static SymbolNode current_symbol_node( ASTNode current ) {
         while ( !(current instanceof SymbolNode) ) {
             if ( current instanceof Root ) {
                 System.out.println( "At root. Lmao" );
@@ -121,7 +121,7 @@ public class AST_SymbolCollector extends VisitorBase {
         return (SymbolNode)current;
     }
 
-    private Scope _current_scope( ASTNode current ) {
+    public static Scope current_scope( ASTNode current ) {
         while ( !(current instanceof SymbolNode) ) {
             if ( current instanceof Root ) {
                 System.out.println( "At root. Lmao" );

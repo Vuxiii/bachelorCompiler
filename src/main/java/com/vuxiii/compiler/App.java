@@ -321,16 +321,13 @@ public final class App {
         a = 42;
         let b: int;
         b = 69;
-        let f1: (param: int);
-        f1 = (param: int) {
-            param = 0;
-            let a: int;
-            a = 1;
-            let b: int;
-            b = 2;
+        let f1: (param: int) -> int;
+        f1 = (param: int) -> int {
+            return 10 + param;
         };
+        a = f1(4242);
 
-        print( " %\\n", 2 + 3*5 );
+        print( " %\\n", a );
 
         """;
         

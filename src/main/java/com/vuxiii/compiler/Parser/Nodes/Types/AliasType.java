@@ -47,6 +47,11 @@ public class AliasType extends Type  {
     public String simple_type_name() {
         return aliasInfo.str();
     }
+
+    @Override
+    public int physical_size() {
+        return alias_type.physical_size();
+    }
     
     
 }

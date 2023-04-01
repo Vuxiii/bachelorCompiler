@@ -110,5 +110,11 @@ public class FunctionType extends Type {
             out += "void";
         return out;
     }
+
+    @Override
+    public int physical_size() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'physical_size'");
+    }
     
 }
