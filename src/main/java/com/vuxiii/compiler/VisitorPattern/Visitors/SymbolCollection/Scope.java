@@ -13,6 +13,7 @@ public class Scope {
 
     private Map<String, Integer> parameter_offsets = new HashMap<>();
     private int current_parameter_offset = 2;
+    
     private Map<String, Integer> variable_offsets = new HashMap<>();
     private int current_variable_offset = 1;
 

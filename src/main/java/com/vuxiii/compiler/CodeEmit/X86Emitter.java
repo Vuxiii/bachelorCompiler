@@ -9,6 +9,9 @@ import java.util.Set;
 import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexIdent;
 import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexLiteral;
 import com.vuxiii.compiler.Parser.Nodes.Print;
+import com.vuxiii.compiler.Parser.Nodes.Root;
+import com.vuxiii.compiler.VisitorPattern.Annotations.VisitOrder;
+import com.vuxiii.compiler.VisitorPattern.Annotations.VisitorPattern;
 import com.vuxiii.compiler.VisitorPattern.Visitors.CodeGeneration.AddressingMode;
 import com.vuxiii.compiler.VisitorPattern.Visitors.CodeGeneration.ArgumentKind;
 import com.vuxiii.compiler.VisitorPattern.Visitors.CodeGeneration.FunctionBlock;
@@ -43,13 +46,15 @@ public class X86Emitter {
     private static Operand rdx = Operand.from_register(Register.RDX , AddressingMode.REGISER);
     private static Operand rbp = Operand.from_register(Register.RBP, AddressingMode.REGISER);
 
-    public X86Emitter( List<Instruction> instructions, Map<String, FunctionBlock> functions, Map<String, Scope> scopes, Map<Print, StringNode> buffers ) {
+    public X86Emitter( List<Instruction> instructions, Map<String, FunctionBlock> functions, Root root ) {
         this.instructions = instructions;
-        this.scopes = scopes;
+
+        scopes = root.scope_map;
+        string_buffers = root.strings;
+
         var_offsets = new HashMap<>();
 
         this.functions = functions;
-        this.string_buffers = buffers;
     }
 
     private void push_no_offset( String s ) {
@@ -101,8 +106,7 @@ public class X86Emitter {
         for ( String function : functions.keySet() ) {
             FunctionBlock fb = functions.get(function);
             
-            
-            _run( fb.instructions, scopes.get( function ) );
+            _run( fb.instructions, scopes.get( "function " + function ) );
             
         }
 
@@ -110,7 +114,6 @@ public class X86Emitter {
 
 
         setup_stackpointer();
-
         _run( instructions, scopes.get( "root" ) );
         
         restore_stackpointer();

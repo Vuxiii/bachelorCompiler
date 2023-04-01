@@ -6,6 +6,7 @@ import com.vuxiii.compiler.Lexer.Lexer;
 import com.vuxiii.compiler.Parser.Parser;
 import com.vuxiii.compiler.Parser.Nodes.Assignment;
 import com.vuxiii.compiler.Parser.Nodes.Print;
+import com.vuxiii.compiler.Parser.Nodes.Root;
 import com.vuxiii.compiler.Parser.Nodes.Statement;
 import com.vuxiii.compiler.Parser.Nodes.StatementKind;
 import com.vuxiii.compiler.VisitorPattern.ASTNode;
@@ -427,43 +428,13 @@ public final class App {
         System.out.println( printer.get_ascii() );
 
 
-        AST_SymbolCollector symbolCollector = new AST_SymbolCollector();
-        ast.accept( symbolCollector );
-
-        List<Scope> scopes = symbolCollector.scopes;
-        
-        int i = 0;
-        for ( Scope scope : scopes ) {
-            System.out.println( "Scope [" + (i++) + "]" );
-            System.out.println( "local vars:" );
-            for ( String var : scope.get_variables() )
-                System.out.println( "  " + var );
-            System.out.println( "captured vars:" );
-            for ( String capture : scope.get_captures() )
-                System.out.println( "  " + capture );
-                
-            System.out.println();
-        }
-
-        System.out.println( symbolCollector.scope_map.keySet() );
-        symbolCollector.scope_map.keySet().forEach( k -> { System.out.println( "Key: " + k + " -> " + symbolCollector.scope_map.get(k) ); } );
-
-        Map<String, Scope> scope_map = symbolCollector.scope_map; 
-
         line_break();
         System.out.println( "String collector" );
         line_break();
 
         StringCollector str_collector = new StringCollector();
         ast.accept( str_collector );
-
-        Map<Print, StringNode> strings = str_collector.strings;
-
-        // for ( String s : strings.keySet() ) {
-        //     System.out.println( s + " -> " + strings.get( s ) );
-        // }
-
-
+        
 
         // [[ Type Checking ]]
 
@@ -476,7 +447,7 @@ public final class App {
 
 
         
-        AST_StackMachine generator = new AST_StackMachine( symbolCollector.functions, scope_map, strings );
+        AST_StackMachine generator = new AST_StackMachine();
         ast.accept(generator);
 
         line_break();
@@ -521,7 +492,7 @@ public final class App {
         System.out.println( "Passing instruction to CodeEmitter");
         line_break();
 
-        X86Emitter emitter = new X86Emitter( instructions, fbs, scope_map, strings );
+        X86Emitter emitter = new X86Emitter( instructions, fbs, (Root)ast );
 
         String asm_code = emitter.run();
         System.out.println( asm_code );

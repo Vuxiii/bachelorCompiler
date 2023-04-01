@@ -6,14 +6,19 @@ import java.util.Map;
 import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexLiteral;
 import com.vuxiii.compiler.Parser.Nodes.Print;
 import com.vuxiii.compiler.Parser.Nodes.PrintKind;
+import com.vuxiii.compiler.Parser.Nodes.Root;
 import com.vuxiii.compiler.VisitorPattern.Visitor;
 import com.vuxiii.compiler.VisitorPattern.Annotations.VisitOrder;
 import com.vuxiii.compiler.VisitorPattern.Annotations.VisitorPattern;
 
 public class StringCollector extends Visitor {
     
-    public Map<Print, StringNode> strings = new HashMap<>();
-    // public Map<String, StringNode> strings = new HashMap<>();
+    Root root;
+
+    @VisitorPattern( when = VisitOrder.ENTER_NODE )
+    public void init_root( Root root ) {
+        this.root = root;
+    }
 
     @VisitorPattern( when = VisitOrder.ENTER_NODE )
     public void string_collector( Print node ) {
@@ -23,7 +28,7 @@ public class StringCollector extends Visitor {
 
         System.out.println( "Found string: " + node );
 
-        strings.put( node, new StringNode( literal.val, node.arg_list.get() ) );
+        root.strings.put( node, new StringNode( literal.val, node.arg_list.get() ) );
 
     }
 }

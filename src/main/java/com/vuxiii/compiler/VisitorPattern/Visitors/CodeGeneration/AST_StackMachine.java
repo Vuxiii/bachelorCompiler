@@ -20,8 +20,10 @@ import com.vuxiii.compiler.Parser.Nodes.IfList;
 import com.vuxiii.compiler.Parser.Nodes.IfNode;
 import com.vuxiii.compiler.Parser.Nodes.Print;
 import com.vuxiii.compiler.Parser.Nodes.PrintKind;
+import com.vuxiii.compiler.Parser.Nodes.Root;
 import com.vuxiii.compiler.Parser.Nodes.Statement;
 import com.vuxiii.compiler.Parser.Nodes.StatementKind;
+import com.vuxiii.compiler.Parser.Nodes.SymbolNode;
 import com.vuxiii.compiler.Parser.Nodes.Types.FunctionType;
 import com.vuxiii.compiler.VisitorPattern.ASTNode;
 import com.vuxiii.compiler.VisitorPattern.Visitor;
@@ -32,8 +34,6 @@ import com.vuxiii.compiler.VisitorPattern.Visitors.SymbolCollection.Scope;
 
 public class AST_StackMachine extends Visitor {
     
-    private Map<String, Scope> scopes;
-
     public LinkedList<Instruction> code = new LinkedList<>();
 
     public Map<String, FunctionBlock> functions = new HashMap<>();
@@ -50,29 +50,7 @@ public class AST_StackMachine extends Visitor {
 
     private String end_of_body_label = "";
 
-    public AST_StackMachine( List<Assignment> functions, Map<String, Scope> scopes, Map<Print, StringNode> strings ) {
-        this.strings = strings;
-        this.scopes = scopes;
-        
-        for ( Assignment node : functions ) { 
-            current_scope = scopes.get( node.id.name );
-            function_assembler( node, scopes.get( node.id.name ) );
-        }
-
-        
-
-        // Make room for our main function's variables!
-
-        int total_variables_in_main = scopes.get("root").get_variables().size();
-        int total_offset = total_variables_in_main*8;
-
-        Operand left = new Operand( total_offset, AddressingMode.IMMEDIATE );
-        Operand right = new Operand( Register.RSP, AddressingMode.REGISER );
-        Arguments args = new Arguments( left, right, right );
-        Instruction ins = new Instruction( Opcode.MINUS, args, new Comment( "Making room for local variables in main scope!" ) );
-        
-        push( ins );
-    }
+    public AST_StackMachine() {}
 
     public AST_StackMachine( Scope scope, Map<Print, StringNode> strings ) {
         this.strings = strings;
@@ -84,8 +62,6 @@ public class AST_StackMachine extends Visitor {
         String label = function.id.name;
         FunctionBlock fb = new FunctionBlock( label );
 
-
-        
 
         fb.push( new Instruction( Opcode.LABEL, Arguments.from_label( label ) ) );
 
@@ -108,6 +84,29 @@ public class AST_StackMachine extends Visitor {
         functions.put( label, fb );
 
     }
+
+    @VisitorPattern( when = VisitOrder.ENTER_NODE )
+    public void init( Root root ) {
+        strings = root.strings;
+        // Initialize all the functions
+        for ( Assignment node : root.functions ) { 
+            current_scope = ((SymbolNode)node.parent.get()).scope;
+            function_assembler( node, current_scope );
+        }
+
+        // Make room for our main function's variables!
+
+        int total_variables_in_main = ((SymbolNode)root.node).scope.get_variables().size();
+        int total_offset = total_variables_in_main*8;
+
+        Operand left = new Operand( total_offset, AddressingMode.IMMEDIATE );
+        Operand right = new Operand( Register.RSP, AddressingMode.REGISER );
+        Arguments args = new Arguments( left, right, right );
+        Instruction ins = new Instruction( Opcode.MINUS, args, new Comment( "Making room for local variables in main scope!" ) );
+        
+        push( ins );
+
+    }   
 
     @VisitorPattern( when = VisitOrder.ENTER_NODE )
     public void literal( LexLiteral leaf_literal ) {

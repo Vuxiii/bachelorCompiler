@@ -2,6 +2,7 @@ package com.vuxiii.compiler.Parser.Nodes;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import com.vuxiii.LR.Records.Term;
 import com.vuxiii.compiler.VisitorPattern.ASTNode;
@@ -16,9 +17,10 @@ public class SymbolNode extends ASTNode {
     
     public final String scope_name;
     public final Scope scope;
-    public final Scope parent_scope;
 
-    public SymbolNode( Term term, ASTNode child, String name, Scope scope, Scope parent_scope ) {
+    public final Optional<SymbolNode> parent_scope;
+
+    public SymbolNode( Term term, ASTNode child, String name, Scope scope, Optional<SymbolNode> parent_scope ) {
         super(term);
         this.child = child;
         this.scope_name = name;
