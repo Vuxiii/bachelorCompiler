@@ -19,7 +19,7 @@ import com.vuxiii.compiler.VisitorPattern.Visitors.CodeGeneration.StringCollecti
 import com.vuxiii.compiler.VisitorPattern.Visitors.Debug.AST_Printer;
 import com.vuxiii.compiler.VisitorPattern.Visitors.SymbolCollection.AST_FixTypes;
 import com.vuxiii.compiler.VisitorPattern.Visitors.SymbolCollection.AST_SymbolCollector;
-import com.vuxiii.compiler.VisitorPattern.Visitors.SymbolCollection.AST_SymbolCollectorv2;
+import com.vuxiii.compiler.VisitorPattern.Visitors.SymbolCollection.AST_SymbolCollector;
 import com.vuxiii.compiler.VisitorPattern.Visitors.SymbolCollection.Scope;
 import com.vuxiii.compiler.VisitorPattern.Visitors.TreeCollaps.AST_Shrinker;
 import com.vuxiii.compiler.VisitorPattern.Visitors.TreeCollaps.AST_Shrinker_Statement;
@@ -420,7 +420,7 @@ public final class App {
         System.out.println( "Symbol collector" );
         line_break();
         
-        AST_SymbolCollectorv2 v2 = new AST_SymbolCollectorv2();
+        AST_SymbolCollector v2 = new AST_SymbolCollector();
         ast.accept(v2);
         
         printer = new AST_Printer();
