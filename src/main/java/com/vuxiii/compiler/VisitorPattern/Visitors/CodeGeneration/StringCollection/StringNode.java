@@ -24,9 +24,8 @@ public class StringNode {
         this.str_literal = str_literal;
         id = string_count++;
         name = "string" + id;
-        stop_name = name + "_stops";
-        substitute_name = name + "_subs";
-        System.out.println(str_literal + "#################");
+        stop_name = name + "stops";
+        substitute_name = name + "subs";
         
         // int actual_length = 0;
                 
@@ -55,6 +54,16 @@ public class StringNode {
         stop_indicators.add( count_length(str_literal.substring( 1, str_literal.length()-1 ) ) );
         System.out.println( stop_indicators );
     }
+    public StringNode( String str_literal ) {
+        this.str_literal = str_literal;
+        id = string_count++;
+        name = "string" + id;
+        stop_name = name + "stops";
+        substitute_name = name + "subs";
+        
+        stop_indicators.add( count_length(str_literal.substring( 1, str_literal.length()-1 ) ) );
+        System.out.println( stop_indicators );
+    }
 
     public int count_length( String s ) {
         int len = 0;
@@ -69,11 +78,12 @@ public class StringNode {
 
         return len;
     }
+
     public String toString() {
         String out  = "";
 
         out += "Name: " + name + "\n";
-        out += "\tLiteral: " + str_literal + "\n\tStop_Indicators: " + stop_indicators.toString() + "\n\tSubstitutes: " + substitutes.toString();
+        out += "\tLiteral: " + str_literal + "\n\tStop_Indicators: " + stop_indicators.toString() + "\n\tSubstitutes: " + substitutes.toString() + "\n";
 
         return out;
     }

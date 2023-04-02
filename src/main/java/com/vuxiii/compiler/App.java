@@ -33,6 +33,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.vuxiii.LR.Records.ASTToken;
+import com.vuxiii.LR.LRParser;
 import com.vuxiii.LR.Settings;
 
 /**
@@ -235,101 +236,11 @@ public final class App {
         } else if ( 5 + 50 ) {
             print( "Else if 2" );
         } else {
-            print( "Else" );
+            print( "Else %", 3 );
         };
-
-        """;
-        input = """
-        let first: int;
-        first = 7;
-        let second: int;
-        
-        print( " %\\n", 4 + 2 * first );
-        print( " %\\n", 2 * first + 4 );
-
-        print( " %\\n", 2 + 3 * first );
-        """;
-        input = """
-
-        let bas: boolean;
-        bas = false;
-        let a: int;
-
-        if ( true ) {
-            a = 1;
-        } else if (false) {
-            a = 2;
-        } else {
-            a = 3;
-        };
-
-        print( " %\\n", a );
-
-        if ( false ) {
-            a = 1;
-        } else if (true) {
-            a = 2;
-        } else {
-            a = 3;
-        };
-
-        print( " %\\n", a );
-
-        if ( false ) {
-            a = 1;
-        } else if (false) {
-            a = 2;
-        } else {
-            a = 3;
-        };
-
-        print( " %\\n", a );
         """;
 
-        input = """
-        let a: (c:int) -> int;
-        a = (c: int) -> int {
-            let b: (d:int) -> int;
-            b = (d:int) -> int {
-                print( " %\\n", d );
-            };
-            b(c);
-            print( " %\\n", 3 );
-        };
 
-        let first: int;
-        first = 7;
-        a(first);
-        """;
-
-        input = """
-        let a: (c:int) -> int;
-        a = (b: int) -> int {
-            let c: (d:int) -> int;
-            c = (d: int) -> int {
-                return d + 7;
-            };
-            return c(b) + 2;
-        };
-
-        let first: int;
-        first = 7;
-        print( " %\\n", a(first) );
-        """;
-        input = """
-        let a: int;
-        a = 42;
-        let b: int;
-        b = 69;
-        let f1: (param: int) -> int;
-        f1 = (param: int) -> int {
-            return 10 + param;
-        };
-        a = f1(4242);
-
-        print( " %\\n", a );
-
-        """;
         
 
         System.out.println( input );
@@ -349,8 +260,6 @@ public final class App {
         // [[ Parser ]]
         
         ASTNode ast = Parser.getAST( tokens );
-
-
 
         System.out.println( ast );
         
@@ -432,6 +341,7 @@ public final class App {
         StringCollector str_collector = new StringCollector();
         ast.accept( str_collector );
         
+        
 
         // [[ Type Checking ]]
 
@@ -453,7 +363,7 @@ public final class App {
 
 
         List<Instruction> instructions = generator.code;
-        Map<String, FunctionBlock> fbs = generator.functions;
+        Map<String, FunctionBlock> fbs = AST_StackMachine.functions;
 
 
         System.out.println( "[[ Functions ]]" );
@@ -505,11 +415,53 @@ public final class App {
 
     }
 
+    public static void reset_compiler() {
+        LRParser.reset();
+    }
+
     private static void line_break() {
         System.out.println( "=".repeat(79) );
     }
 
-    private static void save_to_file( String asm_location, String filename, String body ) {
+    public static String runWithInput( String input ) {
+        Settings.showParsingSteps = false;
+        Settings.showGrammar = false;
+        Settings.showParsingTable = false;
+
+
+        List<ASTToken> tokens = Lexer.lex( input );
+
+        ASTNode ast = Parser.getAST( tokens );
+
+        AST_Shrinker cleaner = new AST_Shrinker();
+        ast.accept( cleaner );
+        
+        AST_Setup_Parents setup_parents = new AST_Setup_Parents();
+        ast.accept(setup_parents);
+        
+        AST_FixTypes type_fixer = new AST_FixTypes();
+        ast.accept( type_fixer );
+        
+        AST_SymbolCollector v2 = new AST_SymbolCollector();
+        ast.accept(v2);
+
+        StringCollector str_collector = new StringCollector();
+        ast.accept( str_collector );
+        
+        AST_StackMachine generator = new AST_StackMachine();
+        ast.accept(generator);
+
+        List<Instruction> instructions = generator.code;
+        Map<String, FunctionBlock> fbs = AST_StackMachine.functions;
+
+        X86Emitter emitter = new X86Emitter( instructions, fbs, (Root)ast );
+
+        String asm_code = emitter.run();
+
+        return asm_code;
+    } 
+
+    public static void save_to_file( String asm_location, String filename, String body ) {
         try {
             FileWriter fw = new FileWriter( asm_location + filename );
             fw.write( body );

@@ -16,7 +16,7 @@ public class Print extends ASTNode {
     public Print( Term term, ASTNode value) {
         super( term ); 
         this.value = value;
-        this.kind = PrintKind.NORMAL;
+        this.kind = PrintKind.STRING;
         super.setup_ASTNodeQueue();
     }
     public Print( Term term, ASTNode string_literal, Argument args ) {

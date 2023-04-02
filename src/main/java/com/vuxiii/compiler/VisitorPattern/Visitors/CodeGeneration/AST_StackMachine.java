@@ -30,16 +30,20 @@ import com.vuxiii.compiler.VisitorPattern.Visitor;
 import com.vuxiii.compiler.VisitorPattern.Annotations.VisitOrder;
 import com.vuxiii.compiler.VisitorPattern.Annotations.VisitorPattern;
 import com.vuxiii.compiler.VisitorPattern.Visitors.CodeGeneration.StringCollection.StringNode;
+import com.vuxiii.compiler.VisitorPattern.Visitors.Debug.AST_Printer;
 import com.vuxiii.compiler.VisitorPattern.Visitors.SymbolCollection.AST_SymbolCollector;
 import com.vuxiii.compiler.VisitorPattern.Visitors.SymbolCollection.Scope;
 
 public class AST_StackMachine extends Visitor {
     
+    boolean has_been_computed = false;
+
+
     public LinkedList<Instruction> code = new LinkedList<>();
 
-    public Map<String, FunctionBlock> functions = new HashMap<>();
+    static public Map<String, FunctionBlock> functions = new HashMap<>();
 
-    public Map<Print, StringNode> strings;
+    static public Map<Print, StringNode> strings;
 
     private int function_depth = 0;
 
@@ -53,26 +57,29 @@ public class AST_StackMachine extends Visitor {
 
     public AST_StackMachine() {}
 
-    public AST_StackMachine( Scope scope, Map<Print, StringNode> strings ) {
-        this.strings = strings;
+    private AST_StackMachine( Scope scope  ) {
         this.parameters = scope.get_parameters();
         this.current_scope = scope;
     }
 
-    private void function_assembler( Assignment function, Scope current_scope ) {
+    private void function_assembler( Assignment function ) {
         String label = function.id.name;
-        FunctionBlock fb = new FunctionBlock( label );
+        FunctionBlock fb = functions.get( label );
+
+        current_scope = ((SymbolNode)function.parent.get()).scope;
 
 
         fb.push( new Instruction( Opcode.LABEL, Arguments.from_label( label ) ) );
 
-        if ( ((FunctionType)function.value).return_type.isPresent() ) {
-            FunctionType func = (FunctionType)function.value;
-            push( new Instruction( Opcode.MINUS, new Arguments( 
-                                    Operand.from_int(func.return_type.get().physical_size(), AddressingMode.IMMEDIATE),
-                                    Operand.from_register(Register.RSP, AddressingMode.REGISER),
-                                    Operand.from_register(Register.RSP, AddressingMode.REGISER) ) ) );
-        }
+        // if ( ((FunctionType)function.value).return_type.isPresent() ) {
+            // FunctionType func = (FunctionType)function.value;
+            // fb.push_comment( "Ensuring space for return value" );
+            // fb.push( new Instruction( Opcode.MINUS, new Arguments( 
+            //                         Operand.from_int(func.return_type.get().physical_size(), AddressingMode.IMMEDIATE),
+            //                         Operand.from_register(Register.RSP, AddressingMode.REGISER),
+            //                         Operand.from_register(Register.RSP, AddressingMode.REGISER) ) ) );
+            // fb.push_comment( "Done" );
+        // }
 
         fb.push( new Instruction( Opcode.SETUP_STACK ) );
 
@@ -80,8 +87,11 @@ public class AST_StackMachine extends Visitor {
 
         System.out.println( parameters );
 
-
-        AST_StackMachine stackMachine = new AST_StackMachine( current_scope, strings ); // Insert internal functions here.
+        if ( strings == null ) {
+            System.out.println( "WTYARTYSF" );
+            System.exit(-1);
+        }
+        AST_StackMachine stackMachine = new AST_StackMachine( current_scope ); // Insert internal functions here.
 
         function.value.accept( stackMachine );
 
@@ -90,17 +100,26 @@ public class AST_StackMachine extends Visitor {
         fb.push( new Instruction( Opcode.RESTORE_STACK ) );
         fb.push( new Instruction( Opcode.RETURN ) );
 
-        functions.put( label, fb );
 
     }
 
     @VisitorPattern( when = VisitOrder.ENTER_NODE )
     public void init( Root root ) {
         strings = root.strings;
+        if ( strings == null ) {
+            System.out.println( "WTF" );
+            System.exit(-1);
+        }
         // Initialize all the functions
-        for ( Assignment node : root.functions ) { 
-            current_scope = ((SymbolNode)node.parent.get()).scope;
-            function_assembler( node, current_scope );
+
+        for ( Assignment func : root.functions ) { 
+            String label = func.id.name;
+            FunctionBlock fb = new FunctionBlock( label, func );
+            functions.put( label, fb );
+        }
+
+        for ( Assignment func : root.functions ) { 
+            function_assembler( func );
         }
 
         // Make room for our main function's variables!
@@ -117,20 +136,17 @@ public class AST_StackMachine extends Visitor {
 
     }   
 
-    @VisitorPattern( when = VisitOrder.EXIT_NODE ) 
+    @VisitorPattern( when = VisitOrder.EXIT_NODE, order = 1 ) 
     public void add_return( Statement ret ) {
-        if ( ret.kind != StatementKind.RETURN ) return;
+        if ( ret.kind.equals(StatementKind.RETURN) == false ) return;
+        System.out.println( "depth " + function_depth );
+        if ( function_depth != 0 ) return;
 
-        Scope scope = AST_SymbolCollector.current_scope(ret);
+        AST_Printer prins = new AST_Printer();
+        ret.accept( prins );
+        System.out.println( prins.get_ascii() ); 
 
-        Operand target = Operand.from_register( Register.RBP, AddressingMode.DIRECT_OFFSET);
-        target.offset = scope.get_parameters().size() + 1;
-
-        push( new Instruction( Opcode.POP, Arguments.from_register( Register.RBX ) ) );
-        push( new Instruction( Opcode.MOVE, new Arguments( 
-                                Operand.from_register( Register.RBX, AddressingMode.REGISER), 
-                                target), new Comment( "Storing computed value into return spot" ) ) );
-
+        push( new Instruction( Opcode.POP, Arguments.from_register( Register.RAX ) ) );
     }
 
     @VisitorPattern( when = VisitOrder.ENTER_NODE )
@@ -144,6 +160,8 @@ public class AST_StackMachine extends Visitor {
 
     @VisitorPattern( when = VisitOrder.AFTER_CHILD )
     public void if_list_insert_jumps( IfList if_list ) {
+        System.out.println( "IN IF LIST AFTER CHILD!!!!!!");
+        if ( function_depth != 0 ) return;
         push( new Instruction( Opcode.JUMP, Arguments.from_label( if_list.end_of_ifs ) ) );
         if ( end_of_body_label.length() == 0 ) return;
         push( new Instruction( Opcode.LABEL, Arguments.from_label( end_of_body_label ) ) );
@@ -152,16 +170,19 @@ public class AST_StackMachine extends Visitor {
 
     @VisitorPattern( when = VisitOrder.EXIT_NODE )
     public void if_list_insert_label( IfList if_list ) {
+        if ( function_depth != 0 ) return;
         push( new Instruction( Opcode.LABEL, Arguments.from_label( if_list.end_of_ifs ) ) );
     }
 
     @VisitorPattern( when = VisitOrder.ENTER_NODE )
     public void if_statement( IfNode if_node ) {
+        if ( function_depth != 0 ) return;
         if_state = IfState.ENTER_GUARD;
     }
     
     @VisitorPattern( when = VisitOrder.BEFORE_CHILD )
     public void if_statement_before_child( IfNode if_node ) {
+        if ( function_depth != 0 ) return;
         switch (if_state) {
             case ENTER_BODY: {
 
@@ -184,6 +205,7 @@ public class AST_StackMachine extends Visitor {
     
     @VisitorPattern( when = VisitOrder.AFTER_CHILD )
     public void if_statement_after_child( IfNode if_node ) {
+        if ( function_depth != 0 ) return;
         switch (if_state) {
             case ENTER_BODY: {
                 push( new Instruction( Opcode.JUMP, Arguments.from_label( if_node.end_of_body ) ) );
@@ -208,12 +230,13 @@ public class AST_StackMachine extends Visitor {
 
     @VisitorPattern( when = VisitOrder.ENTER_NODE )
     public void if_guard_enter( Expression guard ) {
+        if ( function_depth != 0 ) return;
         if ( if_state != IfState.ENTER_GUARD ) return; // Ensure that we actually are in an if block
 
         if ( guard.node instanceof LexIdent ) {
             // Load the value
             LexIdent id = (LexIdent)guard.node;
-            _load_var(id, new Operand( Register.RAX, AddressingMode.REGISER ) );
+           push( _load_var(id, new Operand( Register.RAX, AddressingMode.REGISER ) ) );
         } else if ( guard.node instanceof LexLiteral ) {
             // Load the literal
             LexLiteral lit = (LexLiteral)guard.node;
@@ -224,13 +247,15 @@ public class AST_StackMachine extends Visitor {
 
     @VisitorPattern( when = VisitOrder.EXIT_NODE )
     public void if_guard_leave( Expression guard ) {
+        if ( function_depth != 0 ) return;
         if ( if_state != IfState.ENTER_GUARD) return;
 
         push( new Instruction( Opcode.COMPARE, Arguments.compare( Register.RAX, 1 ) ) );
     }
 
-    @VisitorPattern( when = VisitOrder.EXIT_NODE )
+    @VisitorPattern( when = VisitOrder.EXIT_NODE, order = 2 )
     public void if_body_leave( Statement body ) {
+        if ( function_depth != 0 ) return;
         if ( if_state != IfState.ENTER_BODY) return;
 
         if_state = IfState.EXIT_BODY;
@@ -241,9 +266,9 @@ public class AST_StackMachine extends Visitor {
         if ( function_depth != 0 ) return;
         
 
-        if ( arg.node instanceof LexIdent ) {
+        if ( arg.node instanceof Expression && ((Expression)arg.node).node instanceof LexIdent ) {
 
-            _load_var((LexIdent)arg.node, new Operand( Register.RAX, AddressingMode.REGISER ) );
+            push( _load_var((LexIdent)((Expression)arg.node).node, new Operand( Register.RAX, AddressingMode.REGISER ) ) );
             push( new Instruction( Opcode.PUSH, Arguments.from_register( Register.RAX ) ) );
         }
     }
@@ -252,15 +277,19 @@ public class AST_StackMachine extends Visitor {
     public void function_call( FunctionCall call ) {
         if ( function_depth != 0 ) return; // Wtf
 
-        push( new Instruction( Opcode.CALL, Arguments.from_label( call.func_name.name ), new Comment( "Calling function " + call.func_name.name ) ) );
-
-    }
-
-    @VisitorPattern( when = VisitOrder.EXIT_NODE )
-    public void function_return( Statement return_node ) {
-        if ( return_node.kind != StatementKind.RETURN ) return;
-
         
+        String func_name = call.func_name.name;
+        System.out.println( func_name );
+        System.out.println( functions );
+        Assignment func = functions.get( func_name ).function;
+
+        push( new Instruction( Opcode.CALL, Arguments.from_label( func_name ), new Comment( "Calling function " + func_name ) ) );
+
+        // Slå functionen op. Maybe it might be bigger in size.
+        if ( ((FunctionType)func.value).return_type.isPresent() ) {
+            push( new Instruction( Opcode.PUSH, Arguments.from_register( Register.RAX ) ) );
+        }
+
 
     }
 
@@ -269,12 +298,12 @@ public class AST_StackMachine extends Visitor {
         if ( function_depth != 0 ) return;
         
         if ( binop.right.isLeaf() && binop.right instanceof LexIdent ) {
-            _load_var( (LexIdent)binop.right, new Operand( Register.RCX, AddressingMode.REGISER ) );
+            push( _load_var( (LexIdent)binop.right, new Operand( Register.RCX, AddressingMode.REGISER ) ) );
         } else {
             push( new Instruction( Opcode.POP, Arguments.from_register( Register.RCX ), new Comment( "Retrieving second argument" ) ) );
         }
         if ( binop.left.isLeaf() && binop.left instanceof LexIdent ) {
-            _load_var( (LexIdent)binop.left, new Operand( Register.RBX, AddressingMode.REGISER ) );
+            push( _load_var( (LexIdent)binop.left, new Operand( Register.RBX, AddressingMode.REGISER ) ) );
         } else
             push( new Instruction( Opcode.POP, Arguments.from_register( Register.RBX ), new Comment( "Retrieving first argument" ) ) );
         
@@ -363,7 +392,7 @@ public class AST_StackMachine extends Visitor {
 
         push( new Instruction( Opcode.COMMENT, Arguments.from_label( "Setup Print" ) ) );
                                 // Make some fancy string stuff.
-        if ( print_node.kind == PrintKind.NORMAL ) {
+        if ( print_node.kind == PrintKind.STRING ) {
             push( new Instruction( Opcode.POP, 
                                     Arguments.from_register( Register.RDI ), 
                                     new Comment( "Fetching value " + print_node.value ) ) );
@@ -373,6 +402,7 @@ public class AST_StackMachine extends Visitor {
             // Do the fancy things
             // Fetch the String -> rdi
             // String str_literal = ((LexLiteral)print_node.value).matchInfo.str();
+            System.out.println( strings );
             StringNode str_node = strings.get( print_node );
             Operand string_operand = new Operand( str_node.name, AddressingMode.IMMEDIATE );
             Operand string_target = new Operand( Register.RDI, AddressingMode.REGISER );
@@ -461,14 +491,14 @@ public class AST_StackMachine extends Visitor {
      * This method loads the given variable
      * @param id
      */
-    private void _load_var( LexIdent id, Operand target ) {
+    private Instruction _load_var( LexIdent id, Operand target ) {
         String var_name = id.name;
         Operand var = new Operand( var_name, AddressingMode.IMMEDIATE );
         boolean target_is_parameter = current_scope.get_parameters().contains( var_name );
-        push( new Instruction( Opcode.LOAD_VARIABLE, 
+        return new Instruction( Opcode.LOAD_VARIABLE, 
                                 new Arguments( var, target, target ), 
                                 new Comment( "Load variable " + var_name ),
-                                target_is_parameter ) );
+                                target_is_parameter );
     }
 
 

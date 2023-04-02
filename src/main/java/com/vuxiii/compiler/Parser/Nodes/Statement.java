@@ -38,7 +38,7 @@ public class Statement extends ASTNode {
 
     @Override
     public String getPrintableName() {
-        return (next.isEmpty()  ? ( kind == StatementKind.RETURN ? "Return Statement" : "Statement" ) 
+        return (next.isEmpty()  ? ( kind == StatementKind.RETURN ? "Return Statement" : "Statement " + kind ) 
                                 : "Statement_List");
     }
     

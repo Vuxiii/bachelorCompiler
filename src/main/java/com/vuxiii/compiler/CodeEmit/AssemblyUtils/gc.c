@@ -345,6 +345,30 @@ void print_block( size_t *scope_layout, size_t *stack, size_t amount_of_tabs ) {
     } while( 1 + scope_layout + j != end_of_header );
 }
 
+/**
+ * @param buffer %rdi The buffer to print
+ * @param offsets %rdx The offset in the buffer where the substitutes are located
+ * @param subs %rsi What to substitute with
+ * @param num_of_subs %rcx The number of substitutes
+ * !TODO: Possibly add a layout pointer, such that we get this print for free
+ */
+void print_subs( char *buffer, long *offsets, char *subs, long num_of_subs ) {
+    int curr = 0;
+    int offset_into_buffer = 0;
+    while ( curr < num_of_subs ) {
+        long first_n = offsets[curr] - (curr > 0 ? offsets[curr-1] : 0);
+        char *to_write = buffer + offset_into_buffer;
+        char *sub = subs;
+
+        printf( "%.*s%s", first_n, to_write, sub );
+        
+        ++offset_into_buffer; // Skip %
+        ++curr; // Advance to next sub.
+        offset_into_buffer += first_n;
+        subs += strlen(subs) + 1;
+    }
+}
+
 void print_scopes() {
     printf( "Amount of scopes: %ld\n", scope_offset );
     for ( size_t i = 0; i < scope_offset; ++i ) {

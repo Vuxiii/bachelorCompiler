@@ -19,7 +19,7 @@ public class Lexer {
             List<ASTToken> li = lexer.match( input );
             li.add( new TokenEOP( Symbol.t_Dollar ) );
 
-            return li;    
+            return li;
         } catch ( ParserException e ) {
             e.printStackTrace();
             System.out.println( new com.vuxiii.compiler.Error.Error( "Lexer Error", "Couldn't parse the input for some reason.\nThis is a mistake made by the developer of this compiler!" ).toString() );

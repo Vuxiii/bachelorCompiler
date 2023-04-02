@@ -67,7 +67,7 @@ public class X86Emitter {
 
     private void file_header() {
         
-        push_no_offset( ".section .data" );
+        // push_no_offset( ".section .data" );
         push_no_offset( ".section .text" );
         push_no_offset( ".global main" );
         push_no_offset( "main:" );
