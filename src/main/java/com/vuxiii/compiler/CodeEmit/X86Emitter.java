@@ -8,8 +8,11 @@ import java.util.Set;
 
 import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexIdent;
 import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexLiteral;
+import com.vuxiii.compiler.Parser.Nodes.Argument;
+import com.vuxiii.compiler.Parser.Nodes.Expression;
 import com.vuxiii.compiler.Parser.Nodes.Print;
 import com.vuxiii.compiler.Parser.Nodes.Root;
+import com.vuxiii.compiler.VisitorPattern.ASTNode;
 import com.vuxiii.compiler.VisitorPattern.Annotations.VisitOrder;
 import com.vuxiii.compiler.VisitorPattern.Annotations.VisitorPattern;
 import com.vuxiii.compiler.VisitorPattern.Visitors.CodeGeneration.AddressingMode;
@@ -93,8 +96,20 @@ public class X86Emitter {
         for ( Print print_node : string_buffers.keySet() ) {
             StringNode node = string_buffers.get( print_node );
             push_no_offset( node.name + ": .ascii " + node.str_literal );
-            push_no_offset( node.stop_name + ": .space " +  node.stop_indicators.size() * 8 );
-            push_no_offset( node.substitute_name + ": .space " +  node.substitutes.size() * 8 );
+            if (  node.substitutes.size() > 0 ) {
+                String subs = "";
+                for ( ASTNode n : node.substitutes ) {
+                    Expression exp = (Expression)n;
+
+                    if ( exp.node instanceof LexLiteral ) {
+                        LexLiteral id = (LexLiteral)exp.node;
+
+                        subs += id.val.substring(1, id.val.length()-1 ) + "\\0";
+                    } // else if ( n instanceof LexIdent )
+                }
+                push_no_offset( node.substitute_name + ": .ascii \"" + subs + '"' );
+            }
+            // push_no_offset( node.stop_name + ": .space " +  node.stop_indicators.size() * 8 );
         }
         
         push_no_offset( ".section .text" );
@@ -247,7 +262,13 @@ public class X86Emitter {
                     push_code( "leaq " + fst + ", " + snd );
                 } break;
                 case PRINT: {                    
-                    push_code( "call printStringWithReplace" );
+                    push_code( "call print_subs" );
+                } break;
+                case PRINT_STRING: {
+                    push_code( "call print_string" );
+                } break;
+                case PRINT_NUM: {
+                    push_code( "call print_num" );
                 } break;
                 case COMMENT: {
                     push_no_offset( "" );

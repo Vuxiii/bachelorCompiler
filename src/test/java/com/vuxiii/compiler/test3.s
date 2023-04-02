@@ -1,13 +1,13 @@
 .section .data
-string1: .ascii " %\n"
-string1_stops: .space 16
-string1_subs: .space 8
-string0: .ascii " %\n"
-string0_stops: .space 16
-string0_subs: .space 8
-string2: .ascii " %\n"
-string2_stops: .space 16
-string2_subs: .space 8
+string0: .ascii "Number 1 is: %\n"
+string0subs: .ascii ""
+string0stops: .space 16
+string1: .ascii "Number 2 is: %\n"
+string1subs: .ascii ""
+string1stops: .space 16
+string2: .ascii "Number 3 is: %\n"
+string2subs: .ascii ""
+string2stops: .space 16
 .section .text
 .section .text
 .global main
@@ -44,14 +44,17 @@ main:
 # Setup Print
 
     movq $string0, %rdi
-    leaq string0_stops, %rsi
-    movq $1, (%rsi)
-    movq $3, 8(%rsi)
-    leaq string0_subs, %rdx
-    popq %rax
-    movq %rax, (%rdx)
-    movq $1, %rcx
-    call printStringWithReplace
+    movq $13, %rsi
+    movq $0, %rdx
+    call print_string
+    movq (%rsp), %rdi
+    call print_num
+    movq $string0, %rdi
+    movq $1, %rsi
+    movq $14, %rdx
+    call print_string
+    addq $8, %rsp
+    movq %rsp, %rsp
 
 # End Print
 
@@ -76,14 +79,17 @@ main:
 # Setup Print
 
     movq $string1, %rdi
-    leaq string1_stops, %rsi
-    movq $1, (%rsi)
-    movq $3, 8(%rsi)
-    leaq string1_subs, %rdx
-    popq %rax
-    movq %rax, (%rdx)
-    movq $1, %rcx
-    call printStringWithReplace
+    movq $13, %rsi
+    movq $0, %rdx
+    call print_string
+    movq (%rsp), %rdi
+    call print_num
+    movq $string1, %rdi
+    movq $1, %rsi
+    movq $14, %rdx
+    call print_string
+    addq $8, %rsp
+    movq %rsp, %rsp
 
 # End Print
 
@@ -108,14 +114,17 @@ main:
 # Setup Print
 
     movq $string2, %rdi
-    leaq string2_stops, %rsi
-    movq $1, (%rsi)
-    movq $3, 8(%rsi)
-    leaq string2_subs, %rdx
-    popq %rax
-    movq %rax, (%rdx)
-    movq $1, %rcx
-    call printStringWithReplace
+    movq $13, %rsi
+    movq $0, %rdx
+    call print_string
+    movq (%rsp), %rdi
+    call print_num
+    movq $string2, %rdi
+    movq $1, %rsi
+    movq $14, %rdx
+    call print_string
+    addq $8, %rsp
+    movq %rsp, %rsp
 
 # End Print
 

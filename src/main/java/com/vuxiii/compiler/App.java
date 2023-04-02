@@ -83,24 +83,6 @@ public final class App {
             }
             print(a);
             """;
-        // input = """
-        //     b = 1.0;
-        //     c = 5.;
-        //     a = 3 + b * (10 / 5);
-        //     b = 10 + a;
-        //     print( a );
-        //     print( b );
-        //     print( 45 );
-        //     """;
-        // input = """
-        //     b = 1;
-        //     a = 3 + 5 * (10 / 5);
-        //     b = 10 + a;
-        //     print( a );
-        //     print( b );
-        //     print( 45 );
-        //     """;
-        // Capture example.
         input = """
             let a: int;
             a = 3;
@@ -137,9 +119,8 @@ public final class App {
             let a: my_func;
             let b: second;
 
-            a = () {
+            a = () -> void
                 print( 2 );
-            };
 
             b = ( z: int ) -> int {
                 print( z + 3 );
@@ -149,99 +130,19 @@ public final class App {
             b(3);
 
         """;
-        input = """
-            type functype: (x: int) -> int;
-            let a: ( z: int ) -> int;
-            let b: functype;
 
-            a = ( z: int ) -> int {
-                let inner_var: int;
-                inner_var = 2;
-                print( inner_var + z );
-            };
+        input = """
+            type my_func: ();
+            let a: my_func;
+            
         """;
         input = """
-            let a: int;
-            a = 3;
-            let my_function: ( x: int ) -> int;
-            let b: int;
-
-            b = 2;
-
-            my_function = ( x: int ) -> int {
-                let inner_var: int;
-                inner_var = 3;
-                print( x );
-            };
-
-            let my_second_function: ( x: int, b: int ) -> int;
-            my_second_function = (x: int, b: int) -> int {
-                let inner_fn: ( z: int ) -> int;
-                inner_fn = ( z: int ) -> int {
-                    let inner_fn_var: int;
-                    print( z );
-                };
-                print(x+b);
-            };
-
-            my_second_function( 2, 7 );
+            print("asd");
+            if ( 1 ) {
+                print( "Yay" );
+            }
+            print("asd");
         """;
-        input = """
-
-            let b: int;
-            b = 4;
-
-            print( b * 2 + 4);
-
-        """;
-        input = """
-        let first: int;
-        first = 5;
-        let third: int;
-        third = 2 * first;
-
-        let second: int;
-        second = 20;
-        print( first + second * third );
-
-        
-
-        """;
-        input = """
-        if ( 4 + 4 ) {
-            print( "If" );
-        } 
-
-        if ( 4 + 4 ) {
-            print( "If" );
-        } else {
-            print( "Else" );
-        };
-
-        if ( 4 + 4 ) {
-            print( "If" );
-        } else if ( 5 + 5 ) {
-            print( "Else if " );
-        } else {
-            print( "Else" );
-        };
-
-        """;
-        input = """
-
-        if ( 4 + 4 ) {
-            print( "If" );
-        } else if ( 5 + 5 ) {
-            print( "Else if 1" );
-        } else if ( 5 + 50 ) {
-            print( "Else if 2" );
-        } else {
-            print( "Else %", 3 );
-        };
-        """;
-
-
-        
 
         System.out.println( input );
 
@@ -256,7 +157,7 @@ public final class App {
         line_break();
 
         Settings.showGrammar = true;
-        Settings.showParsingTable = false;
+        Settings.showParsingTable = true;
         // [[ Parser ]]
         
         ASTNode ast = Parser.getAST( tokens );

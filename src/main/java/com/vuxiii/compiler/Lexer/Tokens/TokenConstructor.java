@@ -37,7 +37,7 @@ public class TokenConstructor {
             case INT_LITERAL: case DOUBLE_LITERAL: case BOOL_LITERAL: case STRING_LITERAL: {
                 return new LexLiteral( matchInfo, type );
             }
-            case TYPE_INT: case TYPE_DOUBLE: case TYPE_BOOL: case TYPE_STRING: {
+            case TYPE_INT: case TYPE_DOUBLE: case TYPE_BOOL: case TYPE_STRING: case TYPE_VOID: {
                 return new LexType( matchInfo, type );
             }
             case LEFT_PARENTHESIS: {

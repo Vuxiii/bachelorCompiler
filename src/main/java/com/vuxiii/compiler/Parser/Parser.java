@@ -103,12 +103,13 @@ public class Parser {
         g = new Grammar();
         
         // n_Start -> n_StatementList t_Dollar
-        g.addRuleWithReduceFunction( Symbol.n_Start, List.of( Symbol.n_StatementList, Symbol.t_Dollar ), t -> {
+        g.addRuleWithReduceFunction( Symbol.n_Start, List.of( Symbol.n_Statement, Symbol.t_Dollar ), t -> {
             return t.get(0);
-        });        
-
+        });
+        
         // n_StatementList -> n_StatementList n_Statement
         g.addRuleWithReduceFunction( Symbol.n_StatementList, List.of( Symbol.n_Statement, Symbol.n_StatementList ), t -> {
+            System.out.println( "IM IN LIST" );
             Statement stm1 = (Statement)t.get(0);
             Statement stm2 = (Statement)t.get(1);
             return new Statement( Symbol.n_StatementList, stm1.node, stm2, stm1.kind );
@@ -116,6 +117,7 @@ public class Parser {
 
         // n_StatementList -> n_Statement
         g.addRuleWithReduceFunction( Symbol.n_StatementList, List.of( Symbol.n_Statement ), t -> {
+            System.out.println( "IM IN SINGLE" );
             Statement stm1 = (Statement)t.get(0);
             return new Statement( Symbol.n_StatementList, stm1.node, stm1.kind );
         });
@@ -126,14 +128,6 @@ public class Parser {
         g.addRuleWithReduceFunction( Symbol.n_Statement, List.of( Symbol.n_Declaration, Symbol.t_Semicolon ), t -> {
             return new Statement( Symbol.n_Statement, (Declaration)t.get(0), StatementKind.DECLARATION );
         });
-
-        // n_Declaration -> n_Declaration_Function 
-        g.addRuleWithReduceFunction( Symbol.n_Declaration, List.of( Symbol.n_Declaration_Function ), t -> {
-            Declaration decl = (Declaration)t.get(0);
-            decl.term = Symbol.n_Declaration;
-            return decl;
-        });
-
 
         // n_Declaration -> n_Declaration_Variable
         g.addRuleWithReduceFunction( Symbol.n_Declaration, List.of( Symbol.n_Declaration_Variable ), t -> {
@@ -149,7 +143,6 @@ public class Parser {
             return decl;
         });
 
-        
         // n_Statement -> n_Assignment t_Semicolon
         g.addRuleWithReduceFunction( Symbol.n_Statement, List.of( Symbol.n_Assignment, Symbol.t_Semicolon ), t -> {
             return new Statement( Symbol.n_Statement, (ASTNode)t.get(0), StatementKind.ASSIGNMENT );
@@ -161,11 +154,6 @@ public class Parser {
         });
 
 
-        
-
-
-
-
         init_scope_capture();
 
         init_functions();
@@ -174,11 +162,6 @@ public class Parser {
         init_arithmetic();
 
         init_types();
-
-        
-
-
-        
 
         // n_Declaration_Variable -> t_Let t_Identifier t_Colon n_User_Type
         g.addRuleWithReduceFunction( Symbol.n_Declaration_Variable, List.of( Symbol.t_Let, Symbol.t_Identifier, Symbol.t_Colon, Symbol.n_Any_Type ), t -> {
@@ -243,13 +226,6 @@ public class Parser {
         g.addRuleWithReduceFunction( Symbol.n_Assignment, List.of( Symbol.t_Identifier, Symbol.t_Equals, Symbol.n_Expression ), t -> {
             return new Assignment( Symbol.n_Assignment, (LexIdent)t.get(0), (ASTNode)t.get(2)  );
         });
-        
-
-        // This is included in the above!
-        // // n_Assignment -> t_Identifier t_Equals n_Literal
-        // g.addRuleWithReduceFunction( Symbol.n_Assignment, List.of( Symbol.t_Identifier, Symbol.t_Equals, Symbol.n_Literal ), t -> {
-        //     return new Assignment( Symbol.n_Assignment, (LexIdent)t.get(0), (ASTNode)t.get(2)  );
-        // });
 
         // n_Assignment -> t_Identifier t_Equals n_Assignment_Function
         g.addRuleWithReduceFunction( Symbol.n_Assignment, List.of( Symbol.t_Identifier, Symbol.t_Equals, Symbol.n_Assignment_Function ), t -> {
@@ -266,18 +242,13 @@ public class Parser {
             return new Print( Symbol.n_Print, (ASTNode)t.get(2), (Argument)t.get(4) );
         });
 
-        // This is included in expression -> Literal -> string_literal
-        // // n_Print -> t_Print t_LParen t_StringLiteral t_RParen
-        // g.addRuleWithReduceFunction( Symbol.n_Print, List.of( Symbol.t_Print, Symbol.t_LParen, Symbol.t_StringLiteral, Symbol.t_RParen ), t -> {
-        //     return new Print( Symbol.n_Print, (ASTNode)t.get(2) );
-        // });
         
     }
 
     private static void init_if_statements() {
 
-        // n_Statement -> n_If_Blocks
-        g.addRuleWithReduceFunction( Symbol.n_Statement, List.of( Symbol.n_If_Blocks, Symbol.t_Semicolon ), t -> {
+        // n_Statement -> n_If_Blocks t_Semicolon
+        g.addRuleWithReduceFunction( Symbol.n_Statement, List.of( Symbol.n_If_Blocks ), t -> {
             Statement iff = (Statement)t.get(0);
             iff.term = Symbol.n_Statement;
             return iff;
@@ -289,15 +260,6 @@ public class Parser {
             IfNode iff = (IfNode)t.get(0);
             return new Statement( Symbol.n_If_Blocks, iff, StatementKind.IF );
         });
-
-        // n_If_Blocks -> n_If n_Else
-        // g.addRuleWithReduceFunction( Symbol.n_If_Blocks, List.of( Symbol.n_If, Symbol.n_Else ), t -> {
-        //     IfNode if_block = (IfNode)t.get(0);
-        //     ElseNode else_block = (ElseNode)t.get(1);
-        //     IfElseNode if_else = new IfElseNode( Symbol.t_If, if_block, else_block );
-
-        //     return new Statement( Symbol.n_If_Blocks, if_else, StatementKind.IF_ELSE );
-        // });
 
         // n_If_Blocks -> n_If n_Elif
         g.addRuleWithReduceFunction( Symbol.n_If_Blocks, List.of( Symbol.n_If, Symbol.n_Elif ), t -> {
@@ -319,32 +281,16 @@ public class Parser {
             return else_block;
         });
 
-        // n_Elif -> t_Else n_If
-        g.addRuleWithReduceFunction( Symbol.n_Elif, List.of( Symbol.t_Else, Symbol.n_If ), t -> {
-            IfNode if_block = (IfNode)t.get(1);
-            if_block.term = Symbol.n_Elif;
-            return if_block;
-        });
-
-        // n_Elif -> t_Else n_If n_Elif
-        g.addRuleWithReduceFunction( Symbol.n_Elif, List.of( Symbol.t_Else, Symbol.n_If, Symbol.n_Elif ), t -> {
-            IfNode if_block = (IfNode)t.get(1);
-            ASTNode rest = (ASTNode)t.get(2);
-            
-            return new IfElseNode( Symbol.n_Elif, if_block, new ElseNode( Symbol.n_Elif, new Statement( Symbol.n_Statement, rest, StatementKind.IF_ELSE ) ) );
-        });
-
-
-        // n_If -> t_If t_LParen n_Expression t_RParen t_LCurly n_StatementList t_RCurly
-        g.addRuleWithReduceFunction( Symbol.n_If, List.of( Symbol.t_If, Symbol.t_LParen, Symbol.n_Expression, Symbol.t_RParen, Symbol.t_LCurly, Symbol.n_StatementList, Symbol.t_RCurly ), t -> {
+        // n_If -> t_If t_LParen n_Expression t_RParen n_Statement
+        g.addRuleWithReduceFunction( Symbol.n_If, List.of( Symbol.t_If, Symbol.t_LParen, Symbol.n_Expression, Symbol.t_RParen, Symbol.n_Statement ), t -> {
             Expression guard = (Expression)t.get(2);
-            Statement body = (Statement)t.get(5);
+            Statement body = (Statement)t.get(4);
             return new IfNode( Symbol.n_If, guard, body );
         });
 
-        // n_Else -> t_Else t_LCurly n_StatementList t_RCurly
-        g.addRuleWithReduceFunction( Symbol.n_Else, List.of( Symbol.t_Else, Symbol.t_LCurly, Symbol.n_StatementList, Symbol.t_RCurly ), t -> {
-            Statement body = (Statement)t.get(2);
+        // n_Else -> t_Else n_Statement
+        g.addRuleWithReduceFunction( Symbol.n_Else, List.of( Symbol.t_Else, Symbol.n_Statement ), t -> {
+            Statement body = (Statement)t.get(1);
             return new ElseNode( Symbol.n_Else, body );
         });
     }
@@ -500,6 +446,10 @@ public class Parser {
         g.addRuleWithReduceFunction( Symbol.n_Standard_Type, List.of( Symbol.t_Type_String ), t -> {
             return new StandardType( Symbol.n_Standard_Type, (LexType)t.get(0)  );
         });
+        // n_Standard_Type -> t_Type_Void
+        g.addRuleWithReduceFunction( Symbol.n_Standard_Type, List.of( Symbol.t_Type_Void ), t -> {
+            return new StandardType( Symbol.n_Standard_Type, (LexType)t.get(0)  );
+        });
     }
 
     private static void init_arithmetic() {
@@ -641,18 +591,6 @@ public class Parser {
             Argument arg = (Argument)t.get(0);
             return new Argument( Symbol.n_Arg_List, arg.node, arg.kind );
         });
-
-        // n_Arg -> t_Identifier
-        // g.addRuleWithReduceFunction( Symbol.n_Arg, List.of( Symbol.t_Identifier ), t -> {
-        //     return new Argument( Symbol.n_Arg, (ASTNode)t.get(0), ArgumentKind.IDENTIFIER );
-        // });
-
-        //TODO: Fix me. 
-        // n_Arg -> t_Literal
-        // g.addRuleWithReduceFunction( Symbol.n_Arg, List.of( Symbol.n_Literal ), t -> {
-        //     return new Argument( Symbol.n_Arg, (ASTNode)t.get(0), ArgumentKind.LITERAL );
-        // });
-        
         // n_Arg -> n_Expression
         g.addRuleWithReduceFunction( Symbol.n_Arg, List.of( Symbol.n_Expression ), t -> {
             return new Argument( Symbol.n_Arg, (ASTNode)t.get(0), ArgumentKind.EXPRESSION );

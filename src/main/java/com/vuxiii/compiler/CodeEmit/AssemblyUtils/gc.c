@@ -360,13 +360,22 @@ void print_subs( char *buffer, long *offsets, char *subs, long num_of_subs ) {
         char *to_write = buffer + offset_into_buffer;
         char *sub = subs;
 
-        printf( "%.*s%s", first_n, to_write, sub );
+        printf( "%.*s%s\n", first_n, to_write, sub );
         
         ++offset_into_buffer; // Skip %
         ++curr; // Advance to next sub.
         offset_into_buffer += first_n;
         subs += strlen(subs) + 1;
     }
+}
+
+void print_string( char *buffer, long len, long offset ) {
+    // printf( "\n\tBuffer is: %s\n", buffer + offset );
+    printf( "%.*s", len, buffer + offset );
+}
+
+void print_num( long num ) {
+    printf( "%ld", num );
 }
 
 void print_scopes() {

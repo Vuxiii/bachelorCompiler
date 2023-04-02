@@ -18,11 +18,17 @@ public class AST_Shrinker extends VisitorBase {
 
     @VisitorPattern( when = VisitOrder.EXIT_NODE )
     public void call_other_shrinkers( Root root ) {
-        AST_Shrinker_Statement_Collector collector = new AST_Shrinker_Statement_Collector();
-        root.accept(collector);
-        AST_Shrinker_Statement collaps_statement = new AST_Shrinker_Statement( collector.mapper );
+        AST_Shrinker_Statement_Collector scollector = new AST_Shrinker_Statement_Collector();
+        root.accept(scollector);
+        AST_Shrinker_Statement collaps_statement = new AST_Shrinker_Statement( scollector.mapper );
         root.accept( collaps_statement );
-        collector.cleanup();
+        scollector.cleanup();
+
+        AST_Shrinker_Argument_Collector acollector = new AST_Shrinker_Argument_Collector();
+        root.accept(acollector);
+        AST_Shrinker_Argument collaps_arg = new AST_Shrinker_Argument( acollector.mapper );
+        root.accept( collaps_arg );
+        acollector.cleanup();
 
         AST_Shrinker_If_Collector if_collec = new AST_Shrinker_If_Collector();
         root.accept( if_collec );

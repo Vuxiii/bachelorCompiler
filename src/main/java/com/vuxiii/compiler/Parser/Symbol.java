@@ -25,6 +25,7 @@ public class Symbol {
     public static final NonTerminal n_Function_Signature = new NonTerminal( "FUNCTION_SIGNATURE" );
 
     public static final NonTerminal n_Function_Call = new NonTerminal( "FUNCTION_CALL" );
+    public static final NonTerminal n_Function_Body = new NonTerminal( "FUNCTION_BODY" );;
 
     public static final NonTerminal n_Function_Param_Signature = new NonTerminal( "FUNCTION_PARAM_SIGNATURE" );
     public static final NonTerminal n_Parameter_List = new NonTerminal( "PARAMETER_LIST" );
@@ -88,6 +89,7 @@ public class Symbol {
     public static final Terminal t_Type_Double = new Terminal( "type_double" );
     public static final Terminal t_Type_Bool = new Terminal( "type_bool" );
     public static final Terminal t_Type_String = new Terminal( "type_string" );
+    public static final Terminal t_Type_Void = new Terminal( "type_void" );;
 
     public static final Terminal t_Semicolon = new Terminal( "';'" );
     public static final Terminal t_Colon = new Terminal( "':'" );
@@ -109,6 +111,8 @@ public class Symbol {
     public static final Terminal t_Return = new Terminal( "return" );
     public static final Terminal t_Let = new Terminal( "let" );
     public static final Terminal t_Arrow_Right = new Terminal( "'->'" );
+
+
 
 
 

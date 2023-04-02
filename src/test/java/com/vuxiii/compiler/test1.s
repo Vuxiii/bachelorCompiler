@@ -1,14 +1,49 @@
 .section .data
-string1: .ascii " %\n"
-string1_stops: .space 16
-string1_subs: .space 8
-string2: .ascii " %\n"
-string2_stops: .space 16
-string2_subs: .space 8
-string0: .ascii " %\n"
-string0_stops: .space 16
-string0_subs: .space 8
+string0: .ascii "%\n"
+string0subs: .ascii ""
 .section .text
+a:
+    pushq %rbp
+    movq %rsp, %rbp # Setup stackpointer
+    subq $16, %rsp
+    
+    # [[ Loading variable b ]] 
+    # [[ offset is 2 ]] 
+    movq 16(%rbp), %rax
+    
+    pushq %rax
+    callq c
+    pushq %rax
+    pushq $5
+    popq %rcx
+    popq %rbx
+    addq %rbx, %rcx
+    movq %rcx, %rax
+    pushq %rax
+    popq %rax
+    movq %rbp, %rsp # Restore stackpointer
+    popq %rbp
+    retq
+    
+c:
+    pushq %rbp
+    movq %rsp, %rbp # Setup stackpointer
+    subq $8, %rsp
+    pushq $4
+    popq %rcx
+    
+    # [[ Loading variable d ]] 
+    # [[ offset is 2 ]] 
+    movq 16(%rbp), %rbx
+    
+    addq %rbx, %rcx
+    movq %rcx, %rax
+    pushq %rax
+    popq %rax
+    movq %rbp, %rsp # Restore stackpointer
+    popq %rbp
+    retq
+    
 .section .text
 .global main
 main:
@@ -16,196 +51,47 @@ main:
     movq %rsp, %rbp # Setup stackpointer
     subq $16, %rsp
     movq %rsp, %rsp
-    pushq $0
-    popq %rax
-    
-    # [[ Storing variable bas ]] 
-    # [[ offset is -1 ]] 
-    movq %rax, -8(%rbp)
-    
-    pushq $1
-    popq %rax
-    pushq $1
-    cmpq $1, %rax
-    jne IfEndOfBody1
-    pushq $1
-    popq %rax
-    
-    # [[ Storing variable a ]] 
-    # [[ offset is -2 ]] 
-    movq %rax, -16(%rbp)
-    
-    jmp IfEndOfBody1
-    jmp EndOfIfBlocks1
-    pushq $0
-    popq %rax
-    pushq $0
-    cmpq $1, %rax
-    jne IfEndOfBody2
-    pushq $2
-    popq %rax
-    
-    # [[ Storing variable a ]] 
-    # [[ offset is -2 ]] 
-    movq %rax, -16(%rbp)
-    
-    jmp IfEndOfBody2
-    jmp EndOfIfBlocks1
     pushq $3
     popq %rax
     
-    # [[ Storing variable a ]] 
+    # [[ Storing variable first ]] 
     # [[ offset is -2 ]] 
     movq %rax, -16(%rbp)
     
-    jmp EndOfIfBlocks1
-EndOfIfBlocks1:
     
-    # [[ Loading variable a ]] 
+    # [[ Loading variable first ]] 
     # [[ offset is -2 ]] 
     movq -16(%rbp), %rax
     
+    pushq %rax
+    callq a
+    pushq %rax
+    callq a
+    pushq %rax
+    popq %rcx
+    
+    # [[ Loading variable first ]] 
+    # [[ offset is -2 ]] 
+    movq -16(%rbp), %rbx
+    
+    addq %rbx, %rcx
+    movq %rcx, %rax
     pushq %rax
 
 # Setup Print
 
     movq $string0, %rdi
-    leaq string0_stops, %rsi
-    movq $1, (%rsi)
-    movq $3, 8(%rsi)
-    leaq string0_subs, %rdx
-    
-    # [[ Loading variable a ]] 
-    # [[ offset is -2 ]] 
-    movq -16(%rbp), %rax
-    
-    movq %rax, (%rdx)
-    movq $1, %rcx
-    call printStringWithReplace
-
-# End Print
-
-    pushq $0
-    popq %rax
-    pushq $0
-    cmpq $1, %rax
-    jne IfEndOfBody3
-    pushq $1
-    popq %rax
-    
-    # [[ Storing variable a ]] 
-    # [[ offset is -2 ]] 
-    movq %rax, -16(%rbp)
-    
-    jmp IfEndOfBody3
-    jmp EndOfIfBlocks3
-    pushq $1
-    popq %rax
-    pushq $1
-    cmpq $1, %rax
-    jne IfEndOfBody4
-    pushq $2
-    popq %rax
-    
-    # [[ Storing variable a ]] 
-    # [[ offset is -2 ]] 
-    movq %rax, -16(%rbp)
-    
-    jmp IfEndOfBody4
-    jmp EndOfIfBlocks3
-    pushq $3
-    popq %rax
-    
-    # [[ Storing variable a ]] 
-    # [[ offset is -2 ]] 
-    movq %rax, -16(%rbp)
-    
-    jmp EndOfIfBlocks3
-EndOfIfBlocks3:
-    
-    # [[ Loading variable a ]] 
-    # [[ offset is -2 ]] 
-    movq -16(%rbp), %rax
-    
-    pushq %rax
-
-# Setup Print
-
-    movq $string1, %rdi
-    leaq string1_stops, %rsi
-    movq $1, (%rsi)
-    movq $3, 8(%rsi)
-    leaq string1_subs, %rdx
-    
-    # [[ Loading variable a ]] 
-    # [[ offset is -2 ]] 
-    movq -16(%rbp), %rax
-    
-    movq %rax, (%rdx)
-    movq $1, %rcx
-    call printStringWithReplace
-
-# End Print
-
-    pushq $0
-    popq %rax
-    pushq $0
-    cmpq $1, %rax
-    jne IfEndOfBody5
-    pushq $1
-    popq %rax
-    
-    # [[ Storing variable a ]] 
-    # [[ offset is -2 ]] 
-    movq %rax, -16(%rbp)
-    
-    jmp IfEndOfBody5
-    jmp EndOfIfBlocks5
-    pushq $0
-    popq %rax
-    pushq $0
-    cmpq $1, %rax
-    jne IfEndOfBody6
-    pushq $2
-    popq %rax
-    
-    # [[ Storing variable a ]] 
-    # [[ offset is -2 ]] 
-    movq %rax, -16(%rbp)
-    
-    jmp IfEndOfBody6
-    jmp EndOfIfBlocks5
-    pushq $3
-    popq %rax
-    
-    # [[ Storing variable a ]] 
-    # [[ offset is -2 ]] 
-    movq %rax, -16(%rbp)
-    
-    jmp EndOfIfBlocks5
-EndOfIfBlocks5:
-    
-    # [[ Loading variable a ]] 
-    # [[ offset is -2 ]] 
-    movq -16(%rbp), %rax
-    
-    pushq %rax
-
-# Setup Print
-
-    movq $string2, %rdi
-    leaq string2_stops, %rsi
-    movq $1, (%rsi)
-    movq $3, 8(%rsi)
-    leaq string2_subs, %rdx
-    
-    # [[ Loading variable a ]] 
-    # [[ offset is -2 ]] 
-    movq -16(%rbp), %rax
-    
-    movq %rax, (%rdx)
-    movq $1, %rcx
-    call printStringWithReplace
+    movq $0, %rsi
+    movq $0, %rdx
+    call print_string
+    movq (%rsp), %rdi
+    call print_num
+    movq $string0, %rdi
+    movq $1, %rsi
+    movq $1, %rdx
+    call print_string
+    addq $8, %rsp
+    movq %rsp, %rsp
 
 # End Print
 

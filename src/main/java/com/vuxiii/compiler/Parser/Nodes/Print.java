@@ -9,7 +9,7 @@ import com.vuxiii.compiler.VisitorPattern.Annotations.VisitNumber;
 public class Print extends ASTNode {
 
     @VisitNumber( number = 1 ) public ASTNode value;
-    @VisitNumber( number = 2 ) public Optional<Argument> arg_list = Optional.empty();
+    @VisitNumber( number = 2 ) public Optional<ASTNode> arg_list = Optional.empty();
 
     public final PrintKind kind;
 
@@ -19,6 +19,7 @@ public class Print extends ASTNode {
         this.kind = PrintKind.STRING;
         super.setup_ASTNodeQueue();
     }
+
     public Print( Term term, ASTNode string_literal, Argument args ) {
         super( term ); 
         this.value = string_literal;

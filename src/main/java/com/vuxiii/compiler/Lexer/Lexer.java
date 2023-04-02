@@ -36,6 +36,7 @@ public class Lexer {
 
         reg.addRegex( PrimitiveType.DOUBLE.name,          matchInfo -> TokenConstructor.construct( matchInfo, TokenType.TYPE_DOUBLE ) );
         reg.addRegex( PrimitiveType.BOOL.name,            matchInfo -> TokenConstructor.construct( matchInfo, TokenType.TYPE_BOOL ) );
+        reg.addRegex( PrimitiveType.VOID.name,            matchInfo -> TokenConstructor.construct( matchInfo, TokenType.TYPE_VOID ) );
         reg.addRegex( '"' + "(.| |\n)*" + '"',            matchInfo -> TokenConstructor.construct( matchInfo, TokenType.STRING_LITERAL ) );
         reg.addRegex( "[:digit:][:digit:]*",              matchInfo -> TokenConstructor.construct( matchInfo, TokenType.INT_LITERAL ) );
         reg.addRegex( "[:digit:][:digit:]*\\.[:digit:]*", matchInfo -> TokenConstructor.construct( matchInfo, TokenType.DOUBLE_LITERAL ) );
