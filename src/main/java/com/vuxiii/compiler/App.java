@@ -137,11 +137,11 @@ public final class App {
             
         """;
         input = """
-            print("asd");
-            if ( 1 ) {
-                print( "Yay" );
-            }
-            print("asd");
+            if ( 2+2 == 4 ) 
+                print("true");
+            else
+                print("false");
+            print("end");
         """;
 
         System.out.println( input );

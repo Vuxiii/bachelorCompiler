@@ -1,4 +1,5 @@
 .section .data
+string1: .ascii "asd"
 string0: .ascii "Yay"
 .section .text
 .section .text
@@ -12,6 +13,11 @@ main:
     popq %rax
     pushq $1
     cmpq $1, %rax
+    jne IfEndOfBody2
+    pushq $2
+    popq %rax
+    pushq $2
+    cmpq $1, %rax
     jne IfEndOfBody1
 
 # Setup Print
@@ -24,6 +30,17 @@ main:
 # End Print
 
 IfEndOfBody1:
+:
+
+# Setup Print
+
+    movq $string1, %rdi
+    movq $3, %rsi
+    movq $0, %rdx
+    call print_string
+
+# End Print
+
     movq %rbp, %rsp # Restore stackpointer
     popq %rbp
     

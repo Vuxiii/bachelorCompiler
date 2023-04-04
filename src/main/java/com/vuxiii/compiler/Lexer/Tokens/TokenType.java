@@ -11,6 +11,7 @@ import com.vuxiii.compiler.Parser.Symbol;
  */
 public enum TokenType {
     EQUAL( Symbol.t_Equals ),
+    CHECK_EQUAL( Symbol.t_Check_Equal ),
     IDENTIFIER( Symbol.t_Identifier ),
     LEFT_PARENTHESIS( Symbol.t_LParen ),
     RIGHT_PARENTHESIS( Symbol.t_RParen ),

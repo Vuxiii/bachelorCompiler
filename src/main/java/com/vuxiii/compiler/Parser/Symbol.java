@@ -72,6 +72,7 @@ public class Symbol {
     public static final NonTerminal n_Arg_List = new NonTerminal( "ARG_LIST" );
     public static final NonTerminal n_Arg = new NonTerminal( "ARG" );
     
+    public static final NonTerminal n_Equals = new NonTerminal( "Equals" );
 
     // Used under lexical analysis. Tokenization.
     public static final Terminal t_Plus = new Terminal( "'+'" );
@@ -79,6 +80,7 @@ public class Symbol {
     public static final Terminal t_Times = new Terminal( "'*'" );
     public static final Terminal t_Division = new Terminal( "'/'" );
     public static final Terminal t_Equals = new Terminal( "'='" );
+    public static final Terminal t_Check_Equal = new Terminal( "'=='" );
     public static final Terminal t_Identifier = new Terminal( "id" );
     public static final Terminal t_Integer = new Terminal( "integer" );
     public static final Terminal t_Double = new Terminal( "double" );

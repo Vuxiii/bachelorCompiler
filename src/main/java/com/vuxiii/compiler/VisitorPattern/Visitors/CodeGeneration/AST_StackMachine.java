@@ -334,7 +334,9 @@ public class AST_StackMachine extends Visitor {
             case MODULO: {
                 opcode = Opcode.MODULO;
             } break;
-        
+            case EQUALS: {
+                opcode = Opcode.EQUALS;
+            } break;
             default: {
                 System.out.println( "Some unexpected binary operation happend." );
                 System.exit(-1);    

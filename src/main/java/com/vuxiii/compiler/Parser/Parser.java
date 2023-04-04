@@ -103,11 +103,11 @@ public class Parser {
         g = new Grammar();
         
         // n_Start -> n_StatementList t_Dollar
-        g.addRuleWithReduceFunction( Symbol.n_Start, List.of( Symbol.n_Statement, Symbol.t_Dollar ), t -> {
+        g.addRuleWithReduceFunction( Symbol.n_Start, List.of( Symbol.n_StatementList, Symbol.t_Dollar ), t -> {
             return t.get(0);
         });
         
-        // n_StatementList -> n_StatementList n_Statement
+        // n_StatementList -> n_Statement n_StatementList
         g.addRuleWithReduceFunction( Symbol.n_StatementList, List.of( Symbol.n_Statement, Symbol.n_StatementList ), t -> {
             System.out.println( "IM IN LIST" );
             Statement stm1 = (Statement)t.get(0);
@@ -158,8 +158,9 @@ public class Parser {
 
         init_functions();
 
-
         init_arithmetic();
+
+        init_guards();
 
         init_types();
 
@@ -450,6 +451,20 @@ public class Parser {
         g.addRuleWithReduceFunction( Symbol.n_Standard_Type, List.of( Symbol.t_Type_Void ), t -> {
             return new StandardType( Symbol.n_Standard_Type, (LexType)t.get(0)  );
         });
+    }
+
+    private static void init_guards() {
+
+        // n_Expression -> n_Equals
+        // g.addRuleWithReduceFunction( Symbol.n_Expression, List.of( Symbol.n_Equals ), t -> {
+        //     return new Expression( Symbol.n_Expression, (ASTNode)t.get(0) );
+        // });
+
+        // n_Equals -> n_Expression == n_Expression 
+        g.addRuleWithReduceFunction( Symbol.n_Expression, List.of( Symbol.n_Expression_Arithmetic, Symbol.t_Check_Equal, Symbol.n_Expression_Arithmetic ), t -> {
+            return new Expression( Symbol.n_Expression, new BinaryOperation( Symbol.n_Equals, (ASTNode)t.get(0), (ASTNode)t.get(2), (ASTNode)t.get(1), BinaryOperationKind.EQUALS ) );
+        });
+
     }
 
     private static void init_arithmetic() {

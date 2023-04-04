@@ -6,4 +6,5 @@ public enum BinaryOperationKind {
     TIMES,
     DIVISION,
     MODULO,
+    EQUALS,
 }
