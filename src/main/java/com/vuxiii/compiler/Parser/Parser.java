@@ -460,9 +460,14 @@ public class Parser {
         //     return new Expression( Symbol.n_Expression, (ASTNode)t.get(0) );
         // });
 
-        // n_Equals -> n_Expression == n_Expression 
+        // n_Equals -> n_Expression t_Check_Equal n_Expression 
         g.addRuleWithReduceFunction( Symbol.n_Expression, List.of( Symbol.n_Expression_Arithmetic, Symbol.t_Check_Equal, Symbol.n_Expression_Arithmetic ), t -> {
             return new Expression( Symbol.n_Expression, new BinaryOperation( Symbol.n_Equals, (ASTNode)t.get(0), (ASTNode)t.get(2), (ASTNode)t.get(1), BinaryOperationKind.EQUALS ) );
+        });
+
+        // n_Equals -> n_Expression t_Check_Not_Equal n_Expression 
+        g.addRuleWithReduceFunction( Symbol.n_Expression, List.of( Symbol.n_Expression_Arithmetic, Symbol.t_Check_Not_Equal, Symbol.n_Expression_Arithmetic ), t -> {
+            return new Expression( Symbol.n_Expression, new BinaryOperation( Symbol.n_Equals, (ASTNode)t.get(0), (ASTNode)t.get(2), (ASTNode)t.get(1), BinaryOperationKind.NOT_EQUALS ) );
         });
 
     }

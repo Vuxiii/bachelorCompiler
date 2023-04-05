@@ -8,9 +8,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.vuxiii.compiler.Error.Error;
 import com.vuxiii.compiler.Lexer.Tokens.PrimitiveType;
+import com.vuxiii.compiler.Lexer.Tokens.TokenType;
 import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexIdent;
 import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexLiteral;
+import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexOperator;
 import com.vuxiii.compiler.Parser.Nodes.Argument;
 import com.vuxiii.compiler.Parser.Nodes.ArgumentList;
 import com.vuxiii.compiler.Parser.Nodes.Assignment;
@@ -186,7 +189,18 @@ public class AST_StackMachine extends Visitor {
 
             } break;
             case EXIT_GUARD: {
-                push( new Instruction( Opcode.JUMP_NOT_EQUAL, Arguments.from_label( if_node.end_of_body ) ) );
+                if ( if_node.guard.node instanceof BinaryOperation ) {
+                    BinaryOperation binop = (BinaryOperation)if_node.guard.node;
+                    LexOperator ope = (LexOperator)binop.operator;
+                    if ( ope.operator == TokenType.CHECK_EQUAL ) {
+                        push( new Instruction( Opcode.JUMP_NOT_EQUAL, Arguments.from_label( if_node.end_of_body ) ) );
+                    } else if ( ope.operator == TokenType.CHECK_NOT_EQUAL ) {
+                        push( new Instruction( Opcode.JUMP_EQUAL, Arguments.from_label( if_node.end_of_body ) ) );
+                    } else {
+                        System.out.println( new Error( "StackMachine Error!", "Some unexpected operator in the guard of an if clause: " + ope.getPrintableName() ));
+                        System.exit(-1);
+                    }
+                }
                 if_state = IfState.ENTER_BODY;
             } break;
             case NONE: {
@@ -235,14 +249,6 @@ public class AST_StackMachine extends Visitor {
             push( new Instruction( Opcode.PUSH, Arguments.from_literal( lit ), new Comment( "Pushing value: " + lit.val ) ) );
             push( new Instruction( Opcode.POP, Arguments.from_register( Register.RAX ), new Comment( "Loading value stored at the top of the stack" ) ) );
         }
-    }
-
-    @VisitorPattern( when = VisitOrder.EXIT_NODE )
-    public void if_guard_leave( Expression guard ) {
-        if ( function_depth != 0 ) return;
-        if ( if_state != IfState.ENTER_GUARD) return;
-
-        push( new Instruction( Opcode.COMPARE, Arguments.compare( Register.RAX, 1 ) ) );
     }
 
     @VisitorPattern( when = VisitOrder.EXIT_NODE, order = 2 )
@@ -334,9 +340,13 @@ public class AST_StackMachine extends Visitor {
             case MODULO: {
                 opcode = Opcode.MODULO;
             } break;
-            case EQUALS: {
-                opcode = Opcode.EQUALS;
-            } break;
+            case EQUALS: case NOT_EQUALS: {
+                opcode = Opcode.COMPARE;
+
+                push( new Instruction( opcode, new Arguments(r1, r2, r2 ) ) );
+
+                return;
+            } 
             default: {
                 System.out.println( "Some unexpected binary operation happend." );
                 System.exit(-1);    

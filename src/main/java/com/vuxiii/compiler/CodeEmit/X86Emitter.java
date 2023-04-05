@@ -285,6 +285,9 @@ public class X86Emitter {
                 case JUMP_NOT_EQUAL: {
                     push_code( "jne " + instruction.args.get().operand_1.get().get_string() );
                 } break;
+                case JUMP_EQUAL: {
+                    push_code( "je " + instruction.args.get().operand_1.get().get_string() );
+                } break;
                 case JUMP: {
                     push_code( "jmp " + instruction.args.get().operand_1.get().get_string() );
                 } break;

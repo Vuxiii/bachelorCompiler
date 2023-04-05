@@ -58,7 +58,7 @@ public class TokenConstructor {
             case RIGHT_CURLY: {
                 return new LexRCurly( matchInfo, type );
             }
-            case PLUS: case MINUS: case DIVISION: case TIMES: case CHECK_EQUAL: {
+            case PLUS: case MINUS: case DIVISION: case TIMES: case CHECK_EQUAL: case CHECK_NOT_EQUAL: {
                 return new LexOperator( matchInfo, type );
             }
             case PRINT: {

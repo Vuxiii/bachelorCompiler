@@ -137,11 +137,16 @@ public final class App {
             
         """;
         input = """
-            if ( 2+2 == 4 ) 
-                print("true");
+            if ( 2+2 == 5 ) 
+                print("2 + 2 == 5 -> true\\n");
             else
-                print("false");
-            print("end");
+                print("2 + 2 == 5 -> false\\n");
+            
+            if ( 2+2 != 5 ) 
+                print("2 + 2 != 5 -> true\\n");
+            else
+                print("2 + 2 != 5 -> false\\n");
+            print("end\\n");
         """;
 
         System.out.println( input );
@@ -157,7 +162,7 @@ public final class App {
         line_break();
 
         Settings.showGrammar = true;
-        Settings.showParsingTable = true;
+        Settings.showParsingTable = false;
         // [[ Parser ]]
         
         ASTNode ast = Parser.getAST( tokens );

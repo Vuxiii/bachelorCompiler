@@ -81,6 +81,7 @@ public class Symbol {
     public static final Terminal t_Division = new Terminal( "'/'" );
     public static final Terminal t_Equals = new Terminal( "'='" );
     public static final Terminal t_Check_Equal = new Terminal( "'=='" );
+    public static final Terminal t_Check_Not_Equal = new Terminal( "'!='" );
     public static final Terminal t_Identifier = new Terminal( "id" );
     public static final Terminal t_Integer = new Terminal( "integer" );
     public static final Terminal t_Double = new Terminal( "double" );

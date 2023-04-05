@@ -7,4 +7,5 @@ public enum BinaryOperationKind {
     DIVISION,
     MODULO,
     EQUALS,
+    NOT_EQUALS
 }

@@ -1,6 +1,9 @@
 .section .data
-string1: .ascii "asd"
-string0: .ascii "Yay"
+string3: .ascii "2 + 2 != 5 -> false\n"
+string0: .ascii "2 + 2 == 5 -> true\n"
+string1: .ascii "2 + 2 == 5 -> false\n"
+string2: .ascii "2 + 2 != 5 -> true\n"
+string4: .ascii "end\n"
 .section .text
 .section .text
 .global main
@@ -9,33 +12,83 @@ main:
     movq %rsp, %rbp # Setup stackpointer
     subq $0, %rsp
     movq %rsp, %rsp
-    pushq $1
-    popq %rax
-    pushq $1
-    cmpq $1, %rax
-    jne IfEndOfBody2
     pushq $2
-    popq %rax
     pushq $2
-    cmpq $1, %rax
+    popq %rcx
+    popq %rbx
+    addq %rbx, %rcx
+    movq %rcx, %rax
+    pushq %rax
+    pushq $5
+    popq %rcx
+    popq %rbx
+    cmpq %rcx, %rbx
     jne IfEndOfBody1
 
 # Setup Print
 
     movq $string0, %rdi
-    movq $3, %rsi
+    movq $19, %rsi
     movq $0, %rdx
     call print_string
 
 # End Print
 
+    jmp EndOfIfBlocks1
 IfEndOfBody1:
-:
 
 # Setup Print
 
     movq $string1, %rdi
-    movq $3, %rsi
+    movq $20, %rsi
+    movq $0, %rdx
+    call print_string
+
+# End Print
+
+    jmp EndOfIfBlocks1
+EndOfIfBlocks1:
+    pushq $2
+    pushq $2
+    popq %rcx
+    popq %rbx
+    addq %rbx, %rcx
+    movq %rcx, %rax
+    pushq %rax
+    pushq $5
+    popq %rcx
+    popq %rbx
+    cmpq %rcx, %rbx
+    je IfEndOfBody2
+
+# Setup Print
+
+    movq $string2, %rdi
+    movq $19, %rsi
+    movq $0, %rdx
+    call print_string
+
+# End Print
+
+    jmp EndOfIfBlocks2
+IfEndOfBody2:
+
+# Setup Print
+
+    movq $string3, %rdi
+    movq $20, %rsi
+    movq $0, %rdx
+    call print_string
+
+# End Print
+
+    jmp EndOfIfBlocks2
+EndOfIfBlocks2:
+
+# Setup Print
+
+    movq $string4, %rdi
+    movq $4, %rsi
     movq $0, %rdx
     call print_string
 
