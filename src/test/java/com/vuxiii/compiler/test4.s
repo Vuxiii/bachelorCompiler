@@ -1,7 +1,6 @@
 .section .data
 string0: .ascii "Hej %, du bor i %. Du er % aar. I Januar var du % aar gammel!\n"
 string0subs: .ascii "William\0Odense\0\0\0"
-string0stops: .space 40
 .section .text
 .section .text
 .global main

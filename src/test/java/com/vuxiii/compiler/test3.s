@@ -1,13 +1,10 @@
 .section .data
 string0: .ascii "Number 1 is: %\n"
 string0subs: .ascii ""
-string0stops: .space 16
 string1: .ascii "Number 2 is: %\n"
 string1subs: .ascii ""
-string1stops: .space 16
 string2: .ascii "Number 3 is: %\n"
 string2subs: .ascii ""
-string2stops: .space 16
 .section .text
 .section .text
 .global main

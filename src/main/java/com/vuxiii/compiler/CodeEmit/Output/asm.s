@@ -1,96 +1,199 @@
 .section .data
-string3: .ascii "2 + 2 != 5 -> false\n"
-string0: .ascii "2 + 2 == 5 -> true\n"
-string1: .ascii "2 + 2 == 5 -> false\n"
-string2: .ascii "2 + 2 != 5 -> true\n"
-string4: .ascii "end\n"
+string1: .ascii "%\n"
+string1subs: .ascii ""
+string2: .ascii "%\n"
+string2subs: .ascii ""
+string0: .ascii "%\n"
+string0subs: .ascii ""
 .section .text
 .section .text
 .global main
 main:
     pushq %rbp
     movq %rsp, %rbp # Setup stackpointer
-    subq $0, %rsp
+    subq $16, %rsp
     movq %rsp, %rsp
+    pushq $0
+    popq %rax
+    
+    # [[ Storing variable bas ]] 
+    # [[ offset is -1 ]] 
+    movq %rax, -8(%rbp)
+    
+    pushq $1
+    popq %rax
+    pushq $1
+    pushq $1
+    popq %rax
+    
+    # [[ Storing variable a ]] 
+    # [[ offset is -2 ]] 
+    movq %rax, -16(%rbp)
+    
+    jmp EndOfIfBlocks1
+IfEndOfBody1:
+    pushq $0
+    popq %rax
+    pushq $0
     pushq $2
-    pushq $2
-    popq %rcx
-    popq %rbx
-    addq %rbx, %rcx
-    movq %rcx, %rax
+    popq %rax
+    
+    # [[ Storing variable a ]] 
+    # [[ offset is -2 ]] 
+    movq %rax, -16(%rbp)
+    
+    jmp EndOfIfBlocks2
+IfEndOfBody2:
+    pushq $3
+    popq %rax
+    
+    # [[ Storing variable a ]] 
+    # [[ offset is -2 ]] 
+    movq %rax, -16(%rbp)
+    
+    jmp EndOfIfBlocks2
+EndOfIfBlocks2:
+    jmp EndOfIfBlocks1
+EndOfIfBlocks1:
+    
+    # [[ Loading variable a ]] 
+    # [[ offset is -2 ]] 
+    movq -16(%rbp), %rax
+    
     pushq %rax
-    pushq $5
-    popq %rcx
-    popq %rbx
-    cmpq %rcx, %rbx
-    jne IfEndOfBody1
 
 # Setup Print
 
     movq $string0, %rdi
-    movq $19, %rsi
+    movq $0, %rsi
     movq $0, %rdx
     call print_string
+    movq (%rsp), %rdi
+    call print_num
+    movq $string0, %rdi
+    movq $1, %rsi
+    movq $1, %rdx
+    call print_string
+    addq $8, %rsp
+    movq %rsp, %rsp
 
 # End Print
 
-    jmp EndOfIfBlocks1
-IfEndOfBody1:
+    pushq $0
+    popq %rax
+    pushq $0
+    pushq $1
+    popq %rax
+    
+    # [[ Storing variable a ]] 
+    # [[ offset is -2 ]] 
+    movq %rax, -16(%rbp)
+    
+    jmp EndOfIfBlocks3
+IfEndOfBody3:
+    pushq $1
+    popq %rax
+    pushq $1
+    pushq $2
+    popq %rax
+    
+    # [[ Storing variable a ]] 
+    # [[ offset is -2 ]] 
+    movq %rax, -16(%rbp)
+    
+    jmp EndOfIfBlocks4
+IfEndOfBody4:
+    pushq $3
+    popq %rax
+    
+    # [[ Storing variable a ]] 
+    # [[ offset is -2 ]] 
+    movq %rax, -16(%rbp)
+    
+    jmp EndOfIfBlocks4
+EndOfIfBlocks4:
+    jmp EndOfIfBlocks3
+EndOfIfBlocks3:
+    
+    # [[ Loading variable a ]] 
+    # [[ offset is -2 ]] 
+    movq -16(%rbp), %rax
+    
+    pushq %rax
 
 # Setup Print
 
     movq $string1, %rdi
-    movq $20, %rsi
+    movq $0, %rsi
     movq $0, %rdx
     call print_string
+    movq (%rsp), %rdi
+    call print_num
+    movq $string1, %rdi
+    movq $1, %rsi
+    movq $1, %rdx
+    call print_string
+    addq $8, %rsp
+    movq %rsp, %rsp
 
 # End Print
 
-    jmp EndOfIfBlocks1
-EndOfIfBlocks1:
+    pushq $0
+    popq %rax
+    pushq $0
+    pushq $1
+    popq %rax
+    
+    # [[ Storing variable a ]] 
+    # [[ offset is -2 ]] 
+    movq %rax, -16(%rbp)
+    
+    jmp EndOfIfBlocks5
+IfEndOfBody5:
+    pushq $0
+    popq %rax
+    pushq $0
     pushq $2
-    pushq $2
-    popq %rcx
-    popq %rbx
-    addq %rbx, %rcx
-    movq %rcx, %rax
+    popq %rax
+    
+    # [[ Storing variable a ]] 
+    # [[ offset is -2 ]] 
+    movq %rax, -16(%rbp)
+    
+    jmp EndOfIfBlocks6
+IfEndOfBody6:
+    pushq $3
+    popq %rax
+    
+    # [[ Storing variable a ]] 
+    # [[ offset is -2 ]] 
+    movq %rax, -16(%rbp)
+    
+    jmp EndOfIfBlocks6
+EndOfIfBlocks6:
+    jmp EndOfIfBlocks5
+EndOfIfBlocks5:
+    
+    # [[ Loading variable a ]] 
+    # [[ offset is -2 ]] 
+    movq -16(%rbp), %rax
+    
     pushq %rax
-    pushq $5
-    popq %rcx
-    popq %rbx
-    cmpq %rcx, %rbx
-    je IfEndOfBody2
 
 # Setup Print
 
     movq $string2, %rdi
-    movq $19, %rsi
+    movq $0, %rsi
     movq $0, %rdx
     call print_string
-
-# End Print
-
-    jmp EndOfIfBlocks2
-IfEndOfBody2:
-
-# Setup Print
-
-    movq $string3, %rdi
-    movq $20, %rsi
-    movq $0, %rdx
+    movq (%rsp), %rdi
+    call print_num
+    movq $string2, %rdi
+    movq $1, %rsi
+    movq $1, %rdx
     call print_string
-
-# End Print
-
-    jmp EndOfIfBlocks2
-EndOfIfBlocks2:
-
-# Setup Print
-
-    movq $string4, %rdi
-    movq $4, %rsi
-    movq $0, %rdx
-    call print_string
+    addq $8, %rsp
+    movq %rsp, %rsp
 
 # End Print
 

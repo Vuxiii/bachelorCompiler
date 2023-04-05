@@ -137,16 +137,39 @@ public final class App {
             
         """;
         input = """
-            if ( 2+2 == 5 ) 
-                print("2 + 2 == 5 -> true\\n");
-            else
-                print("2 + 2 == 5 -> false\\n");
-            
-            if ( 2+2 != 5 ) 
-                print("2 + 2 != 5 -> true\\n");
-            else
-                print("2 + 2 != 5 -> false\\n");
-            print("end\\n");
+        let bas: boolean;
+        bas = false;
+        let a: int;
+
+        if ( true ) {
+            a = 1;
+        } else if (false) {
+            a = 2;
+        } else {
+            a = 3;
+        }
+
+        print( "%\\n", a );
+
+        if ( false ) {
+            a = 1;
+        } else if (true) {
+            a = 2;
+        } else {
+            a = 3;
+        }
+
+        print( "%\\n", a );
+
+        if ( false ) {
+            a = 1;
+        } else if (false) {
+            a = 2;
+        } else {
+            a = 3;
+        }
+
+        print( "%\\n", a );
         """;
 
         System.out.println( input );

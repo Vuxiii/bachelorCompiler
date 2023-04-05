@@ -1,16 +1,39 @@
 package com.vuxiii.compiler;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertLinesMatch;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.commons.exec.CommandLine;
+import org.apache.commons.exec.DefaultExecuteResultHandler;
 import org.apache.commons.exec.DefaultExecutor;
 import org.apache.commons.exec.ExecuteException;
 import org.apache.commons.exec.PumpStreamHandler;
 import org.junit.jupiter.api.Test;
  
 public class SourceCodeTests {
+
+    private List<String> run_and_get_output( String cmd ) throws IOException {
+        ProcessBuilder pb = new ProcessBuilder( cmd );
+        // pb.directory(new File("."));
+        pb.redirectOutput(ProcessBuilder.Redirect.PIPE);
+        Process p = pb.start();
+        InputStream stdout = p.getInputStream();
+
+        BufferedReader reader = new BufferedReader(new InputStreamReader(stdout));
+        List<String> out = reader.lines().collect(Collectors.toList());
+        return out;
+    }
+
     @Test
     void nested_function_tests() {
         App.reset_compiler();
@@ -32,21 +55,42 @@ public class SourceCodeTests {
         String asm = App.runWithInput( input );
         String testname = "test1";
         App.save_to_file( "src/test/java/com/vuxiii/compiler/", testname + ".s", asm );
-        CommandLine compile = new CommandLine("gcc -no-pie src/main/java/com/vuxiii/compiler/CodeEmit/AssemblyUtils/utils.s src/main/java/com/vuxiii/compiler/CodeEmit/AssemblyUtils/gc.c src/test/java/com/vuxiii/compiler/" + testname + ".s -o src/test/java/com/vuxiii/compiler/" + testname);
-        CommandLine run = new CommandLine("./" + testname);
+        
+        File utils = new File("src/main/java/com/vuxiii/compiler/CodeEmit/AssemblyUtils/utils.s");
+        assertEquals( utils.exists(), true );
+        
+        File gc = new File("src/main/java/com/vuxiii/compiler/CodeEmit/AssemblyUtils/gc.c");
+        assertEquals( gc.exists(), true );
+        
+        File ass = new File( "src/test/java/com/vuxiii/compiler/", testname + ".s" );
+        assertEquals( ass.exists(), true );
+        
+        
+        CommandLine compile = new CommandLine( "gcc" );
+        compile.addArgument( "-no-pie" );
+        compile.addArgument( utils.getPath() );
+        compile.addArgument( gc.getPath() );
+        compile.addArgument( ass.getPath() );
+        compile.addArgument( "-o" );
+        compile.addArgument( "src/test/java/com/vuxiii/compiler/" + testname );
+        
         DefaultExecutor executor = new DefaultExecutor();
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        executor.setStreamHandler(new PumpStreamHandler( out ) );
 
         try {
-            executor.execute(compile);
-            executor.execute(run);
-            String a = out.toString("UTF-8");
-            assertEquals( "24\n", a );
+            executor.execute(compile );
+
+            File outfile = new File( "src/test/java/com/vuxiii/compiler/" + testname );
+            assertEquals( outfile.exists(), true );
+
+            List<String> out = run_and_get_output( "src/test/java/com/vuxiii/compiler/" + testname );
+            
+            assertLinesMatch( List.of("24" ), out);
         } catch (ExecuteException e) {
             e.printStackTrace();
+            assertFalse(true);
         } catch (IOException e) {
             e.printStackTrace();
+            assertFalse(true);
         }
     }
 
@@ -64,7 +108,7 @@ public class SourceCodeTests {
             a = 2;
         } else {
             a = 3;
-        };
+        }
 
         print( "%\\n", a );
 
@@ -74,7 +118,7 @@ public class SourceCodeTests {
             a = 2;
         } else {
             a = 3;
-        };
+        }
 
         print( "%\\n", a );
 
@@ -84,7 +128,7 @@ public class SourceCodeTests {
             a = 2;
         } else {
             a = 3;
-        };
+        }
 
         print( "%\\n", a );
         """;
@@ -93,23 +137,44 @@ public class SourceCodeTests {
 
         String testname = "test1";
         App.save_to_file( "src/test/java/com/vuxiii/compiler/", testname + ".s", asm );
-        CommandLine compile = new CommandLine("gcc -no-pie src/main/java/com/vuxiii/compiler/CodeEmit/AssemblyUtils/utils.s src/main/java/com/vuxiii/compiler/CodeEmit/AssemblyUtils/gc.c src/test/java/com/vuxiii/compiler/" + testname + ".s -o src/test/java/com/vuxiii/compiler/" + testname);
-        CommandLine run = new CommandLine("./" + testname);
+        
+        File utils = new File("src/main/java/com/vuxiii/compiler/CodeEmit/AssemblyUtils/utils.s");
+        assertEquals( utils.exists(), true );
+        
+        File gc = new File("src/main/java/com/vuxiii/compiler/CodeEmit/AssemblyUtils/gc.c");
+        assertEquals( gc.exists(), true );
+        
+        File ass = new File( "src/test/java/com/vuxiii/compiler/", testname + ".s" );
+        assertEquals( ass.exists(), true );
+        
+        
+        CommandLine compile = new CommandLine( "gcc" );
+        compile.addArgument( "-no-pie" );
+        compile.addArgument( utils.getPath() );
+        compile.addArgument( gc.getPath() );
+        compile.addArgument( ass.getPath() );
+        compile.addArgument( "-o" );
+        compile.addArgument( "src/test/java/com/vuxiii/compiler/" + testname );
         
         DefaultExecutor executor = new DefaultExecutor();
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        executor.setStreamHandler(new PumpStreamHandler( out ) );
+
 
         try {
-            executor.execute(compile);
-            executor.execute(run);
-            String a = out.toString("UTF-8");
-            assertEquals( "1\n2\n3\n", a );
+            executor.execute(compile );
+
+            File outfile = new File( "src/test/java/com/vuxiii/compiler/" + testname );
+            assertEquals( outfile.exists(), true );
+
+            List<String> out = run_and_get_output( "src/test/java/com/vuxiii/compiler/" + testname );
+            
+            assertLinesMatch( List.of("1", "2", "3" ), out);
 
         } catch (ExecuteException e) {
             e.printStackTrace();
+            assertFalse(true);
         } catch (IOException e) {
             e.printStackTrace();
+            assertFalse(true);
         }
     }  
 
@@ -126,27 +191,52 @@ public class SourceCodeTests {
         print( "Number 3 is: %\\n", 2 + 3 * first );
         """;
 
+        
+
         String asm = App.runWithInput( input );
 
         String testname = "test3";
         App.save_to_file( "src/test/java/com/vuxiii/compiler/", testname + ".s", asm );
-        CommandLine compile = new CommandLine("gcc -no-pie src/main/java/com/vuxiii/compiler/CodeEmit/AssemblyUtils/utils.s src/main/java/com/vuxiii/compiler/CodeEmit/AssemblyUtils/gc.c src/test/java/com/vuxiii/compiler/" + testname + ".s -o src/test/java/com/vuxiii/compiler/" + testname);
-        CommandLine run = new CommandLine("./" + testname);
+        
+        File utils = new File("src/main/java/com/vuxiii/compiler/CodeEmit/AssemblyUtils/utils.s");
+        assertEquals( utils.exists(), true );
+        
+        File gc = new File("src/main/java/com/vuxiii/compiler/CodeEmit/AssemblyUtils/gc.c");
+        assertEquals( gc.exists(), true );
+        
+        File ass = new File( "src/test/java/com/vuxiii/compiler/", testname + ".s" );
+        assertEquals( ass.exists(), true );
+        
+        
+        CommandLine compile = new CommandLine( "gcc" );
+        compile.addArgument( "-no-pie" );
+        compile.addArgument( utils.getPath() );
+        compile.addArgument( gc.getPath() );
+        compile.addArgument( ass.getPath() );
+        compile.addArgument( "-o" );
+        compile.addArgument( "src/test/java/com/vuxiii/compiler/" + testname );
         
         DefaultExecutor executor = new DefaultExecutor();
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        executor.setStreamHandler(new PumpStreamHandler( out ) );
+
 
         try {
-            executor.execute(compile);
-            executor.execute(run);
-            String a = out.toString("UTF-8");
-            assertEquals( "Number 1 is: 18\nNumber 2 is: 18\nNumber 3 is: 23\n", a );
+            executor.execute(compile );
+
+            File outfile = new File( "src/test/java/com/vuxiii/compiler/" + testname );
+            assertEquals( outfile.exists(), true );
+
+            List<String> out = run_and_get_output( "src/test/java/com/vuxiii/compiler/" + testname );
+            
+            assertLinesMatch( List.of("Number 1 is: 18","Number 2 is: 18","Number 3 is: 23" ), out);
 
         } catch (ExecuteException e) {
             e.printStackTrace();
+            assertFalse(true);
         } catch (IOException e) {
+            System.out.println( "Cause: " + e.getCause().getMessage() );
+            
             e.printStackTrace();
+            assertFalse(true);
         }
     }
 
@@ -161,23 +251,40 @@ public class SourceCodeTests {
 
         String testname = "test4";
         App.save_to_file( "src/test/java/com/vuxiii/compiler/", testname + ".s", asm );
-        CommandLine compile = new CommandLine("gcc -no-pie src/main/java/com/vuxiii/compiler/CodeEmit/AssemblyUtils/utils.s src/main/java/com/vuxiii/compiler/CodeEmit/AssemblyUtils/gc.c src/test/java/com/vuxiii/compiler/" + testname + ".s -o src/test/java/com/vuxiii/compiler/" + testname);
-        CommandLine run = new CommandLine("./" + testname);
+        
+        File utils = new File("src/main/java/com/vuxiii/compiler/CodeEmit/AssemblyUtils/utils.s");
+        assertEquals( utils.exists(), true );
+        
+        File gc = new File("src/main/java/com/vuxiii/compiler/CodeEmit/AssemblyUtils/gc.c");
+        assertEquals( gc.exists(), true );
+        
+        File ass = new File( "src/test/java/com/vuxiii/compiler/", testname + ".s" );
+        assertEquals( ass.exists(), true );
+        
+        
+        CommandLine compile = new CommandLine( "gcc" );
+        compile.addArgument( "-no-pie" );
+        compile.addArgument( utils.getPath() );
+        compile.addArgument( gc.getPath() );
+        compile.addArgument( ass.getPath() );
+        compile.addArgument( "-o" );
+        compile.addArgument( "src/test/java/com/vuxiii/compiler/" + testname );
         
         DefaultExecutor executor = new DefaultExecutor();
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        executor.setStreamHandler(new PumpStreamHandler( out ) );
 
         try {
             executor.execute(compile);
-            executor.execute(run);
-            String a = out.toString("UTF-8");
-            assertEquals( "Hej William, du bor i Odense. Du er 23 aar. I Januar var du 22 aar gammel!\n", a );
+
+            List<String> out = run_and_get_output( "src/test/java/com/vuxiii/compiler/" + testname );
+            
+            assertLinesMatch( List.of("Hej William, du bor i Odense. Du er 23 aar. I Januar var du 22 aar gammel!" ), out);
 
         } catch (ExecuteException e) {
             e.printStackTrace();
+            assertFalse(true);
         } catch (IOException e) {
             e.printStackTrace();
+            assertFalse(true);
         }
     }
 
@@ -187,13 +294,13 @@ public class SourceCodeTests {
         String input = """
         if ( 1 ) {
             print( "If\\n" );
-        };
+        }
 
         if ( 4 + 4 ) {
             print( "If\\n" );
         } else {
             print( "Else\\n" );
-        };
+        }
 
         if ( 4 + 4 ) {
             print( "If\\n" );
@@ -201,30 +308,129 @@ public class SourceCodeTests {
             print( "Else if\\n" );
         } else {
             print( "Else\\n" );
-        };
+        }
+
+        print("Fix ending...\\n");
         """;
 
         String asm = App.runWithInput( input );
 
         String testname = "test5";
         App.save_to_file( "src/test/java/com/vuxiii/compiler/", testname + ".s", asm );
-        CommandLine compile = new CommandLine("gcc -no-pie src/main/java/com/vuxiii/compiler/CodeEmit/AssemblyUtils/utils.s src/main/java/com/vuxiii/compiler/CodeEmit/AssemblyUtils/gc.c src/test/java/com/vuxiii/compiler/" + testname + ".s -o src/test/java/com/vuxiii/compiler/" + testname);
-        CommandLine run = new CommandLine("./" + testname);
+        
+        File utils = new File("src/main/java/com/vuxiii/compiler/CodeEmit/AssemblyUtils/utils.s");
+        assertEquals( utils.exists(), true );
+        
+        File gc = new File("src/main/java/com/vuxiii/compiler/CodeEmit/AssemblyUtils/gc.c");
+        assertEquals( gc.exists(), true );
+        
+        File ass = new File( "src/test/java/com/vuxiii/compiler/", testname + ".s" );
+        assertEquals( ass.exists(), true );
+        
+        
+        CommandLine compile = new CommandLine( "gcc" );
+        compile.addArgument( "-no-pie" );
+        compile.addArgument( utils.getPath() );
+        compile.addArgument( gc.getPath() );
+        compile.addArgument( ass.getPath() );
+        compile.addArgument( "-o" );
+        compile.addArgument( "src/test/java/com/vuxiii/compiler/" + testname );
         
         DefaultExecutor executor = new DefaultExecutor();
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        executor.setStreamHandler(new PumpStreamHandler( out ) );
+
 
         try {
             executor.execute(compile);
-            executor.execute(run);
-            String a = out.toString("UTF-8");
-            assertEquals( "If\nElse\nElse if\n", a );
+
+            List<String> out = run_and_get_output( "src/test/java/com/vuxiii/compiler/" + testname );
+            
+            assertLinesMatch( List.of("If", "Else", "Else if", "Fix ending..." ), out);
 
         } catch (ExecuteException e) {
             e.printStackTrace();
+            assertFalse(true);
         } catch (IOException e) {
             e.printStackTrace();
+            assertFalse(true);
+        }
+    }
+
+    @Test
+    void if_else_custom_guards_test() {
+        App.reset_compiler();
+        String input = """
+        if ( 2+2 == 5 ) 
+            print("2 + 2 == 5 -> true\\n");
+        else
+            print("2 + 2 == 5 -> false\\n");
+        
+        if ( 2+2 != 5 ) 
+            print("2 + 2 != 5 -> true\\n");
+        else
+            print("2 + 2 != 5 -> false\\n");
+    
+        if ( true == true ) 
+            print( "true == true -> true\\n" );
+        else
+            print( "true == true -> false\\n" );
+        
+        if ( true != true ) 
+            print( "true != true -> true\\n" );
+        else
+            print( "true != true -> false\\n" );
+        
+        if ( false == false ) 
+            print( "false == false -> true\\n" );
+        else
+            print( "false == false -> false\\n" );
+        
+        if ( false != false ) 
+            print( "false != false -> true\\n" );
+        else
+            print( "false != false -> false\\n" );
+        
+        print("end\\n");
+        """;
+
+        String asm = App.runWithInput( input );
+
+        String testname = "test6";
+        App.save_to_file( "src/test/java/com/vuxiii/compiler/", testname + ".s", asm );
+        
+        File utils = new File("src/main/java/com/vuxiii/compiler/CodeEmit/AssemblyUtils/utils.s");
+        assertEquals( utils.exists(), true );
+        
+        File gc = new File("src/main/java/com/vuxiii/compiler/CodeEmit/AssemblyUtils/gc.c");
+        assertEquals( gc.exists(), true );
+        
+        File ass = new File( "src/test/java/com/vuxiii/compiler/", testname + ".s" );
+        assertEquals( ass.exists(), true );
+        
+        
+        CommandLine compile = new CommandLine( "gcc" );
+        compile.addArgument( "-no-pie" );
+        compile.addArgument( utils.getPath() );
+        compile.addArgument( gc.getPath() );
+        compile.addArgument( ass.getPath() );
+        compile.addArgument( "-o" );
+        compile.addArgument( "src/test/java/com/vuxiii/compiler/" + testname );
+        
+        DefaultExecutor executor = new DefaultExecutor();
+
+
+        try {
+            executor.execute(compile);
+
+            List<String> out = run_and_get_output( "src/test/java/com/vuxiii/compiler/" + testname );
+            
+            assertLinesMatch( List.of("2 + 2 == 5 -> false", "2 + 2 != 5 -> true", "true == true -> true", "true != true -> false", "false == false -> true", "false != false -> false", "end" ), out);
+
+        } catch (ExecuteException e) {
+            e.printStackTrace();
+            assertFalse(true);
+        } catch (IOException e) {
+            e.printStackTrace();
+            assertFalse(true);
         }
     }
 }

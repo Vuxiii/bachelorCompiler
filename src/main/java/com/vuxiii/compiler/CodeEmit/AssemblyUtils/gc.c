@@ -372,10 +372,12 @@ void print_subs( char *buffer, long *offsets, char *subs, long num_of_subs ) {
 void print_string( char *buffer, long len, long offset ) {
     // printf( "\n\tBuffer is: %s\n", buffer + offset );
     printf( "%.*s", len, buffer + offset );
+    fflush(NULL);
 }
 
 void print_num( long num ) {
     printf( "%ld", num );
+    fflush(NULL);
 }
 
 void print_scopes() {
