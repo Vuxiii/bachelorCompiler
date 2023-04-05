@@ -200,6 +200,11 @@ public class AST_StackMachine extends Visitor {
                         System.out.println( new Error( "StackMachine Error!", "Some unexpected operator in the guard of an if clause: " + ope.getPrintableName() ));
                         System.exit(-1);
                     }
+                } else if ( if_node.guard.node instanceof LexLiteral ) {
+                    Operand left = Operand.from_register( Register.RAX, AddressingMode.REGISER );
+                    push( new Instruction( Opcode.POP, Arguments.from_register( Register.RAX ) ) );
+                    push( new Instruction( Opcode.COMPARE, new Arguments( left, Operand.from_int( 0, AddressingMode.IMMEDIATE ), left ) ) );
+                    push( new Instruction( Opcode.JUMP_EQUAL, Arguments.from_label( if_node.end_of_body ) ) );
                 }
                 if_state = IfState.ENTER_BODY;
             } break;
