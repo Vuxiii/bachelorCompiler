@@ -296,13 +296,13 @@ public class SourceCodeTests {
             print( "If\\n" );
         }
 
-        if ( 4 + 4 ) {
+        if ( 4 - 4 ) {
             print( "If\\n" );
         } else {
             print( "Else\\n" );
         }
 
-        if ( 4 + 4 ) {
+        if ( 4 - 4 ) {
             print( "If\\n" );
         } else if ( 1 ) {
             print( "Else if\\n" );
@@ -424,6 +424,57 @@ public class SourceCodeTests {
             List<String> out = run_and_get_output( "src/test/java/com/vuxiii/compiler/" + testname );
             
             assertLinesMatch( List.of("2 + 2 == 5 -> false", "2 + 2 != 5 -> true", "true == true -> true", "true != true -> false", "false == false -> true", "false != false -> false", "end" ), out);
+
+        } catch (ExecuteException e) {
+            e.printStackTrace();
+            assertFalse(true);
+        } catch (IOException e) {
+            e.printStackTrace();
+            assertFalse(true);
+        }
+    }
+
+    @Test
+    void single_if_test() {
+        App.reset_compiler();
+        String input = """
+        if ( 1 ) {
+            print( "If\\n" );
+        }
+        """;
+
+        String asm = App.runWithInput( input );
+
+        String testname = "test7";
+        App.save_to_file( "src/test/java/com/vuxiii/compiler/", testname + ".s", asm );
+        
+        File utils = new File("src/main/java/com/vuxiii/compiler/CodeEmit/AssemblyUtils/utils.s");
+        assertEquals( utils.exists(), true );
+        
+        File gc = new File("src/main/java/com/vuxiii/compiler/CodeEmit/AssemblyUtils/gc.c");
+        assertEquals( gc.exists(), true );
+        
+        File ass = new File( "src/test/java/com/vuxiii/compiler/", testname + ".s" );
+        assertEquals( ass.exists(), true );
+        
+        
+        CommandLine compile = new CommandLine( "gcc" );
+        compile.addArgument( "-no-pie" );
+        compile.addArgument( utils.getPath() );
+        compile.addArgument( gc.getPath() );
+        compile.addArgument( ass.getPath() );
+        compile.addArgument( "-o" );
+        compile.addArgument( "src/test/java/com/vuxiii/compiler/" + testname );
+        
+        DefaultExecutor executor = new DefaultExecutor();
+
+
+        try {
+            executor.execute(compile);
+
+            List<String> out = run_and_get_output( "src/test/java/com/vuxiii/compiler/" + testname );
+            
+            assertLinesMatch( List.of("If" ), out);
 
         } catch (ExecuteException e) {
             e.printStackTrace();

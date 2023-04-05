@@ -9,11 +9,11 @@ import com.vuxiii.compiler.VisitorPattern.Annotations.VisitNumber;
 public class Field extends ASTNode {
 
 
-    @VisitNumber( number = 1 ) public final ASTNode field;
+    @VisitNumber( number = 1 ) public Declaration field;
 
-    @VisitNumber( number = 2 ) public final Optional<Field> next;
+    @VisitNumber( number = 2 ) public Optional<Field> next;
 
-    public Field( Term term, ASTNode field ) {
+    public Field( Term term, Declaration field ) {
         super( term );
         this.field = field;
         this.next = Optional.empty();
@@ -21,26 +21,13 @@ public class Field extends ASTNode {
         super.setup_ASTNodeQueue();
     }
     
-    public Field( Term term, ASTNode field, Field next ) {
+    public Field( Term term, Declaration field, Field next ) {
         super( term );
         this.field = field;
         this.next = Optional.of(next);
 
         super.setup_ASTNodeQueue();
     }
-
-    @Override
-    public Optional<ASTNode> getChild1() {
-        return Optional.of( field );
-    }
-
-    @Override
-    public Optional<ASTNode> getChild2() {
-        if ( next.isPresent() )
-            return Optional.of( next.get() );
-        return Optional.empty();
-    }
-
 
     public String toString() {
         return "Field_List";

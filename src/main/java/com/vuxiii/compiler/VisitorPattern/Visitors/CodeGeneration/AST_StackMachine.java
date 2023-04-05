@@ -18,6 +18,9 @@ import com.vuxiii.compiler.Parser.Nodes.Argument;
 import com.vuxiii.compiler.Parser.Nodes.ArgumentList;
 import com.vuxiii.compiler.Parser.Nodes.Assignment;
 import com.vuxiii.compiler.Parser.Nodes.BinaryOperation;
+import com.vuxiii.compiler.Parser.Nodes.BinaryOperationKind;
+import com.vuxiii.compiler.Parser.Nodes.Declaration;
+import com.vuxiii.compiler.Parser.Nodes.DeclarationKind;
 import com.vuxiii.compiler.Parser.Nodes.Expression;
 import com.vuxiii.compiler.Parser.Nodes.FunctionCall;
 import com.vuxiii.compiler.Parser.Nodes.IfElseNode;
@@ -26,6 +29,7 @@ import com.vuxiii.compiler.Parser.Nodes.IfNode;
 import com.vuxiii.compiler.Parser.Nodes.Print;
 import com.vuxiii.compiler.Parser.Nodes.PrintKind;
 import com.vuxiii.compiler.Parser.Nodes.Root;
+import com.vuxiii.compiler.Parser.Nodes.ScopeNode;
 import com.vuxiii.compiler.Parser.Nodes.Statement;
 import com.vuxiii.compiler.Parser.Nodes.StatementKind;
 import com.vuxiii.compiler.Parser.Nodes.SymbolNode;
@@ -37,6 +41,7 @@ import com.vuxiii.compiler.VisitorPattern.Annotations.VisitorPattern;
 import com.vuxiii.compiler.VisitorPattern.Visitors.CodeGeneration.StringCollection.StringNode;
 import com.vuxiii.compiler.VisitorPattern.Visitors.Debug.AST_Printer;
 import com.vuxiii.compiler.VisitorPattern.Visitors.SymbolCollection.AST_SymbolCollector;
+import com.vuxiii.compiler.VisitorPattern.Visitors.SymbolCollection.Layout;
 import com.vuxiii.compiler.VisitorPattern.Visitors.SymbolCollection.Scope;
 
 public class AST_StackMachine extends Visitor {
@@ -124,10 +129,91 @@ public class AST_StackMachine extends Visitor {
 
         Operand left = new Operand( total_offset, AddressingMode.IMMEDIATE );
         Operand right = new Operand( Register.RSP, AddressingMode.REGISER );
-        Arguments args = new Arguments( left, right, right );
+        Arguments args = new Arguments( List.of(left, right, right) );
         Instruction ins = new Instruction( Opcode.MINUS, args, new Comment( "Making room for local variables in main scope!" ) );
         
         push( ins );
+
+        push( new Instruction( Opcode.CALL, Arguments.from_label( "initialize_heap" ) ) );
+
+        int total_pointers = 1;
+        push( new Instruction( Opcode.MOVE, new Arguments( List.of(
+            Operand.from_int( total_pointers ),
+            Operand.from_register( Register.RDI, AddressingMode.REGISER )
+        ))));
+
+        Operand scope_header = Operand.from_register( Register.RBP, AddressingMode.DIRECT_OFFSET );
+        scope_header.offset = -1;
+        push( new Instruction( Opcode.LEA, new Arguments( List.of( 
+            scope_header,
+            Operand.from_register( Register.RSI, AddressingMode.REGISER )
+        ))));
+
+        // Push the bitfield
+        int total_fields = 1;
+
+        for ( long field : Layout.getLayout( "root" ) ) {
+            push( new Instruction( Opcode.PUSH, Arguments.from_long( field ) ) );
+        }
+
+
+        
+        Operand bitfield = Operand.from_register( Register.RSP, AddressingMode.DIRECT_OFFSET );
+        bitfield.offset = 0;
+        push( new Instruction( Opcode.LEA, new Arguments( List.of( 
+            bitfield,
+            Operand.from_register( Register.RDX, AddressingMode.REGISER )
+        ))));
+
+        
+        push( new Instruction( Opcode.CALL, Arguments.from_label( "new_scope_header" ) ) );
+
+        push( new Instruction( Opcode.ADD, new Arguments( List.of (
+            Operand.from_int( total_fields ),
+            Operand.from_register( Register.RSP, AddressingMode.REGISER )
+        ))));
+
+        // Insert all the scope pointers.
+        // We can then map them correctly afterwards.
+
+        // TODO! Ensure that this also works for functions!!!!!
+
+        for ( Layout layout : Layout.get_all_layouts() ) {
+            // Insert size -> rdi
+            
+            push( new Instruction( Opcode.MOVE, new Arguments( List.of(
+                Operand.from_long( layout.num_of_fields ),
+                Operand.from_register( Register.RDI, AddressingMode.REGISER )
+            ) )));
+
+            // Push the bitfields on the stack
+            for ( long field : layout.bitfields() ) {
+                new Instruction( Opcode.PUSH, Arguments.from_long( field ) );
+            }
+
+            // Load rsp -> rsi
+            Operand rsp = Operand.from_register( Register.RSP, AddressingMode.DIRECT_OFFSET );
+            rsp.offset = 0;
+            push( new Instruction( Opcode.LEA, new Arguments( List.of(
+                rsp,
+                Operand.from_register( Register.RSI, AddressingMode.REGISER )
+            ))));
+
+            // call new_layout
+            push( new Instruction( Opcode.CALL, Arguments.from_label( "new_layout" ) ) );
+            
+            // add size -> rsp
+            push( new Instruction( Opcode.ADD, new Arguments( List.of( 
+                Operand.from_long( layout.num_of_fields ),
+                Operand.from_register( Register.RSP, AddressingMode.REGISER )
+            ))));
+            
+            // move rax -> layoutspace.
+            push( new Instruction( Opcode.MOVE, new Arguments( List.of(
+                Operand.from_register(Register.RAX, AddressingMode.REGISER),
+                Operand.from_string( layout.name )
+            ))));
+        }
 
     }   
 
@@ -189,7 +275,8 @@ public class AST_StackMachine extends Visitor {
 
             } break;
             case EXIT_GUARD: {
-                if ( if_node.guard.node instanceof BinaryOperation ) {
+                if ( if_node.guard.node instanceof BinaryOperation && 
+                    (((BinaryOperation)if_node.guard.node).kind == BinaryOperationKind.EQUALS || ((BinaryOperation)if_node.guard.node).kind == BinaryOperationKind.NOT_EQUALS ) ) {
                     BinaryOperation binop = (BinaryOperation)if_node.guard.node;
                     LexOperator ope = (LexOperator)binop.operator;
                     if ( ope.operator == TokenType.CHECK_EQUAL ) {
@@ -200,10 +287,10 @@ public class AST_StackMachine extends Visitor {
                         System.out.println( new Error( "StackMachine Error!", "Some unexpected operator in the guard of an if clause: " + ope.getPrintableName() ));
                         System.exit(-1);
                     }
-                } else if ( if_node.guard.node instanceof LexLiteral ) {
+                } else {
                     Operand left = Operand.from_register( Register.RAX, AddressingMode.REGISER );
                     push( new Instruction( Opcode.POP, Arguments.from_register( Register.RAX ) ) );
-                    push( new Instruction( Opcode.COMPARE, new Arguments( left, Operand.from_int( 0, AddressingMode.IMMEDIATE ), left ) ) );
+                    push( new Instruction( Opcode.COMPARE, new Arguments( List.of(left, Operand.from_int( 0 )) ) ) );
                     push( new Instruction( Opcode.JUMP_EQUAL, Arguments.from_label( if_node.end_of_body ) ) );
                 }
                 if_state = IfState.ENTER_BODY;
@@ -323,8 +410,8 @@ public class AST_StackMachine extends Visitor {
         
         
         Opcode opcode = null;
-        Operand r1 = new Operand( Register.RBX, AddressingMode.REGISER ); 
-        Operand r2 = new Operand( Register.RCX, AddressingMode.REGISER ); 
+        Operand r1 = new Operand( Register.RCX, AddressingMode.REGISER ); 
+        Operand r2 = new Operand( Register.RBX, AddressingMode.REGISER ); 
         Operand target = new Operand( Register.RAX, AddressingMode.REGISER ); 
         switch (binop.kind) {
             case PLUS: {
@@ -348,7 +435,7 @@ public class AST_StackMachine extends Visitor {
             case EQUALS: case NOT_EQUALS: {
                 opcode = Opcode.COMPARE;
 
-                push( new Instruction( opcode, new Arguments(r1, r2, r2 ) ) );
+                push( new Instruction( opcode, new Arguments(List.of(r1, r2) ) ) );
 
                 return;
             } 
@@ -359,11 +446,45 @@ public class AST_StackMachine extends Visitor {
         }
 
         push( new Instruction( opcode, 
-                                    new Arguments( r1, r2, target ), 
+                                    new Arguments( List.of(r1, r2, target) ), 
                                     new Comment( target + " = " + binop  ) ) );
         push( new Instruction( Opcode.PUSH, 
-                                    Arguments.from_operand( target ), 
+                                    new Arguments( List.of( target) ), 
                                     new Comment( "Storing computed value" ) ) );
+    }
+
+    @VisitorPattern( when = VisitOrder.ENTER_NODE )
+    public void heap_declaration( Declaration decl ) {
+        if ( decl.kind != DeclarationKind.HEAP ) return;
+
+        //TODO! Make this dynamic. Currently we only support 64 bit integers
+        String layout_name = Layout.get_layout( decl );
+        LexIdent id = decl.id;
+
+        int size = 1;
+        // How much space do we want for our heap_memory?
+        push( new Instruction( Opcode.MOVE, new Arguments( List.of( 
+            Operand.from_int( size ),
+            Operand.from_register( Register.RDI, AddressingMode.REGISER ) ) ) ) );
+
+        
+        int num_of_bitfields = 0;
+        // Push bitfield
+        for ( long field : Layout.getLayout(id.name) ) {
+            push( new Instruction( Opcode.PUSH, Arguments.from_long( field ) ) );
+            num_of_bitfields++;
+        }
+
+        // The layout
+        push( new Instruction( Opcode.MOVE, new Arguments( List.of( 
+            Operand.from_string( layout_name ),
+            Operand.from_register( Register.RSI, AddressingMode.REGISER ) ) ) ) );
+
+
+        push( new Instruction( Opcode.ADD, new Arguments( List.of(
+            Operand.from_int(num_of_bitfields ),
+            Operand.from_register( Register.RSP, AddressingMode.REGISER )
+        )) ) );
     }
 
     @VisitorPattern( when = VisitOrder.EXIT_NODE )
@@ -374,24 +495,27 @@ public class AST_StackMachine extends Visitor {
 
 
         if ( assignment_node.value instanceof LexIdent ) {
-            String var_name = ((LexIdent)assignment_node.value).name;
-            Operand var_to_load = new Operand( var_name, AddressingMode.IMMEDIATE );
-            boolean target_is_parameter = current_scope.get_parameters().contains( var_name );
+            LexIdent id = (LexIdent)assignment_node.value;
 
-            push( new Instruction( Opcode.LOAD_VARIABLE, 
-                                    new Arguments( var_to_load, new Operand( Register.RAX, AddressingMode.REGISER ) ), 
-                                    new Comment( "Load variable " + var_name ),
-                                    target_is_parameter ) );
+            push( _load_var( id, new Operand( Register.RAX, AddressingMode.REGISER ) ) );
+
         } else { // Literal
             push( new Instruction( Opcode.POP, 
                                 Arguments.from_register( Register.RAX ), 
                                 new Comment( "Fetching value" ) ) );
         }
 
-        
-        push( new Instruction( Opcode.STORE_VARIABLE, 
-                                new Arguments( new Operand( assignment_node.id.name, AddressingMode.IMMEDIATE ), new Operand( Register.RAX, AddressingMode.REGISER ) ), 
-                                new Comment( "Store in variable " + assignment_node.id.name ) ) );
+        if ( AST_SymbolCollector.current_scope( assignment_node.id ).isHeapAllocated( assignment_node.id.name ) ) {
+            Operand rbx = Operand.from_register( Register.RBX, AddressingMode.DIRECT_OFFSET );
+            rbx.offset = 2; //TODO! Make dynamic for records.
+
+            push( new Instruction( Opcode.MOVE, new Arguments( List.of( Operand.from_register( Register.RAX, AddressingMode.REGISER ), rbx ) ) ) );
+        } else {
+            push( new Instruction( Opcode.STORE_VARIABLE, 
+                                    new Arguments( List.of(new Operand( assignment_node.id.name, AddressingMode.IMMEDIATE ), new Operand( Register.RAX, AddressingMode.REGISER )) ), 
+                                    new Comment( "Store in variable " + assignment_node.id.name ) ) );
+
+        }
         
     }
 
@@ -420,9 +544,9 @@ public class AST_StackMachine extends Visitor {
 
         if ( print_node.kind == PrintKind.STRING ) {
             int len = str_node.stop_indicators.get(0);
-            push( new Instruction( Opcode.MOVE, new Arguments( string_operand, string_target ), new Comment( "Fetching value " + print_node.value ) ) );
-            push( new Instruction( Opcode.MOVE, new Arguments( Operand.from_int(len, AddressingMode.IMMEDIATE ), Operand.from_register( Register.RSI, AddressingMode.REGISER ) ) ) );
-            push( new Instruction( Opcode.MOVE, new Arguments( Operand.from_int(0, AddressingMode.IMMEDIATE ), Operand.from_register( Register.RDX, AddressingMode.REGISER ) ) ) );
+            push( new Instruction( Opcode.MOVE, new Arguments( List.of(string_operand, string_target) ), new Comment( "Fetching value " + print_node.value ) ) );
+            push( new Instruction( Opcode.MOVE, new Arguments( List.of(Operand.from_int(len ), Operand.from_register( Register.RSI, AddressingMode.REGISER )) ) ) );
+            push( new Instruction( Opcode.MOVE, new Arguments( List.of(Operand.from_int(0 ), Operand.from_register( Register.RDX, AddressingMode.REGISER )) ) ) );
             push( new Instruction( Opcode.PRINT_STRING, Arguments.from_label( "%\n" ) ) ); 
         } else {
             // Do the fancy things
@@ -447,9 +571,9 @@ public class AST_StackMachine extends Visitor {
                 int len = str_node.stop_indicators.get(i) - prev;
 
                 // Print the main part
-                push( new Instruction( Opcode.MOVE, new Arguments( string_operand, string_target ), new Comment( "The input text" ) ) );
-                push( new Instruction( Opcode.MOVE, new Arguments( Operand.from_int(len, AddressingMode.IMMEDIATE ), Operand.from_register( Register.RSI, AddressingMode.REGISER ) ) ) );
-                push( new Instruction( Opcode.MOVE, new Arguments( Operand.from_int(prev, AddressingMode.IMMEDIATE ), Operand.from_register( Register.RDX, AddressingMode.REGISER ) ) ) );
+                push( new Instruction( Opcode.MOVE, new Arguments( List.of(string_operand, string_target )), new Comment( "The input text" ) ) );
+                push( new Instruction( Opcode.MOVE, new Arguments( List.of(Operand.from_int(len ), Operand.from_register( Register.RSI, AddressingMode.REGISER )) ) ) );
+                push( new Instruction( Opcode.MOVE, new Arguments( List.of(Operand.from_int(prev ), Operand.from_register( Register.RDX, AddressingMode.REGISER )) ) ) );
                 push( new Instruction( Opcode.PRINT_STRING, Arguments.from_label( "%\n" ) ) ); 
 
 
@@ -457,9 +581,9 @@ public class AST_StackMachine extends Visitor {
                 if ( exp.node instanceof LexLiteral && ((LexLiteral)exp.node).literal_type.equals( PrimitiveType.STRING ) ) {
                     Operand string_sub = new Operand( str_node.substitute_name, AddressingMode.IMMEDIATE );
                     int sub_len = ((LexLiteral)exp.node).val.length()-2;
-                    push( new Instruction( Opcode.MOVE, new Arguments( string_sub, string_target ), new Comment( "Fetching value " + print_node.value ) ) );
-                    push( new Instruction( Opcode.MOVE, new Arguments( Operand.from_int(sub_len, AddressingMode.IMMEDIATE ), Operand.from_register( Register.RSI, AddressingMode.REGISER ) ) ) );
-                    push( new Instruction( Opcode.MOVE, new Arguments( Operand.from_int(offset, AddressingMode.IMMEDIATE ), Operand.from_register( Register.RDX, AddressingMode.REGISER ) ) ) );
+                    push( new Instruction( Opcode.MOVE, new Arguments( List.of(string_sub, string_target) ), new Comment( "Fetching value " + print_node.value ) ) );
+                    push( new Instruction( Opcode.MOVE, new Arguments( List.of(Operand.from_int(sub_len ), Operand.from_register( Register.RSI, AddressingMode.REGISER )) ) ) );
+                    push( new Instruction( Opcode.MOVE, new Arguments( List.of(Operand.from_int(offset ), Operand.from_register( Register.RDX, AddressingMode.REGISER )) ) ) );
 
                     push( new Instruction( Opcode.PRINT_STRING, Arguments.from_label( "%\n" ) ) ); 
 
@@ -470,7 +594,7 @@ public class AST_StackMachine extends Visitor {
                     off.offset = str_node.num_of_values_on_stack - stack_counter;
                     stack_counter++;
 
-                    Arguments load = new Arguments( off, Operand.from_register( Register.RDI, AddressingMode.REGISER ) );
+                    Arguments load = new Arguments( List.of(off, Operand.from_register( Register.RDI, AddressingMode.REGISER )) );
                     
                     push( new Instruction( Opcode.MOVE, load, new Comment( "Fetching value " + print_node.value ) ) );
                     push( new Instruction( Opcode.PRINT_NUM, Arguments.from_label( "%\n" ) ) ); 
@@ -481,13 +605,13 @@ public class AST_StackMachine extends Visitor {
 
             }
 
-            push( new Instruction( Opcode.MOVE, new Arguments( string_operand, string_target ), new Comment( "The input text" ) ) );
-            push( new Instruction( Opcode.MOVE, new Arguments( Operand.from_int(str_node.stop_indicators.get(str_node.stop_indicators.size()-1) - prev, AddressingMode.IMMEDIATE ), Operand.from_register( Register.RSI, AddressingMode.REGISER ) ) ) );
-            push( new Instruction( Opcode.MOVE, new Arguments( Operand.from_int(prev, AddressingMode.IMMEDIATE ), Operand.from_register( Register.RDX, AddressingMode.REGISER ) ) ) );
+            push( new Instruction( Opcode.MOVE, new Arguments( List.of(string_operand, string_target )), new Comment( "The input text" ) ) );
+            push( new Instruction( Opcode.MOVE, new Arguments( List.of(Operand.from_int(str_node.stop_indicators.get(str_node.stop_indicators.size()-1) - prev ), Operand.from_register( Register.RSI, AddressingMode.REGISER )) ) ) );
+            push( new Instruction( Opcode.MOVE, new Arguments( List.of(Operand.from_int(prev ), Operand.from_register( Register.RDX, AddressingMode.REGISER )) ) ) );
             push( new Instruction( Opcode.PRINT_STRING, Arguments.from_label( "%\n" ) ) ); 
 
             // Remove the calculated stuff from the stack.
-            push( new Instruction( Opcode.ADD, new Arguments( Operand.from_int(str_node.num_of_values_on_stack * 8, AddressingMode.IMMEDIATE), Operand.from_register( Register.RSP, AddressingMode.REGISER), Operand.from_register( Register.RSP, AddressingMode.REGISER) ) ) );
+            push( new Instruction( Opcode.ADD, new Arguments( List.of(Operand.from_int(str_node.num_of_values_on_stack * 8), Operand.from_register( Register.RSP, AddressingMode.REGISER), Operand.from_register( Register.RSP, AddressingMode.REGISER)) ) ) );
 
         }
 
@@ -498,19 +622,37 @@ public class AST_StackMachine extends Visitor {
         code.add( instruction );
     }
 
+    private void push( List<Instruction> instruction ) {
+        code.addAll( instruction );
+    }
+
     /**
      * This method loads the given variable
      * @param id
      */
-    private Instruction _load_var( LexIdent id, Operand target ) {
+    private List<Instruction> _load_var( LexIdent id, Operand target ) {
         String var_name = id.name;
         Operand var = new Operand( var_name, AddressingMode.IMMEDIATE );
-        boolean target_is_parameter = current_scope.get_parameters().contains( var_name );
-        return new Instruction( Opcode.LOAD_VARIABLE, 
-                                new Arguments( var, target, target ), 
-                                new Comment( "Load variable " + var_name ),
-                                target_is_parameter );
-    }
+        Scope scope = AST_SymbolCollector.current_scope(id);
+        boolean target_is_parameter = scope.get_parameters().contains( var_name );
 
+        if ( scope.isHeapAllocated( var_name ) ) {
+            List<Instruction> li = new ArrayList<>();
+            li.add( new Instruction( Opcode.LOAD_VARIABLE, 
+                                new Arguments( List.of(var, target) ), 
+                                new Comment( "Load variable " + var_name ),
+                                target_is_parameter ) );
+            Operand inter = Operand.from_register( target.get_reg(), AddressingMode.DIRECT_OFFSET );
+            inter.offset = 2;
+            li.add( new Instruction( Opcode.MOVE, new Arguments( List.of( inter, target ) ) ) );
+
+            return li;
+        } else {
+            return List.of(new Instruction( Opcode.LOAD_VARIABLE, 
+                                new Arguments( List.of(var, target) ), 
+                                new Comment( "Load variable " + var_name ),
+                                target_is_parameter ) );
+        }
+    }
 
 }

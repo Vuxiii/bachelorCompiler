@@ -11,13 +11,20 @@ import com.vuxiii.compiler.VisitorPattern.Annotations.VisitNumber;
 
 public class UserType extends Type {
     
-    @VisitNumber( number = 1 ) public final LexIdent identifier;
+    @VisitNumber( number = 1 ) public Optional<LexIdent> identifier;
 
-    @VisitNumber( number = 2 ) public final Field fields;
+    @VisitNumber( number = 2 ) public ASTNode fields;
 
-    public UserType( Term term, LexIdent user_type, Field fields ) {
+    public UserType( Term term, LexIdent user_type, ASTNode fields ) {
         super(term);
-        this.identifier = user_type;
+        this.identifier = Optional.of(user_type);
+        this.fields = fields;
+        super.setup_ASTNodeQueue();
+    }
+
+    public UserType( Term term, ASTNode fields ) {
+        super(term);
+        this.identifier = Optional.empty();
         this.fields = fields;
         super.setup_ASTNodeQueue();
     }
@@ -29,7 +36,9 @@ public class UserType extends Type {
     
     @Override
     public String simple_type_name() {
-        return identifier.name;
+        if ( identifier.isPresent() )
+            return identifier.get().name;
+        return "identifier not set yet for user Type";
     }
 
     @Override

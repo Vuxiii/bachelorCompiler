@@ -164,7 +164,7 @@ public class Parser {
 
         init_types();
 
-        // n_Declaration_Variable -> t_Let t_Identifier t_Colon n_User_Type
+        // n_Declaration_Variable -> t_Let t_Identifier t_Colon n_Any_Type
         g.addRuleWithReduceFunction( Symbol.n_Declaration_Variable, List.of( Symbol.t_Let, Symbol.t_Identifier, Symbol.t_Colon, Symbol.n_Any_Type ), t -> {
             LexIdent id = (LexIdent)t.get(1);
 
@@ -199,6 +199,46 @@ public class Parser {
             }
             System.out.println("--[[ Parser Error ]]--\nSomething happend trying to parse a user type. It is not a UserType or an Identifier. So what is it?" );
             System.out.println( t.get(3) );
+            
+            System.exit(-1);
+            return null; // error!
+        });
+
+        // n_Declaration_Variable -> t_Let t_Identifier t_Colon t_Times n_Any_Type
+        g.addRuleWithReduceFunction( Symbol.n_Declaration_Variable, List.of( Symbol.t_Let, Symbol.t_Identifier, Symbol.t_Colon, Symbol.t_Times, Symbol.n_Any_Type ), t -> {
+            LexIdent id = (LexIdent)t.get(1);
+
+            if ( t.get(4) instanceof Field ) {
+                Field fields = (Field)t.get(4);             
+                UserType type = new UserType( Symbol.n_Declaration_Variable, id, fields );
+                
+                stored_user_types.putIfAbsent( id.matchInfo.str(), type );
+                
+                return new Declaration( Symbol.n_Declaration_Variable, id, type, DeclarationKind.HEAP );
+            } else if (t.get(4) instanceof StandardType ) { 
+                StandardType type = (StandardType)t.get(4); 
+                return new Declaration( Symbol.n_Declaration_Variable, id, type, DeclarationKind.HEAP );
+            } else if ( t.get(4) instanceof LexIdent ) {
+                LexIdent ident = (LexIdent)t.get(4);             
+                Type type = stored_user_types.get( ident.name );
+                
+                if ( type == null )
+                    return new Declaration( Symbol.n_Declaration_Variable, id, new UnknownType(Symbol.n_Declaration_Variable, ident ), DeclarationKind.HEAP );
+
+                return new Declaration( Symbol.n_Declaration_Variable, id, type, DeclarationKind.HEAP );
+            } else if ( t.get(4) instanceof FunctionType ) {
+                FunctionType type = (FunctionType)t.get(4);    
+                stored_user_types.putIfAbsent( id.matchInfo.str(), type );
+                
+                return new Declaration( Symbol.n_Declaration_Variable, id, type, DeclarationKind.FUNCTION );
+            }else if ( t.get(4) instanceof UnknownType ) {
+                UnknownType type = (UnknownType)t.get(4);    
+                stored_user_types.putIfAbsent( id.matchInfo.str(), type );
+                
+                return new Declaration( Symbol.n_Declaration_Variable, id, type, DeclarationKind.FUNCTION );
+            }
+            System.out.println("--[[ Parser Error ]]--\nSomething happend trying to parse a user type. It is not a UserType or an Identifier. So what is it?" );
+            System.out.println( t.get(4) );
             
             System.exit(-1);
             return null; // error!
@@ -340,9 +380,10 @@ public class Parser {
     private static void init_types() {
         // n_User_Type -> t_LCurly n_Field_List t_RCurly
         g.addRuleWithReduceFunction( Symbol.n_User_Type, List.of( Symbol.t_LCurly, Symbol.n_Field_List, Symbol.t_RCurly ), t -> {
-            return new Field( Symbol.n_User_Type, (ASTNode)t.get(1) );
+            Field f = (Field)t.get(1);
+            f.term = Symbol.n_User_Type;
+            return f;
         });
-        
         
         // n_User_Type -> t_Identifier
         g.addRuleWithReduceFunction( Symbol.n_User_Type, List.of( Symbol.t_Identifier ), t -> {
@@ -364,12 +405,12 @@ public class Parser {
         // n_Field_List -> n_Field t_Semicolon n_Field_List
         g.addRuleWithReduceFunction( Symbol.n_Field_List, List.of( Symbol.n_Field, Symbol.t_Semicolon, Symbol.n_Field_List ), t -> {
             Declaration decl = (Declaration)t.get(0);
-            return new Statement( Symbol.n_Field_List, decl, (Statement)t.get(2), StatementKind.DECLARATION );
+            return new Field( Symbol.n_Field_List, decl, (Field)t.get(2) );
         });
         
         // n_Field_List -> n_Field t_Semicolon
         g.addRuleWithReduceFunction( Symbol.n_Field_List, List.of( Symbol.n_Field, Symbol.t_Semicolon ), t -> {
-            return new Statement( Symbol.n_Field_List, (Declaration)t.get(0), StatementKind.DECLARATION );
+            return new Field( Symbol.n_Field_List, (Declaration)t.get(0) );
         });
         
         // n_Field -> t_Identifier t_Colon n_Standard_Type
@@ -426,9 +467,14 @@ public class Parser {
         });
         // n_Any_Type -> n_User_type
         g.addRuleWithReduceFunction( Symbol.n_Any_Type, List.of( Symbol.n_User_Type ), t -> {
-            Type st = (Type)t.get(0);
-            st.term = Symbol.n_Any_Type;
-            return st;
+            if ( t.get(0) instanceof Field ) {
+                Field f = (Field)t.get(0);
+                return new UserType( Symbol.n_Any_Type, f );
+            } else {
+                Type st = (Type)t.get(0);
+                st.term = Symbol.n_Any_Type;
+                return st;
+            }
         });
 
         // n_Standard_Type -> t_Type_Int

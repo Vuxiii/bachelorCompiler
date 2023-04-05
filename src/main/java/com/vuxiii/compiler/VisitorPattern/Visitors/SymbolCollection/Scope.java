@@ -1,6 +1,7 @@
 package com.vuxiii.compiler.VisitorPattern.Visitors.SymbolCollection;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -17,6 +18,8 @@ public class Scope {
     private Map<String, Integer> variable_offsets = new HashMap<>();
     private int current_variable_offset = 1;
 
+    private Set<String> is_var_heap_allocated = new HashSet<>();
+
     private Map<String, LexIdent> capture_vars = new HashMap<>();
 
     public void add_variable( LexIdent variable ) {
@@ -24,10 +27,15 @@ public class Scope {
         local_vars.put( variable.name, variable );
         variable_offsets.put( variable.name, current_variable_offset++ );
     }
+
     public void add_parameter( LexIdent variable ) {
         if ( parameters.containsKey(variable.name) ) return;
         parameters.put( variable.name, variable );
         parameter_offsets.put( variable.name, current_parameter_offset++ );
+    }
+
+    public void identifier_is_heap_allocated( String identifier ) {
+        is_var_heap_allocated.add( identifier );
     }
 
     public void add_capture( LexIdent variable ) {
@@ -42,6 +50,10 @@ public class Scope {
     public LexIdent lookup_this_scope( String variable_name ) {
         LexIdent var = local_vars.get( variable_name );
         return var;
+    }
+
+    public boolean isHeapAllocated( String variable_name ) {
+        return is_var_heap_allocated.contains( variable_name );
     }
 
     public LexIdent lookup_capture( String variable_name ) {

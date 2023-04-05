@@ -13,9 +13,12 @@ import com.vuxiii.compiler.Parser.Symbol;
 import com.vuxiii.compiler.Parser.Nodes.Assignment;
 import com.vuxiii.compiler.Parser.Nodes.Declaration;
 import com.vuxiii.compiler.Parser.Nodes.DeclarationKind;
+import com.vuxiii.compiler.Parser.Nodes.Field;
+import com.vuxiii.compiler.Parser.Nodes.FieldList;
 import com.vuxiii.compiler.Parser.Nodes.Root;
 import com.vuxiii.compiler.Parser.Nodes.SymbolNode;
 import com.vuxiii.compiler.Parser.Nodes.Types.FunctionType;
+import com.vuxiii.compiler.Parser.Nodes.Types.UserType;
 import com.vuxiii.compiler.VisitorPattern.ASTNode;
 import com.vuxiii.compiler.VisitorPattern.Annotations.VisitOrder;
 import com.vuxiii.compiler.VisitorPattern.Annotations.VisitorPattern;
@@ -83,9 +86,41 @@ public class AST_SymbolCollector extends VisitorBase {
 
     @VisitorPattern( when = VisitOrder.ENTER_NODE, order = 1 )
     public void collect_var( Declaration decl ) {
-        if ( decl.kind != DeclarationKind.VARIABLE ) return;
+        if ( decl.kind != DeclarationKind.VARIABLE && decl.kind != DeclarationKind.HEAP ) return;
         current_scope( decl ).add_variable( decl.id );
+        
         System.out.println( "Adding " + decl.id + " to scope " + current_scope(decl));
+
+
+        if ( decl.kind == DeclarationKind.HEAP ) {
+            current_scope( decl ).identifier_is_heap_allocated( decl.id.name );
+            
+
+
+        }
+    }
+
+    @VisitorPattern( when = VisitOrder.ENTER_NODE, order = 3 )
+    public void register_record_layout( Declaration decl ) {
+        if ( decl.kind != DeclarationKind.USER_TYPE ) return;
+
+        UserType type = (UserType)decl.type;
+
+        FieldList fields = (FieldList) type.fields;
+
+        Layout layout = new Layout( decl.id.name );
+
+        long offset = 0;
+
+        for ( Field f : fields.fields ) {
+            Declaration fd = f.field;
+            layout.register( fd.id.name, offset );
+            if ( fd.kind == DeclarationKind.HEAP ) {
+                layout.pointer_at( offset );
+            }
+            offset++;
+        }
+        layout.num_of_fields = offset;
     }
 
     @VisitorPattern( when = VisitOrder.ENTER_NODE, order = 2 )

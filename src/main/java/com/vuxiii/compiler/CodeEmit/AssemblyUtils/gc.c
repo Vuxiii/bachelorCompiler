@@ -19,11 +19,11 @@ static size_t scope_offset = 0;
 
 void initialize_heap() {
     heap = malloc( sizeof(size_t) * heap_size );
-    to_heap = malloc( 2 * sizeof(size_t) * heap_size );
+    // to_heap = malloc( 2 * sizeof(size_t) * heap_size );
 
     scope_pointers = malloc( scope_size * sizeof(size_t *) );
 
-    if ( heap == NULL || to_heap == NULL || scope_pointers == NULL ) {
+    if ( heap == NULL || scope_pointers == NULL ) {
         printf( "Some error initializing the heap...\nExitin!\n" );
         exit(-1);
     }
@@ -34,6 +34,23 @@ void initialize_heap() {
 int get_bit( size_t bit_field, int offset ) {
     uint64_t mask = 1ULL << offset;
     return mask & bit_field ? 1 : 0;
+}
+
+void print_layout( size_t *layout ) {
+    size_t i = 0;
+    size_t bitfield = layout[i];
+    do {
+
+        print_bit_field( bitfield );
+
+        // Next bitfield
+        if ( get_bit(bitfield, 0) == 1 ) {
+            i++;
+            bitfield = layout[i];
+        } else {
+            break;
+        }
+    } while ( bitfield != 0 );
 }
 
 size_t get_size_of_record( size_t *record ) {
@@ -69,133 +86,156 @@ size_t *move_heap_block( size_t **memory_block, size_t *dst ) {
         size_t size_of_block = get_size_of_record( *memory_block );
 
         printf( "We have a size for the memory_block: %ld\n", size_of_block );
-        size_t *new_dst = memcpy( dst, *memory_block, size_of_block );
+        size_t *new_dst = memcpy( dst, *memory_block, size_of_block * sizeof(size_t) );
 
         *memory_block = new_dst;
 
         pointer_offset += size_of_block;
         dst = new_dst + size_of_block;
 
+    } else {
+        return dst;
     }
 
-    // Loop through the layout bitfield. -> Get the pointers!
-    size_t off = 0;
-    size_t *memory_layout = *(memory_block+off+1); // The size field
-    size_t bit_field = *(memory_layout+1);
-    int should_repeat = bit_field == 0 ? 0 : 1;
-    while ( should_repeat == 1 ) {
+    printf( "We have moved the memory_block to the new region!\nNew location is: %p\n", *memory_block );
 
-        for ( size_t i = 1; i < 64; ++i ) {
-            if ( get_bit( bit_field, i ) == 1 ) {
-                // We have found the pointer.
-                // Call ourselves recursivly
-                size_t **ptr = (size_t **)get_pointer_from_heap_at_offset( *memory_block, off*64 + i + 1 ); // The size field
+    size_t *layout = *(size_t**)((*memory_block) + 1);
+    
+    if ( layout == 0 ) return dst;
+
+    printf( "layout: %p\n", layout );
+
+    const size_t header_offset = 1;
+    size_t i = 0;
+    size_t bitfield = layout[i];
+    while ( bitfield != 0 ) {
+        printf( "========================================\n" );
+        printf( "Bitfield: " );
+        print_bit_field( bitfield );
+        for ( size_t b = 1; b < 64; b++ ) {
+            if ( get_bit(bitfield, b) == 1 ) {
+                size_t **new_memory_block = (size_t**)((*memory_block) + b + header_offset);
+                printf( "Found pointer at location: %ld\n", b );
+                printf( "&Pointer[%ld] = %p\n", b, new_memory_block );
+                printf( " Pointer[%ld] = %p\n", b, *new_memory_block );
+                printf( "*Pointer[%ld] = %ld\n", b, *(*new_memory_block) );
                 
-                dst = move_heap_block( ptr, dst );
+                dst = move_heap_block( new_memory_block, dst );
             }
         }
 
-        should_repeat = get_bit( bit_field, 0 );
-        if ( should_repeat == 1 ) {
-            off++;
-            bit_field = *(memory_layout + off+1); // Go to the next bit_field.
-            printf( "We are repeating!\n" );
+        // Next bitfield
+        if ( get_bit(bitfield, 0) == 1 ) {
+            i++;
+            bitfield = layout[i];
         } else {
-            printf( "We are not repeating!\n" );
+            break;
         }
     }
     return dst;
+
 }
 
-size_t *move_these_root_pointers( size_t bit_field, size_t *scope, size_t *dst ) {
-    int should_repeat = 1;
-    size_t off = 0;
-    while ( should_repeat == 1 ) {
-        printf( "We have out bit_field: " );
-        print_bit_field( bit_field );
-        printf( "\n" );
-
-        for ( size_t j = 1; j < 64; ++j ) {
-            if ( get_bit( bit_field, j ) == 1 ) {
-                printf( "At bit %ld\n", j );
-                printf( "And it is set!\n" );
-                // we know scope + (8*j) is a pointer
-                size_t **stack_pointer = (size_t **) (scope - j);
-                size_t *memory_block = *stack_pointer;
-
-                printf( "We have our stack_pointer at %p\n", stack_pointer );
-                printf( "We have our memory_block  at %p\n", memory_block );
-
-                size_t size_of_block = get_size_of_record( memory_block );
-
-                printf( "We have a size for the memory_block: %ld\n", size_of_block );
-                size_t *new_dst = memcpy( dst, memory_block, size_of_block );
-
-                memory_block = new_dst;
-                *stack_pointer = memory_block;
-
-                pointer_offset += size_of_block;
-                dst = new_dst + size_of_block;
-
-
-                // Check to see if this pointer contains any nested pointers
-                if ( get_bit( get_bit_field(memory_block), 0 ) != 0 ) {
-                    // This has pointers
-                    printf( "We have found nested pointers!\n" );
-                    dst = move_heap_block( &memory_block, dst );
-                }
-
+size_t *move_these_root_pointers( size_t* layout, size_t *stack, size_t *dst ) {
+    
+    size_t i = 0;
+    size_t bitfield = layout[i];
+    while ( bitfield != 0 ) {
+        
+        // Check all the 63 bits.
+        for ( size_t b = 1; b < 64; b++ ) {
+            size_t bit = get_bit(bitfield, b);
+            if ( bit == 1 ) {
+                size_t **memory_block = (size_t**)(stack - b);
+                printf( "Found pointer at location: %ld\n", b );
+                printf( "&Pointer[%ld] = %p\n", b, stack - b );
+                printf( "*Pointer[%ld] = %p\n", b, *memory_block );
+                
+                dst = move_heap_block( memory_block, dst );
             }
         }
-        should_repeat = get_bit( bit_field, 0 );
-        if ( should_repeat == 1 ) {
-            off++;
-            bit_field = *(scope + off); // Go to the next bit_field.
-            printf( "We are repeating!\n" );
+
+        // Next bitfield
+        if ( get_bit(bitfield, 0) == 1 ) {
+            i++;
+            bitfield = layout[i];
         } else {
-            printf( "We are not repeating!\n" );
+            break;
         }
     }
     return dst;
 }
 
 void swap_heap_buffers() {
+
+    printf( "\n======================================\nStarting swap_heap_buffers\n" );
     printf( "Start of old heap: %p\n", heap );
     printf( "End of old heap:   %p\n", heap + sizeof(heap) );
 
 
     // We can move through scope_pointers one by one.
+    to_heap = malloc( 2 * sizeof(size_t) * heap_size );
+    if ( to_heap == NULL ) {
+        printf( "Failed to allocate space for the new heap.\nExiting!\n" );
+        exit(-1);
+    }
+
     size_t *dst = to_heap;
     pointer_offset = 0;
 
+
     for ( size_t i = 0; i < scope_offset; ++i ) {
-        size_t *scope = scope_pointers[i];
-        size_t bit_field = get_bit_field( *(size_t **)scope);
+        size_t *scope        =  (size_t *) scope_pointers[i];
+        size_t *scope_layout = *(size_t **)scope_pointers[i];
+        
+        printf("Visiting scope: %p\n", scope_pointers[i] );
         
         printf( "We are looking at scope at address: %p\n", scope );
 
-        if ( bit_field == 0 ) {
+        if ( scope_layout == 0 ) {
             continue; // There are no pointers in this scope. Continue to the check the next one.
         }
 
         // Find all the pointers in this scope by thier offset from scope.
-        dst = move_these_root_pointers( bit_field, scope, dst );
+        dst = move_these_root_pointers( scope_layout, scope, dst );
     }
+
+    // Check if we need to expand the heap.
+    if ( pointer_offset > heap_size * 0.7 ) {
+        printf( "Let's expand it!\n" );
+    }
+
     heap_size *= 2;
 
     size_t *old_heap = heap;
     heap = to_heap;
     
-    to_heap = realloc( old_heap, 2 * sizeof(size_t) * heap_size );
-
+    free( old_heap );
+    
     printf( "Start of new heap: %p\n", heap );
     printf( "End of new heap:   %p\n", heap + heap_size );
+    printf( "\n======================================\nEnding swap_heap_buffers\n" );
 }
 
-// Callable by the user. To allocate new memory
+size_t *new_layout( size_t size, size_t *bitfields ) {
+    size_t *layout = calloc( size, sizeof(size_t) );
+    if ( layout == NULL ) {
+        printf( "Error allocating new layout\nExiting!\n" );
+        exit(-1);
+    }
 
+    memcpy( layout, bitfields, size * sizeof(size_t) );
 
-size_t *new_ptr_size( size_t size, size_t amount_of_bitfields ) {
+    printf( "\n\n" );
+
+    print_layout( layout );
+
+    printf( "\n\n" );
+
+    return layout;
+}
+
+size_t *new_ptr_size( size_t size, size_t *layout ) {
     // Check if heap_pointer + size > heap_size
     if ( pointer_offset + size + 2 >= heap_size ) {
         // We need to move our heap to to_heap, and swap the two pointers
@@ -209,10 +249,6 @@ size_t *new_ptr_size( size_t size, size_t amount_of_bitfields ) {
 
     p[0] = size + 2; // The total size.
     
-    size_t *layout = calloc( size + 1UL, sizeof( size_t )); // Bit field for pointers.
-
-    layout[0] = amount_of_bitfields + 1UL;
-    
     p[1] = (size_t)layout;
 
     
@@ -223,17 +259,18 @@ size_t *new_ptr_size( size_t size, size_t amount_of_bitfields ) {
     return p;
 }
 
-size_t *new_scope_header( size_t size, size_t **pointer_to_stack ) {
+void new_scope_header( size_t size, size_t **pointer_to_stack, size_t *bitfield ) {
 
-    *pointer_to_stack = calloc( size + 1UL, sizeof( size_t ));
-    **pointer_to_stack = size + 1UL;
+    *pointer_to_stack = calloc( size, sizeof( size_t ));
+    
+    memcpy( *pointer_to_stack, bitfield, size );
 
     if ( pointer_to_stack == NULL ) {
         printf( "Failed trying to allocate memory for scope header!\nExiting..!\n" );
         exit(-1);
     }
 
-    printf( "Allocating new scope header:  %p of size: %ld + 1 = %ld\n", *pointer_to_stack, size, size+1 );
+    printf( "Allocating new scope header:  %p of size: %ld\n", *pointer_to_stack, size );
     printf( "Which was stored at location: %p\n", pointer_to_stack );
 
     if ( scope_offset == scope_size ) {
@@ -280,69 +317,87 @@ void print_tabs( size_t amount ) {
     }
 }
 
-void print_block( size_t *scope_layout, size_t *stack, size_t amount_of_tabs ) {
-    size_t *end_of_header = scope_layout + get_size_of_record(scope_layout);
+size_t calc_header_size( size_t *layout ) {
+    if ( layout == 0 ) return 0;
+
+    size_t size = 0;
+    while ( get_bit( layout[size], 0 ) == 1 ) {
+        size++;
+    }
+    return 1 + size;
+}
+
+
+
+void print_block( size_t *memory_block, size_t amount_of_tabs ) {
     
-    // print header
-    print_tabs(amount_of_tabs);
-    printf( "--[ Header ]--\n" );
+    print_tabs( amount_of_tabs );
+    printf( "Visiting memory_block at location: %p\n", memory_block );
+    print_tabs( amount_of_tabs );
+    printf( "size:   %ld\n", memory_block[0] );
+    size_t *layout = (size_t*)memory_block[1];
+    if ( layout == 0 ) {
+        print_tabs( amount_of_tabs );
+        printf( "This memory_block has no pointers. Returning\n" );        
+        return;
+    }
 
-    print_tabs(amount_of_tabs);
-    printf( "Header Size = %ld\n", *scope_layout );
-    size_t j = 1;
-    // do {
-        size_t bit_field = get_bit_field( scope_layout + j );
-        print_tabs(amount_of_tabs);
-        printf( "Bitfield[%ld] = ", j );
-        print_bit_field( bit_field );
-        j++;
-    // } while( scope_layout + j != end_of_header );
+    print_tabs( amount_of_tabs );
+    printf( "layout: %p\t",  (size_t*)memory_block[1] );
 
-    size_t body_size = 0;
-    if ( amount_of_tabs != 1 )
-        body_size = *stack;
+    print_layout( layout );
 
-    // print body
-    j = 0;
-    do {
-        size_t bit_field = get_bit_field( 1 + scope_layout + j );
-        if ( bit_field == 0 ) break;
-    
-        if ( j == 0 ) {
-            print_tabs(amount_of_tabs);
-            printf( "--[  Body  ]--\n" );
+    const size_t offset = 1;
+    size_t i = 0;
+    size_t bitfield = layout[i];
+
+    do { // check if this while loop is correct.
+
+        for ( size_t b = 1; b < 64; ++b ) {
+            if ( get_bit( bitfield, b ) == 1 ) {
+                size_t pointer_offset = b + offset;
+                print_tabs( amount_of_tabs );
+                printf( "Found poitner at location: %p\n", memory_block + pointer_offset );
+                print_block( *(size_t**)(memory_block + pointer_offset), amount_of_tabs + 1 );
+            } 
         }
 
-        for ( size_t z = 1; z < 64; ++z ) {
-            if ( get_bit( bit_field, z ) == 1 ) {
-                size_t offset = j*64UL + z;
-                size_t *p;
-                if ( amount_of_tabs == 1 ) 
-                    p = get_pointer_from_stack_at_offset( stack, offset );
-                else 
-                    p = get_pointer_from_heap_at_offset( stack, offset );
+        // Next bitfield
+        if ( get_bit(bitfield, 0) == 1 ) {
+            i++;
+            bitfield = layout[i];
+        } else {
+            break;
+        }
+    } while ( bitfield != 0 );
+}
 
-                print_tabs(amount_of_tabs);
-                printf( ".size - meta = %ld\n", *(p) - 2 );
-                print_tabs(amount_of_tabs);
-                printf( " Pointer[%ld] = %p\n", offset, p  );
-
-                size_t **newP = (size_t**)p+1;
-
-                print_block( *newP, p, amount_of_tabs + 1 );
-
-            } else if ( body_size > 0 ) {
-                size_t offset = j*64UL + z + 2;
-                if ( offset <= body_size + 2 ) {
-                    size_t *p = stack + offset;
-                    
-                    print_tabs(amount_of_tabs);
-                    printf( ".data = %ld\n", *p );
-                }
+void print_stack_pointers( size_t *layout, size_t *stack ) {
+    // Get first bitfield
+    const size_t offset = 0;
+    size_t i = 0;
+    size_t bitfield = layout[i];
+    while ( bitfield != 0 ) {
+        // Check all the 63 bits.
+        for ( size_t b = 1; b < 64; b++ ) {
+            size_t bit = get_bit(bitfield, b);
+            if ( bit == 1 ) {
+                size_t *ptrptr = *(size_t**)(stack - b - offset);
+                printf( "Found pointer at location: %ld\n", b + offset );
+                printf( "&Pointer[%ld] = %p\n", b+offset, stack - b - offset );
+                printf( "*Pointer[%ld] = %p\n", b+offset, ptrptr );
+                print_block( ptrptr, 1 );
             }
         }
-        j++;
-    } while( 1 + scope_layout + j != end_of_header );
+
+        // Next bitfield
+        if ( get_bit(bitfield, 0) == 1 ) {
+            i++;
+            bitfield = layout[i];
+        } else {
+            break;
+        }
+    }
 }
 
 /**
@@ -370,13 +425,12 @@ void print_subs( char *buffer, long *offsets, char *subs, long num_of_subs ) {
 }
 
 void print_string( char *buffer, long len, long offset ) {
-    // printf( "\n\tBuffer is: %s\n", buffer + offset );
     printf( "%.*s", len, buffer + offset );
     fflush(NULL);
 }
 
 void print_num( long num ) {
-    printf( "%ld", num );
+    printf( "%ld\n", num );
     fflush(NULL);
 }
 
@@ -387,7 +441,7 @@ void print_scopes() {
         size_t *scope_layout = *(size_t **)scope_pointers[i];
         printf("Visiting scope: %p\n", scope_pointers[i] );
         
-        print_block( scope_layout, stack, 1 );
+        print_stack_pointers( scope_layout, stack );
     }
 }
 

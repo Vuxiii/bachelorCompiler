@@ -4,6 +4,8 @@ public enum OperandKind {
     INT,
     DOUBLE,
     BUFFER, 
-    STRING, BOOL,
+    STRING, 
+    BOOL, 
+    LONG,
 
 }

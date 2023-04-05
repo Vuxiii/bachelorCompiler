@@ -9,6 +9,7 @@ import com.vuxiii.compiler.Parser.Nodes.Types.AliasType;
 import com.vuxiii.compiler.Parser.Nodes.Types.FunctionType;
 import com.vuxiii.compiler.Parser.Nodes.Types.StandardType;
 import com.vuxiii.compiler.Parser.Nodes.Types.UnknownType;
+import com.vuxiii.compiler.Parser.Nodes.Types.UserType;
 import com.vuxiii.compiler.VisitorPattern.Visitor;
 import com.vuxiii.compiler.VisitorPattern.Annotations.VisitOrder;
 import com.vuxiii.compiler.VisitorPattern.Annotations.VisitorPattern;
@@ -35,6 +36,8 @@ public class AST_FixTypes extends Visitor {
             decl.kind = DeclarationKind.NEW_FUNCTION_TYPE;
         } else if ( decl.type instanceof StandardType ) {
             decl.kind = DeclarationKind.ALIAS_TO_STD_TYPE;
+        } else if ( decl.type instanceof UserType ) {
+            decl.kind = DeclarationKind.USER_TYPE;
         }
 
     }

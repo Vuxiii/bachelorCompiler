@@ -1,22 +1,16 @@
 package com.vuxiii.compiler.CodeEmit;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
-import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexIdent;
+import com.vuxiii.compiler.Lexer.Tokens.PrimitiveType;
 import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexLiteral;
-import com.vuxiii.compiler.Parser.Nodes.Argument;
 import com.vuxiii.compiler.Parser.Nodes.Expression;
 import com.vuxiii.compiler.Parser.Nodes.Print;
 import com.vuxiii.compiler.Parser.Nodes.Root;
 import com.vuxiii.compiler.VisitorPattern.ASTNode;
-import com.vuxiii.compiler.VisitorPattern.Annotations.VisitOrder;
-import com.vuxiii.compiler.VisitorPattern.Annotations.VisitorPattern;
 import com.vuxiii.compiler.VisitorPattern.Visitors.CodeGeneration.AddressingMode;
-import com.vuxiii.compiler.VisitorPattern.Visitors.CodeGeneration.ArgumentKind;
 import com.vuxiii.compiler.VisitorPattern.Visitors.CodeGeneration.FunctionBlock;
 import com.vuxiii.compiler.VisitorPattern.Visitors.CodeGeneration.Instruction;
 import com.vuxiii.compiler.VisitorPattern.Visitors.CodeGeneration.Operand;
@@ -103,9 +97,13 @@ public class X86Emitter {
 
                     if ( exp.node instanceof LexLiteral ) {
                         LexLiteral id = (LexLiteral)exp.node;
-
-                        subs += id.val.substring(1, id.val.length()-1 ) + "\\0";
-                    } // else if ( n instanceof LexIdent )
+                        if ( id.literal_type == PrimitiveType.STRING ) {
+                            System.out.println( id );
+                            subs += id.val.substring(1, id.val.length()-1 ) + "\\0";
+                        } else {
+                                  
+                        } 
+                    } 
                 }
                 push_no_offset( node.substitute_name + ": .ascii \"" + subs + '"' );
             }
@@ -155,26 +153,26 @@ public class X86Emitter {
 
             switch (instruction.opcode) {
                 case ADD: {
-                    Operand r1 = instruction.args.get().operand_1.get();
-                    Operand r2 = instruction.args.get().operand_2.get();
-                    Operand target = instruction.args.get().target.get();
+                    Operand r1 = instruction.args.get().operands.get(0);
+                    Operand r2 = instruction.args.get().operands.get(1);
+                    // Operand target = instruction.args.get().operands.get(2);
                     
                     push_code( "addq " + ope_string(r1) +", " + ope_string(r2) ); //TODO: Check for double also.
                     
-                    push_code( "movq " + ope_string(r2) +", " + ope_string(target) );
+                    // push_code( "movq " + ope_string(r2) +", " + ope_string(target) );
                 } break;
                 case MINUS: {
-                    Operand r1 = instruction.args.get().operand_1.get();
-                    Operand r2 = instruction.args.get().operand_2.get();
-                    Operand target = instruction.args.get().target.get();
+                    Operand r1 = instruction.args.get().operands.get(0);
+                    Operand r2 = instruction.args.get().operands.get(1);
+                    // Operand target = instruction.args.get().operands.get(2);
                     push_code( "subq " + ope_string(r1) +", " + ope_string(r2) ); //TODO: Check for double also.
 
-                    push_code( "movq " + ope_string(r2) +", " + ope_string(target) );
+                    // push_code( "movq " + ope_string(r2) +", " + ope_string(target) );
                 } break;
                 case MULT: { //TODO: Add support for register * literal
-                    Operand r1 = instruction.args.get().operand_1.get();
-                    Operand r2 = instruction.args.get().operand_2.get();
-                    Operand target = instruction.args.get().target.get();
+                    Operand r1 = instruction.args.get().operands.get(0);
+                    Operand r2 = instruction.args.get().operands.get(1);
+                    Operand target = instruction.args.get().operands.get(2);
                     push_code( "movq " + ope_string(r1) + ", " + ope_string( rax ) );
                     push_code( "imulq " + ope_string(r2) );
                     push_code( "movq " + ope_string(rax) +", " + ope_string(target) );
@@ -186,8 +184,8 @@ public class X86Emitter {
 
 
                 case LOAD_VARIABLE: {
-                    Operand var = instruction.args.get().operand_1.get();
-                    Operand target = instruction.args.get().target.get();
+                    Operand var = instruction.args.get().operands.get(0);
+                    Operand target = instruction.args.get().operands.get(1);
                     
                     int offset = var_offsets.get( var.get_string() );
 
@@ -200,8 +198,8 @@ public class X86Emitter {
                 } break;
 
                 case STORE_VARIABLE: {
-                    String var = instruction.args.get().operand_1.get().get_string();
-                    Operand src_1 = instruction.args.get().target.get();
+                    String var = instruction.args.get().operands.get(0).get_string();
+                    Operand src_1 = instruction.args.get().operands.get(1);
 
                     int offset = var_offsets.get( var );
 
@@ -215,15 +213,15 @@ public class X86Emitter {
                 
                 
                 case PUSH: {
-                    push_code( "pushq " + ope_string(instruction.args.get().operand_1.get() ) );
+                    push_code( "pushq " + ope_string(instruction.args.get().operands.get(0) ) );
 
                 } break;
                 case POP: {
-                    push_code( "popq " + ope_string(instruction.args.get().operand_1.get()) );
+                    push_code( "popq " + ope_string(instruction.args.get().operands.get(0)) );
                 } break;
                 
                 case LABEL: {
-                    push_no_offset( instruction.args.get().operand_1.get().get_string() + ":" );
+                    push_no_offset( instruction.args.get().operands.get(0).get_string() + ":" );
                 } break;
 
                 case SETUP_STACK: {
@@ -243,20 +241,20 @@ public class X86Emitter {
 
                 case CALL: {
                     // Handle argument passing.
-                    push_code( "callq " + instruction.args.get().operand_1.get().get_string() );
+                    push_code( "callq " + instruction.args.get().operands.get(0).get_string() );
                 } break;
                 case MOVE: {
-                    Operand ope_1 = instruction.args.get().operand_1.get();
-                    Operand ope_2 = instruction.args.get().target.get();
+                    Operand ope_1 = instruction.args.get().operands.get(0);
+                    Operand ope_2 = instruction.args.get().operands.get(1);
                     String fst = ope_string( ope_1 );
                     String snd = ope_string( ope_2 );
 
                     push_code( "movq " + fst + ", " + snd );
                 } break;
                 case LEA: {
-                    Operand ope_1 = instruction.args.get().operand_1.get();
-                    Operand ope_2 = instruction.args.get().target.get();
-                    String fst = ope_1.get_string();
+                    Operand ope_1 = instruction.args.get().operands.get(0);
+                    Operand ope_2 = instruction.args.get().operands.get(1);
+                    String fst = ope_string( ope_1 );
                     String snd = ope_string( ope_2 );
 
                     push_code( "leaq " + fst + ", " + snd );
@@ -272,24 +270,24 @@ public class X86Emitter {
                 } break;
                 case COMMENT: {
                     push_no_offset( "" );
-                    push_no_offset( "# " + instruction.args.get().operand_1.get().get_string() );
+                    push_no_offset( "# " + instruction.args.get().operands.get(0).get_string() );
                     push_no_offset( "" );
                 } break;
                 case COMPARE: {
-                    Operand left = instruction.args.get().operand_1.get();
-                    Operand right = instruction.args.get().operand_2.get();
+                    Operand left = instruction.args.get().operands.get(0);
+                    Operand right = instruction.args.get().operands.get(1);
 
                     push_code( "cmpq " + ope_string( right ) + ", " + ope_string( left ) );
 
                 } break;
                 case JUMP_NOT_EQUAL: {
-                    push_code( "jne " + instruction.args.get().operand_1.get().get_string() );
+                    push_code( "jne " + instruction.args.get().operands.get(0).get_string() );
                 } break;
                 case JUMP_EQUAL: {
-                    push_code( "je " + instruction.args.get().operand_1.get().get_string() );
+                    push_code( "je " + instruction.args.get().operands.get(0).get_string() );
                 } break;
                 case JUMP: {
-                    push_code( "jmp " + instruction.args.get().operand_1.get().get_string() );
+                    push_code( "jmp " + instruction.args.get().operands.get(0).get_string() );
                 } break;
                 default: {
                     System.out.println( "\u001B[41m\u001B[37m--[[ Emitter Error ]]--\u001B[0m\nMissing implementation for opcode " + instruction.opcode + "\nExiting!");
@@ -366,6 +364,9 @@ public class X86Emitter {
                     } break;
                     case BOOL: {
                         out += ope.get_bool() == true ? 1 : 0;
+                    } break;
+                    case LONG: {
+                        out += ope.get_long();
                     } break;
                 }
             } break;

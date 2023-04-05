@@ -23,7 +23,7 @@ public class FunctionBlock {
     }
 
     public void push_comment( String comment ) {
-        instructions.add( new Instruction( Opcode.COMMENT, Arguments.from_label(comment) ) );
+        instructions.add( new Instruction( Opcode.COMMENT, Arguments.comment(comment)) );
     }
 
 } 

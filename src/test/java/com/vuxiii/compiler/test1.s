@@ -23,6 +23,9 @@ main:
     pushq $1
     popq %rax
     pushq $1
+    popq %rax
+    cmpq $0, %rax
+    je IfEndOfBody1
     pushq $1
     popq %rax
     
@@ -35,6 +38,9 @@ IfEndOfBody1:
     pushq $0
     popq %rax
     pushq $0
+    popq %rax
+    cmpq $0, %rax
+    je IfEndOfBody2
     pushq $2
     popq %rax
     
@@ -82,6 +88,9 @@ EndOfIfBlocks1:
     pushq $0
     popq %rax
     pushq $0
+    popq %rax
+    cmpq $0, %rax
+    je IfEndOfBody3
     pushq $1
     popq %rax
     
@@ -94,6 +103,9 @@ IfEndOfBody3:
     pushq $1
     popq %rax
     pushq $1
+    popq %rax
+    cmpq $0, %rax
+    je IfEndOfBody4
     pushq $2
     popq %rax
     
@@ -141,6 +153,9 @@ EndOfIfBlocks3:
     pushq $0
     popq %rax
     pushq $0
+    popq %rax
+    cmpq $0, %rax
+    je IfEndOfBody5
     pushq $1
     popq %rax
     
@@ -153,6 +168,9 @@ IfEndOfBody5:
     pushq $0
     popq %rax
     pushq $0
+    popq %rax
+    cmpq $0, %rax
+    je IfEndOfBody6
     pushq $2
     popq %rax
     

@@ -4,33 +4,22 @@ import com.vuxiii.compiler.CodeEmit.X86Emitter;
 import com.vuxiii.compiler.InternalInterpreter.Interpreter;
 import com.vuxiii.compiler.Lexer.Lexer;
 import com.vuxiii.compiler.Parser.Parser;
-import com.vuxiii.compiler.Parser.Nodes.Assignment;
-import com.vuxiii.compiler.Parser.Nodes.Print;
 import com.vuxiii.compiler.Parser.Nodes.Root;
-import com.vuxiii.compiler.Parser.Nodes.Statement;
-import com.vuxiii.compiler.Parser.Nodes.StatementKind;
 import com.vuxiii.compiler.VisitorPattern.ASTNode;
 import com.vuxiii.compiler.VisitorPattern.Visitors.AST_Setup_Parents;
 import com.vuxiii.compiler.VisitorPattern.Visitors.CodeGeneration.AST_StackMachine;
 import com.vuxiii.compiler.VisitorPattern.Visitors.CodeGeneration.FunctionBlock;
 import com.vuxiii.compiler.VisitorPattern.Visitors.CodeGeneration.Instruction;
 import com.vuxiii.compiler.VisitorPattern.Visitors.CodeGeneration.StringCollection.StringCollector;
-import com.vuxiii.compiler.VisitorPattern.Visitors.CodeGeneration.StringCollection.StringNode;
 import com.vuxiii.compiler.VisitorPattern.Visitors.Debug.AST_Printer;
 import com.vuxiii.compiler.VisitorPattern.Visitors.SymbolCollection.AST_FixTypes;
 import com.vuxiii.compiler.VisitorPattern.Visitors.SymbolCollection.AST_SymbolCollector;
-import com.vuxiii.compiler.VisitorPattern.Visitors.SymbolCollection.AST_SymbolCollector;
-import com.vuxiii.compiler.VisitorPattern.Visitors.SymbolCollection.Scope;
 import com.vuxiii.compiler.VisitorPattern.Visitors.TreeCollaps.AST_Shrinker;
-import com.vuxiii.compiler.VisitorPattern.Visitors.TreeCollaps.AST_Shrinker_Statement;
-import com.vuxiii.compiler.VisitorPattern.Visitors.TreeCollaps.AST_Shrinker_Statement_Collector;
 
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import com.vuxiii.LR.Records.ASTToken;
 import com.vuxiii.LR.LRParser;
@@ -113,63 +102,21 @@ public final class App {
 
         """;
         input = """
-            type string: int;
-            type my_func: ();
-            type second: ( z: int ) -> int;
-            let a: my_func;
-            let b: second;
+        
+        type my_rec: {
+            field1: int;
+            field2: int;
+        };
 
-            a = () -> void
-                print( 2 );
+        let a: *int;
+        a = 3;
 
-            b = ( z: int ) -> int {
-                print( z + 3 );
-            };
+        print( "a has the value: %\\n", a );
+        
+        a = 42 - a;
 
-            a();
-            b(3);
+        print( "a has the value: %\\n", a );
 
-        """;
-
-        input = """
-            type my_func: ();
-            let a: my_func;
-            
-        """;
-        input = """
-        let bas: boolean;
-        bas = false;
-        let a: int;
-
-        if ( true ) {
-            a = 1;
-        } else if (false) {
-            a = 2;
-        } else {
-            a = 3;
-        }
-
-        print( "%\\n", a );
-
-        if ( false ) {
-            a = 1;
-        } else if (true) {
-            a = 2;
-        } else {
-            a = 3;
-        }
-
-        print( "%\\n", a );
-
-        if ( false ) {
-            a = 1;
-        } else if (false) {
-            a = 2;
-        } else {
-            a = 3;
-        }
-
-        print( "%\\n", a );
         """;
 
         System.out.println( input );
@@ -185,7 +132,7 @@ public final class App {
         line_break();
 
         Settings.showGrammar = true;
-        Settings.showParsingTable = false;
+        Settings.showParsingTable = true;
         // [[ Parser ]]
         
         ASTNode ast = Parser.getAST( tokens );

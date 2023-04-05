@@ -8,6 +8,7 @@ public class Operand {
     private Optional<Integer> num_int = Optional.empty();
     private Optional<Double> num_double = Optional.empty();
     private Optional<Boolean> num_bool = Optional.empty();
+    private Optional<Long> num_long = Optional.empty();
 
     public AddressingMode addressing_mode;
     public OperandKind kind;
@@ -17,16 +18,20 @@ public class Operand {
         return new Operand( reg, mode );
     }
 
-    public static Operand from_string( String str, AddressingMode mode ) {
-        return new Operand( str, mode );
+    public static Operand from_string( String str ) {
+        return new Operand( str, AddressingMode.IMMEDIATE);
     }
 
-    public static Operand from_int( int num_int, AddressingMode mode ) {
-        return new Operand( num_int, mode );
+    public static Operand from_int( int num_int ) {
+        return new Operand( num_int, AddressingMode.IMMEDIATE );
     }
 
-    public static Operand from_double( double num_double, AddressingMode mode ) {
-        return new Operand( num_double, mode );
+    public static Operand from_long( long num_long ) {
+        return new Operand( num_long, AddressingMode.IMMEDIATE );
+    }
+
+    public static Operand from_double( double num_double ) {
+        return new Operand( num_double, AddressingMode.IMMEDIATE );
     }
 
     public Operand( String str, AddressingMode mode ) {
@@ -50,6 +55,12 @@ public class Operand {
     public Operand( double num_double, AddressingMode mode ) {
         this.num_double = Optional.of(num_double);
         this.kind = OperandKind.DOUBLE;
+        this.addressing_mode = mode;
+    }
+
+    public Operand( long num_long, AddressingMode mode ) {
+        this.num_long = Optional.of(num_long);
+        this.kind = OperandKind.LONG;
         this.addressing_mode = mode;
     }
 
@@ -77,6 +88,10 @@ public class Operand {
 
     public boolean get_bool() {
         return num_bool.get();
+    }
+
+    public long get_long() {
+        return num_long.get();
     }
 
     public String toString() {
