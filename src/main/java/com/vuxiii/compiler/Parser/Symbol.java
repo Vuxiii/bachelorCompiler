@@ -36,6 +36,8 @@ public class Symbol {
     public static final NonTerminal n_Declaration_Type = new NonTerminal( "TYPE_DECLARATION" );
     public static final NonTerminal n_Declaration_Type_Body = new NonTerminal( "TYPE_BODY_DECLARATION" );
 
+    public static final NonTerminal n_Nested_Field = new NonTerminal( "NESTED_FIELD_ACCESS" );
+
 
     public static final NonTerminal n_Return_Type = new NonTerminal( "RETURN_TYPE" );
 
@@ -73,6 +75,9 @@ public class Symbol {
     public static final NonTerminal n_Arg = new NonTerminal( "ARG" );
     
     public static final NonTerminal n_Equals = new NonTerminal( "Equals" );
+
+    public static final NonTerminal n_Record_Type = new NonTerminal( "RECORD" );
+
 
     // Used under lexical analysis. Tokenization.
     public static final Terminal t_Plus = new Terminal( "'+'" );
@@ -114,6 +119,7 @@ public class Symbol {
     public static final Terminal t_Return = new Terminal( "return" );
     public static final Terminal t_Let = new Terminal( "let" );
     public static final Terminal t_Arrow_Right = new Terminal( "'->'" );
+
 
 
 

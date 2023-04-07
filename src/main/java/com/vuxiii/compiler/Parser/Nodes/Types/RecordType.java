@@ -2,38 +2,29 @@ package com.vuxiii.compiler.Parser.Nodes.Types;
 
 import com.vuxiii.LR.Records.Term;
 import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexIdent;
+import com.vuxiii.compiler.Parser.Nodes.FieldList;
 import com.vuxiii.compiler.VisitorPattern.Annotations.VisitNumber;
 
+public class RecordType extends Type {
+    @VisitNumber( number = 1 ) public LexIdent identifier;
 
-public class UnknownType extends Type  {
+    @VisitNumber( number = 2 ) public FieldList fields; // Figure out what these should be.
 
-    // public final MatchInfo aliasInfo;
-
-    @VisitNumber( number = 1 ) public LexIdent unknown_type;
-
-    public UnknownType( Term term, LexIdent identifier ) {
+    public RecordType( Term term, LexIdent user_type, FieldList fields ) {
         super(term);
-        this.unknown_type = identifier;
+        this.identifier = user_type;
+        this.fields = fields;
         super.setup_ASTNodeQueue();
     }
 
     @Override
-    public boolean equals( Object other ) {
-        return false;
-    }
-
-    public String toString() {
-        return "UnknownType";
-    }
-
-    @Override
     public String getPrintableName() {
-        return "Unknown_Type ";
+        return "Record_Type";
     }
     
     @Override
     public String simple_type_name() {
-        return unknown_type.name;
+        return identifier.name;
     }
 
     @Override

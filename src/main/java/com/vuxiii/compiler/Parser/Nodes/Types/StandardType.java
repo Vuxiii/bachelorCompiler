@@ -69,4 +69,5 @@ public class StandardType extends Type  {
                 return 8;
         }
     }
+
 }

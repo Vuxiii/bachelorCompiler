@@ -22,6 +22,10 @@ public class Operand {
         return new Operand( str, AddressingMode.IMMEDIATE);
     }
 
+    public static Operand from_label( String str ) {
+        return new Operand( str, AddressingMode.LABEL);
+    }
+
     public static Operand from_int( int num_int ) {
         return new Operand( num_int, AddressingMode.IMMEDIATE );
     }
@@ -105,7 +109,10 @@ public class Operand {
             return "" + num_double.get();
         } else if ( num_bool.isPresent() ) {
             return "" + num_bool.get();
+        } else if ( num_long.isPresent() ) {
+            return "" + num_long.get();
         }
+
         return "unknown operand (Not implemented!)";
     }
 

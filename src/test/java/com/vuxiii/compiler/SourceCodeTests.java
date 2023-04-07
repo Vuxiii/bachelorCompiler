@@ -484,4 +484,134 @@ public class SourceCodeTests {
             assertFalse(true);
         }
     }
+
+    @Test
+    void record_test() {
+        App.reset_compiler();
+        String input = """
+        type nested: {
+            a: int;
+            b: int;
+            c: int;
+        };
+        
+        let rec: nested;
+        
+        rec.a = 42;
+        rec.b = 69;
+        rec.c = 512;
+        
+        
+        print( "Field a is: %\\n", rec.a );
+        print( "Field b is: %\\n", rec.b );
+        print( "Field c is: %\\n", rec.c );
+        
+        """;
+
+        String asm = App.runWithInput( input );
+
+        String testname = "test8";
+        App.save_to_file( "src/test/java/com/vuxiii/compiler/", testname + ".s", asm );
+        
+        File utils = new File("src/main/java/com/vuxiii/compiler/CodeEmit/AssemblyUtils/utils.s");
+        assertEquals( utils.exists(), true );
+        
+        File gc = new File("src/main/java/com/vuxiii/compiler/CodeEmit/AssemblyUtils/gc.c");
+        assertEquals( gc.exists(), true );
+        
+        File ass = new File( "src/test/java/com/vuxiii/compiler/", testname + ".s" );
+        assertEquals( ass.exists(), true );
+        
+        
+        CommandLine compile = new CommandLine( "gcc" );
+        compile.addArgument( "-no-pie" );
+        compile.addArgument( utils.getPath() );
+        compile.addArgument( gc.getPath() );
+        compile.addArgument( ass.getPath() );
+        compile.addArgument( "-o" );
+        compile.addArgument( "src/test/java/com/vuxiii/compiler/" + testname );
+        
+        DefaultExecutor executor = new DefaultExecutor();
+
+
+        try {
+            executor.execute(compile);
+
+            List<String> out = run_and_get_output( "src/test/java/com/vuxiii/compiler/" + testname );
+            
+            assertLinesMatch( List.of("Field a is: 42", "Field b is: 69", "Field c is: 512" ), out);
+
+        } catch (ExecuteException e) {
+            e.printStackTrace();
+            assertFalse(true);
+        } catch (IOException e) {
+            e.printStackTrace();
+            assertFalse(true);
+        }
+    }
+
+    @Test
+    void static_scoping_test() {
+        App.reset_compiler();
+        String input = """
+        let fun: () -> void;
+        let a: int;
+        a = 0;
+        fun = () -> void {
+            print("%\\n", a);
+            let inner = () -> void;
+            inner = () -> void {
+                let a: int;
+                a = 1;
+                print("%\\n", a);
+            };
+            print("%\\n", a);
+            a = 2;
+        };
+
+        fun();
+        print("%\\n", a);
+        """;
+
+        String asm = App.runWithInput( input );
+
+        String testname = "test9";
+        App.save_to_file( "src/test/java/com/vuxiii/compiler/", testname + ".s", asm );
+        
+        File utils = new File("src/main/java/com/vuxiii/compiler/CodeEmit/AssemblyUtils/utils.s");
+        assertEquals( utils.exists(), true );
+        
+        File gc = new File("src/main/java/com/vuxiii/compiler/CodeEmit/AssemblyUtils/gc.c");
+        assertEquals( gc.exists(), true );
+        
+        File ass = new File( "src/test/java/com/vuxiii/compiler/", testname + ".s" );
+        assertEquals( ass.exists(), true );
+        
+        
+        CommandLine compile = new CommandLine( "gcc" );
+        compile.addArgument( "-no-pie" );
+        compile.addArgument( utils.getPath() );
+        compile.addArgument( gc.getPath() );
+        compile.addArgument( ass.getPath() );
+        compile.addArgument( "-o" );
+        compile.addArgument( "src/test/java/com/vuxiii/compiler/" + testname );
+        
+        DefaultExecutor executor = new DefaultExecutor();
+
+
+        try {
+            executor.execute(compile);
+
+            List<String> out = run_and_get_output( "src/test/java/com/vuxiii/compiler/" + testname );
+            
+            assertLinesMatch( List.of("0", "1", "0", "2" ), out);
+
+        } catch (ExecuteException e) {
+            e.printStackTrace();
+            assertFalse(true);
+        } catch (IOException e) {
+            e.printStackTrace();
+            assertFalse(true);
+        }
+    }
 }

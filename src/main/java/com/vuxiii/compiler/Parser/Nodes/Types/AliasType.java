@@ -13,11 +13,17 @@ public class AliasType extends Type  {
 
     public final MatchInfo aliasInfo;
 
-    @VisitNumber( number = 1 ) public final Type alias_type;
+    @VisitNumber( number = 1 ) public Optional<Type> alias_type = Optional.empty();
 
     public AliasType( Term term, MatchInfo aliasInfo, Type alias ) {
         super(term);
-        this.alias_type = alias;
+        this.alias_type = Optional.of(alias);
+        this.aliasInfo = aliasInfo;
+        super.setup_ASTNodeQueue();
+    }
+
+    public AliasType( Term term, MatchInfo aliasInfo ) {
+        super(term);
         this.aliasInfo = aliasInfo;
         super.setup_ASTNodeQueue();
     }
@@ -50,8 +56,8 @@ public class AliasType extends Type  {
 
     @Override
     public int physical_size() {
-        return alias_type.physical_size();
+        if ( alias_type.isPresent() )
+            return alias_type.get().physical_size();
+        return 0;
     }
-    
-    
 }

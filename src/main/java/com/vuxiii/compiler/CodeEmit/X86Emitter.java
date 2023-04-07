@@ -16,6 +16,7 @@ import com.vuxiii.compiler.VisitorPattern.Visitors.CodeGeneration.Instruction;
 import com.vuxiii.compiler.VisitorPattern.Visitors.CodeGeneration.Operand;
 import com.vuxiii.compiler.VisitorPattern.Visitors.CodeGeneration.Register;
 import com.vuxiii.compiler.VisitorPattern.Visitors.CodeGeneration.StringCollection.StringNode;
+import com.vuxiii.compiler.VisitorPattern.Visitors.SymbolCollection.Layout;
 import com.vuxiii.compiler.VisitorPattern.Visitors.SymbolCollection.Scope;
 
 /**
@@ -87,6 +88,8 @@ public class X86Emitter {
         
         // Insert the substitute buffers.
 
+        push_no_offset("# [ String Buffers and Substitutes ]" );
+
         for ( Print print_node : string_buffers.keySet() ) {
             StringNode node = string_buffers.get( print_node );
             push_no_offset( node.name + ": .ascii " + node.str_literal );
@@ -109,6 +112,18 @@ public class X86Emitter {
             }
             // push_no_offset( node.stop_name + ": .space " +  node.stop_indicators.size() * 8 );
         }
+
+        push_no_offset("" );
+        push_no_offset("# [ Pointers to Record Layouts ]" );
+
+        for ( Layout l : Layout.all_heap_layouts() ) {
+            String layout_name = l.name;
+
+            push_no_offset(layout_name + ": .space 8" );
+
+        }
+        
+        push_no_offset("" );
         
         push_no_offset( ".section .text" );
         
@@ -369,6 +384,9 @@ public class X86Emitter {
                         out += ope.get_long();
                     } break;
                 }
+            } break;
+            case LABEL: {
+                out += ope.get_string();
             } break;
         }
         return out;

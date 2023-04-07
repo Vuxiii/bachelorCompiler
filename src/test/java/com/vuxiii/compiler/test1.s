@@ -1,10 +1,14 @@
 .section .data
+# [ String Buffers and Substitutes ]
 string0: .ascii "%\n"
 string0subs: .ascii ""
 string2: .ascii "%\n"
 string2subs: .ascii ""
 string1: .ascii "%\n"
 string1subs: .ascii ""
+
+# [ Pointers to Record Layouts ]
+
 .section .text
 .section .text
 .global main
@@ -12,7 +16,13 @@ main:
     pushq %rbp
     movq %rsp, %rbp # Setup stackpointer
     subq $16, %rsp
-    movq %rsp, %rsp
+    callq initialize_heap
+    movq $1, %rdi
+    leaq -8(%rbp), %rsi
+    pushq $2
+    leaq (%rsp), %rdx
+    callq new_scope_header
+    addq $1, %rsp
     pushq $0
     popq %rax
     
@@ -74,14 +84,16 @@ EndOfIfBlocks1:
     movq $0, %rsi
     movq $0, %rdx
     call print_string
-    movq (%rsp), %rdi
+    
+    # [[ Loading variable a ]] 
+    # [[ offset is -2 ]] 
+    movq -16(%rbp), %rdi
+    
     call print_num
     movq $string0, %rdi
     movq $1, %rsi
     movq $1, %rdx
     call print_string
-    addq $8, %rsp
-    movq %rsp, %rsp
 
 # End Print
 
@@ -139,14 +151,16 @@ EndOfIfBlocks3:
     movq $0, %rsi
     movq $0, %rdx
     call print_string
-    movq (%rsp), %rdi
+    
+    # [[ Loading variable a ]] 
+    # [[ offset is -2 ]] 
+    movq -16(%rbp), %rdi
+    
     call print_num
     movq $string1, %rdi
     movq $1, %rsi
     movq $1, %rdx
     call print_string
-    addq $8, %rsp
-    movq %rsp, %rsp
 
 # End Print
 
@@ -204,14 +218,16 @@ EndOfIfBlocks5:
     movq $0, %rsi
     movq $0, %rdx
     call print_string
-    movq (%rsp), %rdi
+    
+    # [[ Loading variable a ]] 
+    # [[ offset is -2 ]] 
+    movq -16(%rbp), %rdi
+    
     call print_num
     movq $string2, %rdi
     movq $1, %rsi
     movq $1, %rdx
     call print_string
-    addq $8, %rsp
-    movq %rsp, %rsp
 
 # End Print
 

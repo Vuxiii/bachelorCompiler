@@ -1,6 +1,10 @@
 .section .data
+# [ String Buffers and Substitutes ]
 string0: .ascii "Hej %, du bor i %. Du er % aar. I Januar var du % aar gammel!\n"
-string0subs: .ascii "William\0Odense\0\0\0"
+string0subs: .ascii "William\0Odense\0"
+
+# [ Pointers to Record Layouts ]
+
 .section .text
 .section .text
 .global main
@@ -8,7 +12,13 @@ main:
     pushq %rbp
     movq %rsp, %rbp # Setup stackpointer
     subq $0, %rsp
-    movq %rsp, %rsp
+    callq initialize_heap
+    movq $1, %rdi
+    leaq -8(%rbp), %rsi
+    pushq $2
+    leaq (%rsp), %rdx
+    callq new_scope_header
+    addq $1, %rsp
     pushq $23
     pushq $22
 
@@ -34,20 +44,18 @@ main:
     movq $8, %rsi
     movq $17, %rdx
     call print_string
-    movq 8(%rsp), %rdi
+    movq $23, %rdi
     call print_num
     movq $string0, %rdi
     movq $22, %rsi
     movq $26, %rdx
     call print_string
-    movq (%rsp), %rdi
+    movq $22, %rdi
     call print_num
     movq $string0, %rdi
     movq $13, %rsi
     movq $49, %rdx
     call print_string
-    addq $16, %rsp
-    movq %rsp, %rsp
 
 # End Print
 

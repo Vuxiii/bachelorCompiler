@@ -2,6 +2,7 @@ package com.vuxiii.compiler.Lexer.Tokens.Leaf;
 
 
 import com.vuxiii.DFANFA.MatchInfo;
+import com.vuxiii.LR.Records.Term;
 import com.vuxiii.compiler.Lexer.Tokens.PrimitiveType;
 import com.vuxiii.compiler.Lexer.Tokens.TokenType;
 import com.vuxiii.compiler.Parser.Nodes.Types.Type;

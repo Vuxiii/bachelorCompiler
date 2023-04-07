@@ -16,7 +16,7 @@ nested: .space 8
 main:
     pushq %rbp
     movq %rsp, %rbp # Setup stackpointer
-    subq $32, %rsp
+    subq $24, %rsp
     callq initialize_heap
     movq $1, %rdi
     leaq -8(%rbp), %rsi
@@ -24,32 +24,26 @@ main:
     leaq (%rsp), %rdx
     callq new_scope_header
     addq $1, %rsp
-    movq $1, %rdi
-    pushq $8
-    leaq (%rsp), %rsi
-    callq new_layout
-    addq $1, %rsp
-    movq %rax, nested
     pushq $42
     popq %rax
     
     # [[ Storing variable rec.a ]] 
-    # [[ offset is -2 ]] 
-    movq %rax, -16(%rbp)
+    # [[ offset is -1 ]] 
+    movq %rax, -8(%rbp)
     
     pushq $69
     popq %rax
     
     # [[ Storing variable rec.b ]] 
-    # [[ offset is -3 ]] 
-    movq %rax, -24(%rbp)
+    # [[ offset is -2 ]] 
+    movq %rax, -16(%rbp)
     
     pushq $512
     popq %rax
     
     # [[ Storing variable rec.c ]] 
-    # [[ offset is -4 ]] 
-    movq %rax, -32(%rbp)
+    # [[ offset is -3 ]] 
+    movq %rax, -24(%rbp)
     
 
 # Setup Print
@@ -60,8 +54,8 @@ main:
     call print_string
     
     # [[ Loading variable rec.a ]] 
-    # [[ offset is -2 ]] 
-    movq -16(%rbp), %rdi
+    # [[ offset is -1 ]] 
+    movq -8(%rbp), %rdi
     
     call print_num
     movq $string0, %rdi
@@ -80,8 +74,8 @@ main:
     call print_string
     
     # [[ Loading variable rec.b ]] 
-    # [[ offset is -3 ]] 
-    movq -24(%rbp), %rdi
+    # [[ offset is -2 ]] 
+    movq -16(%rbp), %rdi
     
     call print_num
     movq $string1, %rdi
@@ -100,8 +94,8 @@ main:
     call print_string
     
     # [[ Loading variable rec.c ]] 
-    # [[ offset is -4 ]] 
-    movq -32(%rbp), %rdi
+    # [[ offset is -3 ]] 
+    movq -24(%rbp), %rdi
     
     call print_num
     movq $string2, %rdi

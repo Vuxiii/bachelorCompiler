@@ -14,6 +14,7 @@ import com.vuxiii.compiler.VisitorPattern.Visitors.CodeGeneration.StringCollecti
 import com.vuxiii.compiler.VisitorPattern.Visitors.Debug.AST_Printer;
 import com.vuxiii.compiler.VisitorPattern.Visitors.SymbolCollection.AST_FixTypes;
 import com.vuxiii.compiler.VisitorPattern.Visitors.SymbolCollection.AST_SymbolCollector;
+import com.vuxiii.compiler.VisitorPattern.Visitors.SymbolCollection.Layout;
 import com.vuxiii.compiler.VisitorPattern.Visitors.TreeCollaps.AST_Shrinker;
 
 import java.io.FileWriter;
@@ -102,22 +103,49 @@ public final class App {
 
         """;
         input = """
-        
+        type nested: {
+            nested_field: int;
+        };
+
         type my_rec: {
             field1: int;
             field2: int;
+            nested_records: nested;
         };
 
-        let a: *int;
-        a = 3;
+        let rec: my_rec;
 
-        print( "a has the value: %\\n", a );
-        
-        a = 42 - a;
-
-        print( "a has the value: %\\n", a );
-
+        my_rec.field1 = 42;
         """;
+        input = """
+        type nested: {
+            a: int;
+            b: int;
+            c: *int;
+        };
+
+        let rec: nested;
+
+        rec.a = 42;
+        rec.b = 69;
+        rec.c = 512;
+
+
+        print( "Field a is: %\\n", rec.a );
+        print( "Field b is: %\\n", rec.b );
+        print( "Field c is: %\\n", rec.c );
+        """;
+            
+        // let a: *int;
+        // a = 3;
+
+        // print( "a has the value: %\\n", a );
+        
+        // a = 42 - a;
+
+        // print( "a has the value: %\\n", a );
+
+        // """;
 
         System.out.println( input );
 
@@ -132,7 +160,7 @@ public final class App {
         line_break();
 
         Settings.showGrammar = true;
-        Settings.showParsingTable = true;
+        Settings.showParsingTable = false;
         // [[ Parser ]]
         
         ASTNode ast = Parser.getAST( tokens );
@@ -208,6 +236,11 @@ public final class App {
         printer = new AST_Printer();
         ast.accept( printer );
         System.out.println( printer.get_ascii() );
+
+        // System.out.println( "Layouts:" );
+        // for ( Layout l : Layout.get_all_layouts() ) {
+        //     System.out.println( l );
+        // }
 
 
         line_break();

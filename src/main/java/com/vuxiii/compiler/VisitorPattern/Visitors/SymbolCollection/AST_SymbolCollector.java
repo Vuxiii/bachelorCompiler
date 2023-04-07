@@ -2,9 +2,11 @@ package com.vuxiii.compiler.VisitorPattern.Visitors.SymbolCollection;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import com.vuxiii.Visitor.VisitorBase;
 import com.vuxiii.compiler.Error.Error;
@@ -18,6 +20,7 @@ import com.vuxiii.compiler.Parser.Nodes.FieldList;
 import com.vuxiii.compiler.Parser.Nodes.Root;
 import com.vuxiii.compiler.Parser.Nodes.SymbolNode;
 import com.vuxiii.compiler.Parser.Nodes.Types.FunctionType;
+import com.vuxiii.compiler.Parser.Nodes.Types.RecordType;
 import com.vuxiii.compiler.Parser.Nodes.Types.UserType;
 import com.vuxiii.compiler.VisitorPattern.ASTNode;
 import com.vuxiii.compiler.VisitorPattern.Annotations.VisitOrder;
@@ -30,6 +33,8 @@ public class AST_SymbolCollector extends VisitorBase {
     List<String> scope_stack = new ArrayList<>();
 
     Map<String, Scope> scope_map;
+
+    Set<RecordType> visited_records = new HashSet<>();
 
     @VisitorPattern( when = VisitOrder.ENTER_NODE )
     public void init_root_scope( Root rootie ) {
@@ -66,14 +71,14 @@ public class AST_SymbolCollector extends VisitorBase {
     @VisitorPattern( when = VisitOrder.ENTER_NODE )
     public void init_function_scopes( Assignment func_assignment ) {
         if ( !(func_assignment.value instanceof FunctionType) ) return;
-        
+        if ( !(func_assignment.id instanceof LexIdent) ) return;
         SymbolNode parent_scope = current_symbol_node(func_assignment);
         Scope new_scope = new Scope();
 
-        new_scope.add_variable( func_assignment.id );
+        new_scope.add_variable( (LexIdent)func_assignment.id );
         System.out.println( "Adding " + func_assignment.id + " to scope " + new_scope);
 
-        SymbolNode node = new SymbolNode( Symbol.n_Scope, func_assignment, "function " + func_assignment.id.name, new_scope, Optional.of(parent_scope) );
+        SymbolNode node = new SymbolNode( Symbol.n_Scope, func_assignment, "function " + func_assignment.name(), new_scope, Optional.of(parent_scope) );
         node.parent = Optional.of( func_assignment.parent.get() );
         func_assignment.parent.get().replace_child_with(func_assignment, node);
         func_assignment.parent.get().setup_ASTNodeQueue();
@@ -81,46 +86,57 @@ public class AST_SymbolCollector extends VisitorBase {
 
         functions.add( func_assignment );
 
-        scope_map.put( "function " + func_assignment.id.name, new_scope );
+        scope_map.put( "function " + func_assignment.name(), new_scope );
     }
 
     @VisitorPattern( when = VisitOrder.ENTER_NODE, order = 1 )
     public void collect_var( Declaration decl ) {
         if ( decl.kind != DeclarationKind.VARIABLE && decl.kind != DeclarationKind.HEAP ) return;
-        current_scope( decl ).add_variable( decl.id );
+        Scope scope = current_scope( decl );
+        if ( scope.has_record( decl.type ) ) {
+            // Register the children
+            scope.add_fields( decl );
+        } else {
+            scope.add_variable( decl.id );
+            System.out.println( "Adding " + decl.id + " to scope " + current_scope(decl));
+        }
         
-        System.out.println( "Adding " + decl.id + " to scope " + current_scope(decl));
+        
 
+        
 
         if ( decl.kind == DeclarationKind.HEAP ) {
             current_scope( decl ).identifier_is_heap_allocated( decl.id.name );
-            
-
-
         }
     }
 
     @VisitorPattern( when = VisitOrder.ENTER_NODE, order = 3 )
-    public void register_record_layout( Declaration decl ) {
-        if ( decl.kind != DeclarationKind.USER_TYPE ) return;
+    public void register_record_layout( RecordType record ) {
+        if ( visited_records.contains( record ) ) return;
+        visited_records.add( record );
 
-        UserType type = (UserType)decl.type;
-
-        FieldList fields = (FieldList) type.fields;
-
-        Layout layout = new Layout( decl.id.name );
+        Layout layout_stack = Layout.stack( record.identifier.name );
+        Layout layout_heap = Layout.heap( record.identifier.name );
 
         long offset = 0;
 
-        for ( Field f : fields.fields ) {
+        Scope scope = current_scope(record);
+
+        scope.add_record(record);
+
+        for ( Field f : record.fields.fields ) {
             Declaration fd = f.field;
-            layout.register( fd.id.name, offset );
+            layout_stack.register( fd.id.name, offset );
+            layout_heap.register( fd.id.name, offset );
+
             if ( fd.kind == DeclarationKind.HEAP ) {
-                layout.pointer_at( offset );
+                layout_stack.pointer_at( offset+1 );
+                layout_heap.pointer_at( offset+1 );
             }
             offset++;
         }
-        layout.num_of_fields = offset;
+        layout_stack.num_of_fields = offset;
+        layout_heap.num_of_fields = offset;
     }
 
     @VisitorPattern( when = VisitOrder.ENTER_NODE, order = 2 )

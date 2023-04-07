@@ -30,11 +30,6 @@ public class AST_Shrinker extends VisitorBase {
         root.accept( collaps_arg );
         acollector.cleanup();
 
-        AST_Shrinker_Field_Collector fcollector = new AST_Shrinker_Field_Collector();
-        root.accept( fcollector );
-        AST_Shrinker_Field collaps_field = new AST_Shrinker_Field( fcollector.mapper );
-        root.accept( collaps_field );
-        fcollector.cleanup();
 
         AST_Shrinker_If_Collector if_collec = new AST_Shrinker_If_Collector();
         root.accept( if_collec );

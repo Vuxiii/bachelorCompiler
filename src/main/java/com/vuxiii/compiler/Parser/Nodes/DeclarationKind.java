@@ -9,5 +9,6 @@ public enum DeclarationKind {
     USER_TYPE,
     ALIAS_TO_USER_TYPE,
     ALIAS_TO_STD_TYPE,
+    FIELD,
     UNKNOWN,
 }

@@ -1,17 +1,21 @@
 .section .data
+# [ String Buffers and Substitutes ]
 string4: .ascii "true == true -> true\n"
-string3: .ascii "2 + 2 != 5 -> false\n"
-string2: .ascii "2 + 2 != 5 -> true\n"
+string12: .ascii "end\n"
 string9: .ascii "false == false -> false\n"
+string11: .ascii "false != false -> false\n"
 string5: .ascii "true == true -> false\n"
+string0: .ascii "2 + 2 == 5 -> true\n"
+string2: .ascii "2 + 2 != 5 -> true\n"
+string1: .ascii "2 + 2 == 5 -> false\n"
+string6: .ascii "true != true -> true\n"
+string3: .ascii "2 + 2 != 5 -> false\n"
+string8: .ascii "false == false -> true\n"
 string7: .ascii "true != true -> false\n"
 string10: .ascii "false != false -> true\n"
-string12: .ascii "end\n"
-string1: .ascii "2 + 2 == 5 -> false\n"
-string11: .ascii "false != false -> false\n"
-string6: .ascii "true != true -> true\n"
-string0: .ascii "2 + 2 == 5 -> true\n"
-string8: .ascii "false == false -> true\n"
+
+# [ Pointers to Record Layouts ]
+
 .section .text
 .section .text
 .global main
@@ -19,18 +23,24 @@ main:
     pushq %rbp
     movq %rsp, %rbp # Setup stackpointer
     subq $0, %rsp
-    movq %rsp, %rsp
+    callq initialize_heap
+    movq $1, %rdi
+    leaq -8(%rbp), %rsi
+    pushq $2
+    leaq (%rsp), %rdx
+    callq new_scope_header
+    addq $1, %rsp
     pushq $2
     pushq $2
     popq %rcx
     popq %rbx
-    addq %rbx, %rcx
-    movq %rcx, %rax
+    addq %rcx, %rbx
+    movq %rbx, %rax
     pushq %rax
     pushq $5
     popq %rcx
     popq %rbx
-    cmpq %rcx, %rbx
+    cmpq %rbx, %rcx
     jne IfEndOfBody1
 
 # Setup Print
@@ -60,13 +70,13 @@ EndOfIfBlocks1:
     pushq $2
     popq %rcx
     popq %rbx
-    addq %rbx, %rcx
-    movq %rcx, %rax
+    addq %rcx, %rbx
+    movq %rbx, %rax
     pushq %rax
     pushq $5
     popq %rcx
     popq %rbx
-    cmpq %rcx, %rbx
+    cmpq %rbx, %rcx
     je IfEndOfBody2
 
 # Setup Print
@@ -96,7 +106,7 @@ EndOfIfBlocks2:
     pushq $1
     popq %rcx
     popq %rbx
-    cmpq %rcx, %rbx
+    cmpq %rbx, %rcx
     jne IfEndOfBody3
 
 # Setup Print
@@ -126,7 +136,7 @@ EndOfIfBlocks3:
     pushq $1
     popq %rcx
     popq %rbx
-    cmpq %rcx, %rbx
+    cmpq %rbx, %rcx
     je IfEndOfBody4
 
 # Setup Print
@@ -156,7 +166,7 @@ EndOfIfBlocks4:
     pushq $0
     popq %rcx
     popq %rbx
-    cmpq %rcx, %rbx
+    cmpq %rbx, %rcx
     jne IfEndOfBody5
 
 # Setup Print
@@ -186,7 +196,7 @@ EndOfIfBlocks5:
     pushq $0
     popq %rcx
     popq %rbx
-    cmpq %rcx, %rbx
+    cmpq %rbx, %rcx
     je IfEndOfBody6
 
 # Setup Print

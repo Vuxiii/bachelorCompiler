@@ -27,8 +27,8 @@ void initialize_heap() {
         printf( "Some error initializing the heap...\nExitin!\n" );
         exit(-1);
     }
-    printf( "Start of new heap: %p\n", heap );
-    printf( "End   of new heap: %p\n", heap + heap_size );
+    // printf( "Start of new heap: %p\n", heap );
+    // printf( "End   of new heap: %p\n", heap + heap_size );
 }
 
 int get_bit( size_t bit_field, int offset ) {
@@ -85,7 +85,7 @@ size_t *move_heap_block( size_t **memory_block, size_t *dst ) {
 
         size_t size_of_block = get_size_of_record( *memory_block );
 
-        printf( "We have a size for the memory_block: %ld\n", size_of_block );
+        // printf( "We have a size for the memory_block: %ld\n", size_of_block );
         size_t *new_dst = memcpy( dst, *memory_block, size_of_block * sizeof(size_t) );
 
         *memory_block = new_dst;
@@ -97,28 +97,28 @@ size_t *move_heap_block( size_t **memory_block, size_t *dst ) {
         return dst;
     }
 
-    printf( "We have moved the memory_block to the new region!\nNew location is: %p\n", *memory_block );
+    // printf( "We have moved the memory_block to the new region!\nNew location is: %p\n", *memory_block );
 
     size_t *layout = *(size_t**)((*memory_block) + 1);
     
     if ( layout == 0 ) return dst;
 
-    printf( "layout: %p\n", layout );
+    // printf( "layout: %p\n", layout );
 
     const size_t header_offset = 1;
     size_t i = 0;
     size_t bitfield = layout[i];
     while ( bitfield != 0 ) {
-        printf( "========================================\n" );
-        printf( "Bitfield: " );
-        print_bit_field( bitfield );
+        // printf( "========================================\n" );
+        // printf( "Bitfield: " );
+        // print_bit_field( bitfield );
         for ( size_t b = 1; b < 64; b++ ) {
             if ( get_bit(bitfield, b) == 1 ) {
                 size_t **new_memory_block = (size_t**)((*memory_block) + b + header_offset);
-                printf( "Found pointer at location: %ld\n", b );
-                printf( "&Pointer[%ld] = %p\n", b, new_memory_block );
-                printf( " Pointer[%ld] = %p\n", b, *new_memory_block );
-                printf( "*Pointer[%ld] = %ld\n", b, *(*new_memory_block) );
+                // printf( "Found pointer at location: %ld\n", b );
+                // printf( "&Pointer[%ld] = %p\n", b, new_memory_block );
+                // printf( " Pointer[%ld] = %p\n", b, *new_memory_block );
+                // printf( "*Pointer[%ld] = %ld\n", b, *(*new_memory_block) );
                 
                 dst = move_heap_block( new_memory_block, dst );
             }
@@ -147,9 +147,9 @@ size_t *move_these_root_pointers( size_t* layout, size_t *stack, size_t *dst ) {
             size_t bit = get_bit(bitfield, b);
             if ( bit == 1 ) {
                 size_t **memory_block = (size_t**)(stack - b);
-                printf( "Found pointer at location: %ld\n", b );
-                printf( "&Pointer[%ld] = %p\n", b, stack - b );
-                printf( "*Pointer[%ld] = %p\n", b, *memory_block );
+                // printf( "Found pointer at location: %ld\n", b );
+                // printf( "&Pointer[%ld] = %p\n", b, stack - b );
+                // printf( "*Pointer[%ld] = %p\n", b, *memory_block );
                 
                 dst = move_heap_block( memory_block, dst );
             }
@@ -168,9 +168,9 @@ size_t *move_these_root_pointers( size_t* layout, size_t *stack, size_t *dst ) {
 
 void swap_heap_buffers() {
 
-    printf( "\n======================================\nStarting swap_heap_buffers\n" );
-    printf( "Start of old heap: %p\n", heap );
-    printf( "End of old heap:   %p\n", heap + sizeof(heap) );
+    // printf( "\n======================================\nStarting swap_heap_buffers\n" );
+    // printf( "Start of old heap: %p\n", heap );
+    // printf( "End of old heap:   %p\n", heap + sizeof(heap) );
 
 
     // We can move through scope_pointers one by one.
@@ -188,9 +188,9 @@ void swap_heap_buffers() {
         size_t *scope        =  (size_t *) scope_pointers[i];
         size_t *scope_layout = *(size_t **)scope_pointers[i];
         
-        printf("Visiting scope: %p\n", scope_pointers[i] );
+        // printf("Visiting scope: %p\n", scope_pointers[i] );
         
-        printf( "We are looking at scope at address: %p\n", scope );
+        // printf( "We are looking at scope at address: %p\n", scope );
 
         if ( scope_layout == 0 ) {
             continue; // There are no pointers in this scope. Continue to the check the next one.
@@ -212,9 +212,9 @@ void swap_heap_buffers() {
     
     free( old_heap );
     
-    printf( "Start of new heap: %p\n", heap );
-    printf( "End of new heap:   %p\n", heap + heap_size );
-    printf( "\n======================================\nEnding swap_heap_buffers\n" );
+    // printf( "Start of new heap: %p\n", heap );
+    // printf( "End of new heap:   %p\n", heap + heap_size );
+    // printf( "\n======================================\nEnding swap_heap_buffers\n" );
 }
 
 size_t *new_layout( size_t size, size_t *bitfields ) {
@@ -253,8 +253,8 @@ size_t *new_ptr_size( size_t size, size_t *layout ) {
 
     
 
-    printf( "Allocating new pointer: %p\n", p );
-    printf( "Offset for heap_ptr is: 8 bytes * %ld\n", pointer_offset );
+    // printf( "Allocating new pointer: %p\n", p );
+    // printf( "Offset for heap_ptr is: 8 bytes * %ld\n", pointer_offset );
 
     return p;
 }
@@ -270,8 +270,8 @@ void new_scope_header( size_t size, size_t **pointer_to_stack, size_t *bitfield 
         exit(-1);
     }
 
-    printf( "Allocating new scope header:  %p of size: %ld\n", *pointer_to_stack, size );
-    printf( "Which was stored at location: %p\n", pointer_to_stack );
+    // printf( "Allocating new scope header:  %p of size: %ld\n", *pointer_to_stack, size );
+    // printf( "Which was stored at location: %p\n", pointer_to_stack );
 
     if ( scope_offset == scope_size ) {
         scope_size *= 2;
@@ -430,7 +430,7 @@ void print_string( char *buffer, long len, long offset ) {
 }
 
 void print_num( long num ) {
-    printf( "%ld\n", num );
+    printf( "%ld", num );
     fflush(NULL);
 }
 

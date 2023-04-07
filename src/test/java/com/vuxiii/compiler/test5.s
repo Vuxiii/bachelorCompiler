@@ -1,11 +1,15 @@
 .section .data
-string0: .ascii "If\n"
-string1: .ascii "If\n"
+# [ String Buffers and Substitutes ]
 string2: .ascii "Else\n"
-string4: .ascii "Else if\n"
+string0: .ascii "If\n"
 string3: .ascii "If\n"
+string4: .ascii "Else if\n"
 string5: .ascii "Else\n"
+string1: .ascii "If\n"
 string6: .ascii "Fix ending...\n"
+
+# [ Pointers to Record Layouts ]
+
 .section .text
 .section .text
 .global main
@@ -13,7 +17,13 @@ main:
     pushq %rbp
     movq %rsp, %rbp # Setup stackpointer
     subq $0, %rsp
-    movq %rsp, %rsp
+    callq initialize_heap
+    movq $1, %rdi
+    leaq -8(%rbp), %rsi
+    pushq $2
+    leaq (%rsp), %rdx
+    callq new_scope_header
+    addq $1, %rsp
     pushq $1
     popq %rax
     pushq $1
@@ -35,8 +45,8 @@ IfEndOfBody1:
     pushq $4
     popq %rcx
     popq %rbx
-    subq %rbx, %rcx
-    movq %rcx, %rax
+    subq %rcx, %rbx
+    movq %rbx, %rax
     pushq %rax
     popq %rax
     cmpq $0, %rax
@@ -69,8 +79,8 @@ EndOfIfBlocks1:
     pushq $4
     popq %rcx
     popq %rbx
-    subq %rbx, %rcx
-    movq %rcx, %rax
+    subq %rcx, %rbx
+    movq %rbx, %rax
     pushq %rax
     popq %rax
     cmpq $0, %rax

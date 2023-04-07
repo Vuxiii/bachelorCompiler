@@ -26,6 +26,7 @@ import com.vuxiii.compiler.Parser.Nodes.FunctionCall;
 import com.vuxiii.compiler.Parser.Nodes.IfElseNode;
 import com.vuxiii.compiler.Parser.Nodes.IfList;
 import com.vuxiii.compiler.Parser.Nodes.IfNode;
+import com.vuxiii.compiler.Parser.Nodes.NestedField;
 import com.vuxiii.compiler.Parser.Nodes.Print;
 import com.vuxiii.compiler.Parser.Nodes.PrintKind;
 import com.vuxiii.compiler.Parser.Nodes.Root;
@@ -73,7 +74,7 @@ public class AST_StackMachine extends Visitor {
     }
 
     private void function_assembler( Assignment function ) {
-        String label = function.id.name;
+        String label = function.name();
         FunctionBlock fb = functions.get( label );
 
         current_scope = ((SymbolNode)function.parent.get()).scope;
@@ -113,7 +114,7 @@ public class AST_StackMachine extends Visitor {
         // Initialize all the functions
 
         for ( Assignment func : root.functions ) { 
-            String label = func.id.name;
+            String label = func.name();
             FunctionBlock fb = new FunctionBlock( label, func );
             functions.put( label, fb );
         }
@@ -178,17 +179,20 @@ public class AST_StackMachine extends Visitor {
 
         // TODO! Ensure that this also works for functions!!!!!
 
-        for ( Layout layout : Layout.get_all_layouts() ) {
+        for ( Layout layout : Layout.all_heap_layouts() ) {
             // Insert size -> rdi
             
+            if ( layout.bitfields().size() == 0 ) continue;
+
             push( new Instruction( Opcode.MOVE, new Arguments( List.of(
-                Operand.from_long( layout.num_of_fields ),
+                Operand.from_long( layout.bitfields().size() ),
                 Operand.from_register( Register.RDI, AddressingMode.REGISER )
             ) )));
 
             // Push the bitfields on the stack
+            System.out.println( layout );
             for ( long field : layout.bitfields() ) {
-                new Instruction( Opcode.PUSH, Arguments.from_long( field ) );
+                push( new Instruction( Opcode.PUSH, Arguments.from_long( field ) ) );
             }
 
             // Load rsp -> rsi
@@ -204,14 +208,14 @@ public class AST_StackMachine extends Visitor {
             
             // add size -> rsp
             push( new Instruction( Opcode.ADD, new Arguments( List.of( 
-                Operand.from_long( layout.num_of_fields ),
+                Operand.from_long( layout.bitfields().size()),
                 Operand.from_register( Register.RSP, AddressingMode.REGISER )
             ))));
             
             // move rax -> layoutspace.
             push( new Instruction( Opcode.MOVE, new Arguments( List.of(
                 Operand.from_register(Register.RAX, AddressingMode.REGISER),
-                Operand.from_string( layout.name )
+                Operand.from_label( layout.name )
             ))));
         }
 
@@ -423,8 +427,12 @@ public class AST_StackMachine extends Visitor {
             
             case TIMES: {
                 opcode = Opcode.MULT;
-            } break;
-            
+                push( new Instruction( opcode,      new Arguments( List.of(r1, r2, target) ) ) );
+                push( new Instruction( Opcode.PUSH, 
+                                            new Arguments( List.of( target) ), 
+                                            new Comment( "Storing computed value" ) ) );
+                return;
+            } 
             case DIVISION: {
                 opcode = Opcode.DIV_INTEGER;
             } break;
@@ -445,9 +453,8 @@ public class AST_StackMachine extends Visitor {
             }break;
         }
 
-        push( new Instruction( opcode, 
-                                    new Arguments( List.of(r1, r2, target) ), 
-                                    new Comment( target + " = " + binop  ) ) );
+        push( new Instruction( opcode,      new Arguments( List.of(r1, r2) ) ) );
+        push( new Instruction( Opcode.MOVE, new Arguments( List.of(r2, target) ) ) );
         push( new Instruction( Opcode.PUSH, 
                                     new Arguments( List.of( target) ), 
                                     new Comment( "Storing computed value" ) ) );
@@ -461,30 +468,30 @@ public class AST_StackMachine extends Visitor {
         String layout_name = Layout.get_layout( decl );
         LexIdent id = decl.id;
 
-        int size = 1;
-        // How much space do we want for our heap_memory?
-        push( new Instruction( Opcode.MOVE, new Arguments( List.of( 
-            Operand.from_int( size ),
-            Operand.from_register( Register.RDI, AddressingMode.REGISER ) ) ) ) );
+        // int size = 1;
+        // // How much space do we want for our heap_memory?
+        // push( new Instruction( Opcode.MOVE, new Arguments( List.of( 
+        //     Operand.from_int( size ),
+        //     Operand.from_register( Register.RDI, AddressingMode.REGISER ) ) ) ) );
 
         
-        int num_of_bitfields = 0;
-        // Push bitfield
-        for ( long field : Layout.getLayout(id.name) ) {
-            push( new Instruction( Opcode.PUSH, Arguments.from_long( field ) ) );
-            num_of_bitfields++;
-        }
+        // int num_of_bitfields = 0;
+        // // Push bitfield
+        // for ( long field : Layout.getLayout(id.name) ) {
+        //     push( new Instruction( Opcode.PUSH, Arguments.from_long( field ) ) );
+        //     num_of_bitfields++;
+        // }
 
-        // The layout
-        push( new Instruction( Opcode.MOVE, new Arguments( List.of( 
-            Operand.from_string( layout_name ),
-            Operand.from_register( Register.RSI, AddressingMode.REGISER ) ) ) ) );
+        // // The layout
+        // push( new Instruction( Opcode.MOVE, new Arguments( List.of( 
+        //     Operand.from_string( layout_name ),
+        //     Operand.from_register( Register.RSI, AddressingMode.REGISER ) ) ) ) );
 
 
-        push( new Instruction( Opcode.ADD, new Arguments( List.of(
-            Operand.from_int(num_of_bitfields ),
-            Operand.from_register( Register.RSP, AddressingMode.REGISER )
-        )) ) );
+        // push( new Instruction( Opcode.ADD, new Arguments( List.of(
+        //     Operand.from_int(num_of_bitfields ),
+        //     Operand.from_register( Register.RSP, AddressingMode.REGISER )
+        // )) ) );
     }
 
     @VisitorPattern( when = VisitOrder.EXIT_NODE )
@@ -505,15 +512,15 @@ public class AST_StackMachine extends Visitor {
                                 new Comment( "Fetching value" ) ) );
         }
 
-        if ( AST_SymbolCollector.current_scope( assignment_node.id ).isHeapAllocated( assignment_node.id.name ) ) {
+        if ( AST_SymbolCollector.current_scope( assignment_node.id ).isHeapAllocated( assignment_node.name() ) ) {
             Operand rbx = Operand.from_register( Register.RBX, AddressingMode.DIRECT_OFFSET );
             rbx.offset = 2; //TODO! Make dynamic for records.
 
             push( new Instruction( Opcode.MOVE, new Arguments( List.of( Operand.from_register( Register.RAX, AddressingMode.REGISER ), rbx ) ) ) );
         } else {
             push( new Instruction( Opcode.STORE_VARIABLE, 
-                                    new Arguments( List.of(new Operand( assignment_node.id.name, AddressingMode.IMMEDIATE ), new Operand( Register.RAX, AddressingMode.REGISER )) ), 
-                                    new Comment( "Store in variable " + assignment_node.id.name ) ) );
+                                    new Arguments( List.of(new Operand( assignment_node.name(), AddressingMode.IMMEDIATE ), new Operand( Register.RAX, AddressingMode.REGISER )) ), 
+                                    new Comment( "Store in variable " + assignment_node.name() ) ) );
 
         }
         
@@ -550,7 +557,7 @@ public class AST_StackMachine extends Visitor {
             push( new Instruction( Opcode.PRINT_STRING, Arguments.from_label( "%\n" ) ) ); 
         } else {
             // Do the fancy things
-
+            
             List<Argument> args;
 
             if ( print_node.arg_list.get() instanceof Argument ) {
@@ -560,7 +567,6 @@ public class AST_StackMachine extends Visitor {
                 args = ((ArgumentList)print_node.arg_list.get()).args;
             }
 
-            int stack_counter = 1;
             int offset = 0;
             int prev = 0;
 
@@ -589,14 +595,25 @@ public class AST_StackMachine extends Visitor {
 
                     offset += sub_len + 1;
                 } else /*if ( exp.node instanceof LexLiteral && ((LexLiteral)exp.node).literal_type.equals( PrimitiveType.INT ) ) */ {
-                    
-                    Operand off = Operand.from_register( Register.RSP, AddressingMode.DIRECT_OFFSET );
-                    off.offset = str_node.num_of_values_on_stack - stack_counter;
-                    stack_counter++;
+                    if ( exp.node instanceof LexIdent ) {
+                        push( _load_var( (LexIdent)exp.node, Operand.from_register( Register.RDI, AddressingMode.REGISER ) ) );
+                    } else if ( exp.node instanceof NestedField ) {
+                        push( _load_var( (NestedField)exp.node, Operand.from_register( Register.RDI, AddressingMode.REGISER ) ) );
+                        
+                    } else if ( exp.node instanceof LexLiteral ) {
+                        LexLiteral lit = (LexLiteral)exp.node;
+                        if ( lit.literal_type == PrimitiveType.INT ) {
+                            push( new Instruction( Opcode.MOVE, new Arguments( List.of( 
+                                Operand.from_int( Integer.parseInt(lit.val) ),
+                                Operand.from_register( Register.RDI, AddressingMode.REGISER )
+                            ) ) ) );
+                        }
+                    } else if ( exp.node instanceof BinaryOperation ) {
+                        push( new Instruction( Opcode.POP, Arguments.from_register( Register.RDI) ) ); 
 
-                    Arguments load = new Arguments( List.of(off, Operand.from_register( Register.RDI, AddressingMode.REGISER )) );
-                    
-                    push( new Instruction( Opcode.MOVE, load, new Comment( "Fetching value " + print_node.value ) ) );
+                    }
+
+
                     push( new Instruction( Opcode.PRINT_NUM, Arguments.from_label( "%\n" ) ) ); 
 
                 }
@@ -609,9 +626,6 @@ public class AST_StackMachine extends Visitor {
             push( new Instruction( Opcode.MOVE, new Arguments( List.of(Operand.from_int(str_node.stop_indicators.get(str_node.stop_indicators.size()-1) - prev ), Operand.from_register( Register.RSI, AddressingMode.REGISER )) ) ) );
             push( new Instruction( Opcode.MOVE, new Arguments( List.of(Operand.from_int(prev ), Operand.from_register( Register.RDX, AddressingMode.REGISER )) ) ) );
             push( new Instruction( Opcode.PRINT_STRING, Arguments.from_label( "%\n" ) ) ); 
-
-            // Remove the calculated stuff from the stack.
-            push( new Instruction( Opcode.ADD, new Arguments( List.of(Operand.from_int(str_node.num_of_values_on_stack * 8), Operand.from_register( Register.RSP, AddressingMode.REGISER), Operand.from_register( Register.RSP, AddressingMode.REGISER)) ) ) );
 
         }
 
@@ -632,6 +646,35 @@ public class AST_StackMachine extends Visitor {
      */
     private List<Instruction> _load_var( LexIdent id, Operand target ) {
         String var_name = id.name;
+        Operand var = new Operand( var_name, AddressingMode.IMMEDIATE );
+        Scope scope = AST_SymbolCollector.current_scope(id);
+        boolean target_is_parameter = scope.get_parameters().contains( var_name );
+
+        if ( scope.isHeapAllocated( var_name ) ) {
+            List<Instruction> li = new ArrayList<>();
+            li.add( new Instruction( Opcode.LOAD_VARIABLE, 
+                                new Arguments( List.of(var, target) ), 
+                                new Comment( "Load variable " + var_name ),
+                                target_is_parameter ) );
+            Operand inter = Operand.from_register( target.get_reg(), AddressingMode.DIRECT_OFFSET );
+            inter.offset = 2;
+            li.add( new Instruction( Opcode.MOVE, new Arguments( List.of( inter, target ) ) ) );
+
+            return li;
+        } else {
+            return List.of(new Instruction( Opcode.LOAD_VARIABLE, 
+                                new Arguments( List.of(var, target) ), 
+                                new Comment( "Load variable " + var_name ),
+                                target_is_parameter ) );
+        }
+    }
+
+    /**
+     * This method loads the given variable
+     * @param id
+     */
+    private List<Instruction> _load_var( NestedField id, Operand target ) {
+        String var_name = id.name();
         Operand var = new Operand( var_name, AddressingMode.IMMEDIATE );
         Scope scope = AST_SymbolCollector.current_scope(id);
         boolean target_is_parameter = scope.get_parameters().contains( var_name );

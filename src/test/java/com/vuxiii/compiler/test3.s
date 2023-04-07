@@ -1,10 +1,14 @@
 .section .data
+# [ String Buffers and Substitutes ]
+string1: .ascii "Number 2 is: %\n"
+string1subs: .ascii ""
 string0: .ascii "Number 1 is: %\n"
 string0subs: .ascii ""
 string2: .ascii "Number 3 is: %\n"
 string2subs: .ascii ""
-string1: .ascii "Number 2 is: %\n"
-string1subs: .ascii ""
+
+# [ Pointers to Record Layouts ]
+
 .section .text
 .section .text
 .global main
@@ -12,7 +16,13 @@ main:
     pushq %rbp
     movq %rsp, %rbp # Setup stackpointer
     subq $16, %rsp
-    movq %rsp, %rsp
+    callq initialize_heap
+    movq $1, %rdi
+    leaq -8(%rbp), %rsi
+    pushq $2
+    leaq (%rsp), %rdx
+    callq new_scope_header
+    addq $1, %rsp
     pushq $7
     popq %rax
     
@@ -28,14 +38,14 @@ main:
     movq -8(%rbp), %rcx
     
     popq %rbx
-    movq %rbx, %rax
-    imulq %rcx
+    movq %rcx, %rax
+    imulq %rbx
     movq %rax, %rax
     pushq %rax
     popq %rcx
     popq %rbx
-    addq %rbx, %rcx
-    movq %rcx, %rax
+    addq %rcx, %rbx
+    movq %rbx, %rax
     pushq %rax
 
 # Setup Print
@@ -44,14 +54,12 @@ main:
     movq $13, %rsi
     movq $0, %rdx
     call print_string
-    movq (%rsp), %rdi
+    popq %rdi
     call print_num
     movq $string0, %rdi
     movq $1, %rsi
     movq $14, %rdx
     call print_string
-    addq $8, %rsp
-    movq %rsp, %rsp
 
 # End Print
 
@@ -62,15 +70,15 @@ main:
     movq -8(%rbp), %rcx
     
     popq %rbx
-    movq %rbx, %rax
-    imulq %rcx
+    movq %rcx, %rax
+    imulq %rbx
     movq %rax, %rax
     pushq %rax
     pushq $4
     popq %rcx
     popq %rbx
-    addq %rbx, %rcx
-    movq %rcx, %rax
+    addq %rcx, %rbx
+    movq %rbx, %rax
     pushq %rax
 
 # Setup Print
@@ -79,14 +87,12 @@ main:
     movq $13, %rsi
     movq $0, %rdx
     call print_string
-    movq (%rsp), %rdi
+    popq %rdi
     call print_num
     movq $string1, %rdi
     movq $1, %rsi
     movq $14, %rdx
     call print_string
-    addq $8, %rsp
-    movq %rsp, %rsp
 
 # End Print
 
@@ -98,14 +104,14 @@ main:
     movq -8(%rbp), %rcx
     
     popq %rbx
-    movq %rbx, %rax
-    imulq %rcx
+    movq %rcx, %rax
+    imulq %rbx
     movq %rax, %rax
     pushq %rax
     popq %rcx
     popq %rbx
-    addq %rbx, %rcx
-    movq %rcx, %rax
+    addq %rcx, %rbx
+    movq %rbx, %rax
     pushq %rax
 
 # Setup Print
@@ -114,14 +120,12 @@ main:
     movq $13, %rsi
     movq $0, %rdx
     call print_string
-    movq (%rsp), %rdi
+    popq %rdi
     call print_num
     movq $string2, %rdi
     movq $1, %rsi
     movq $14, %rdx
     call print_string
-    addq $8, %rsp
-    movq %rsp, %rsp
 
 # End Print
 
