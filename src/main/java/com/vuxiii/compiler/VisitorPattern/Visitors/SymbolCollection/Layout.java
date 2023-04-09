@@ -5,12 +5,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.vuxiii.compiler.Parser.Nodes.Declaration;
+import com.vuxiii.compiler.Parser.Nodes.Types.RecordType;
 
 public class Layout {
 
-    static List<Layout> all_heap_layouts = new ArrayList<>();
-    static List<Layout> all_stack_layouts = new ArrayList<>();
+    public static Map<RecordType, Layout> all_heap_layouts = new HashMap<>();
+    public static Map<RecordType, Layout> all_stack_layouts = new HashMap<>();
 
     Map<String, Long> offsets = new HashMap<>();
     List<Long> bitfields = new ArrayList<>();
@@ -23,21 +23,21 @@ public class Layout {
 
     private Layout() {}
 
-    public static Layout heap( String name ) {
+    public static Layout heap( RecordType rec ) {
         Layout h = new Layout();
-        h.name = name;
+        h.name = rec.identifier.name;
         h.num_of_fields = 696969696;
 
-        all_heap_layouts.add( h );
+        all_heap_layouts.put( rec, h );
         return h;
     }
 
-    public static Layout stack( String name ) {
+    public static Layout stack( RecordType rec ) {
         Layout s = new Layout();
-        s.name = name;
+        s.name = rec.identifier.name;
         s.num_of_fields = 696969696;
 
-        all_stack_layouts.add( s );
+        all_stack_layouts.put( rec, s );
         return s;
     }
 
@@ -45,30 +45,6 @@ public class Layout {
         offsets.put( field, offset );
     }
 
-
-
-
-
-
-
-
-
-    public static String get_layout(Declaration decl) {
-        return ""; //TODO! Implement me
-    }
-
-    public static List<Long> getLayout( String string ) {
-        
-        return List.of( 2l );
-    }
-
-    public static List<Layout> all_stack_layouts() {
-        return all_stack_layouts;
-    }
-
-    public static List<Layout> all_heap_layouts() {
-        return all_heap_layouts;
-    }
 
     public List<Long> bitfields() {
         return bitfields;

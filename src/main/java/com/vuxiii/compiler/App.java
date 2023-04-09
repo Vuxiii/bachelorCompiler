@@ -135,6 +135,13 @@ public final class App {
         print( "Field b is: %\\n", rec.b );
         print( "Field c is: %\\n", rec.c );
         """;
+
+        input = """
+                type a: { f: *int; };
+                let b: a;
+                b = 42;
+                print("%\\n", b);
+                """;
             
         // let a: *int;
         // a = 3;

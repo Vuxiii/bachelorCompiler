@@ -495,7 +495,9 @@ public class Parser {
         
         // n_Field_List -> n_Field t_Semicolon
         g.addRuleWithReduceFunction( Symbol.n_Field_List, List.of( Symbol.n_Field, Symbol.t_Semicolon ), t -> {
-            return new Field( Symbol.n_Field_List, (Declaration)t.get(0) );
+            FieldList list = new FieldList( Symbol.n_Field_List );
+            list.push( new Field( Symbol.n_Field_List, (Declaration)t.get(0) ) );
+            return list;
         });
         
         // n_Field -> t_Identifier t_Colon n_Standard_Type

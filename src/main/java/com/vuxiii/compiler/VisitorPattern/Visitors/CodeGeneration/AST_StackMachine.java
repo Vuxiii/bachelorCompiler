@@ -153,9 +153,10 @@ public class AST_StackMachine extends Visitor {
         // Push the bitfield
         int total_fields = 1;
 
-        for ( long field : Layout.getLayout( "root" ) ) {
-            push( new Instruction( Opcode.PUSH, Arguments.from_long( field ) ) );
-        }
+        //TODO! Implement me
+        // for ( long field : Layout.getLayout( "root" ) ) {
+        //     push( new Instruction( Opcode.PUSH, Arguments.from_long( field ) ) );
+        // }
 
 
         
@@ -179,7 +180,7 @@ public class AST_StackMachine extends Visitor {
 
         // TODO! Ensure that this also works for functions!!!!!
 
-        for ( Layout layout : Layout.all_heap_layouts() ) {
+        for ( Layout layout : Layout.all_heap_layouts.values() ) {
             // Insert size -> rdi
             
             if ( layout.bitfields().size() == 0 ) continue;
@@ -465,18 +466,20 @@ public class AST_StackMachine extends Visitor {
         if ( decl.kind != DeclarationKind.HEAP ) return;
 
         //TODO! Make this dynamic. Currently we only support 64 bit integers
-        String layout_name = Layout.get_layout( decl );
+        
         LexIdent id = decl.id;
 
-        // int size = 1;
-        // // How much space do we want for our heap_memory?
-        // push( new Instruction( Opcode.MOVE, new Arguments( List.of( 
-        //     Operand.from_int( size ),
-        //     Operand.from_register( Register.RDI, AddressingMode.REGISER ) ) ) ) );
+
+
+        int size = 1;
+        // How much space do we want for our heap_memory?
+        push( new Instruction( Opcode.MOVE, new Arguments( List.of( 
+            Operand.from_int( size ),
+            Operand.from_register( Register.RDI, AddressingMode.REGISER ) ) ) ) );
 
         
-        // int num_of_bitfields = 0;
-        // // Push bitfield
+        int num_of_bitfields = 0;
+        // Push bitfield
         // for ( long field : Layout.getLayout(id.name) ) {
         //     push( new Instruction( Opcode.PUSH, Arguments.from_long( field ) ) );
         //     num_of_bitfields++;
@@ -488,10 +491,10 @@ public class AST_StackMachine extends Visitor {
         //     Operand.from_register( Register.RSI, AddressingMode.REGISER ) ) ) ) );
 
 
-        // push( new Instruction( Opcode.ADD, new Arguments( List.of(
-        //     Operand.from_int(num_of_bitfields ),
-        //     Operand.from_register( Register.RSP, AddressingMode.REGISER )
-        // )) ) );
+        push( new Instruction( Opcode.ADD, new Arguments( List.of(
+            Operand.from_int(num_of_bitfields ),
+            Operand.from_register( Register.RSP, AddressingMode.REGISER )
+        )) ) );
     }
 
     @VisitorPattern( when = VisitOrder.EXIT_NODE )

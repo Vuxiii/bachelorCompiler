@@ -110,13 +110,14 @@ public class AST_SymbolCollector extends VisitorBase {
         }
     }
 
+
     @VisitorPattern( when = VisitOrder.ENTER_NODE, order = 3 )
     public void register_record_layout( RecordType record ) {
         if ( visited_records.contains( record ) ) return;
         visited_records.add( record );
 
-        Layout layout_stack = Layout.stack( record.identifier.name );
-        Layout layout_heap = Layout.heap( record.identifier.name );
+        Layout layout_stack = Layout.stack( record );
+        Layout layout_heap = Layout.heap( record );
 
         long offset = 0;
 

@@ -116,7 +116,7 @@ public class X86Emitter {
         push_no_offset("" );
         push_no_offset("# [ Pointers to Record Layouts ]" );
 
-        for ( Layout l : Layout.all_heap_layouts() ) {
+        for ( Layout l : Layout.all_heap_layouts.values() ) {
             String layout_name = l.name;
 
             push_no_offset(layout_name + ": .space 8" );
