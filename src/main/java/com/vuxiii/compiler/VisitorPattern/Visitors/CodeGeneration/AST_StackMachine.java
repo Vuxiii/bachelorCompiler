@@ -154,11 +154,14 @@ public class AST_StackMachine extends Visitor {
         int total_fields = 1;
 
         //TODO! Implement me
+        // Layout.
         // for ( long field : Layout.getLayout( "root" ) ) {
         //     push( new Instruction( Opcode.PUSH, Arguments.from_long( field ) ) );
         // }
 
+        SymbolNode symbol = (SymbolNode)root.node;
 
+        System.out.println( "\n\n\n" + symbol.layout.toString() + "\n\n\n"  );
         
         Operand bitfield = Operand.from_register( Register.RSP, AddressingMode.DIRECT_OFFSET );
         bitfield.offset = 0;

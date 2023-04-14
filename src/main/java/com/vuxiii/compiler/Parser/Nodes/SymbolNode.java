@@ -7,6 +7,7 @@ import java.util.Optional;
 import com.vuxiii.LR.Records.Term;
 import com.vuxiii.compiler.VisitorPattern.ASTNode;
 import com.vuxiii.compiler.VisitorPattern.Annotations.VisitNumber;
+import com.vuxiii.compiler.VisitorPattern.Visitors.SymbolCollection.Layout;
 import com.vuxiii.compiler.VisitorPattern.Visitors.SymbolCollection.Scope;
 
 public class SymbolNode extends ASTNode {
@@ -17,7 +18,7 @@ public class SymbolNode extends ASTNode {
     
     public final String scope_name;
     public final Scope scope;
-
+    public Layout layout;
     public final Optional<SymbolNode> parent_scope;
 
     public SymbolNode( Term term, ASTNode child, String name, Scope scope, Optional<SymbolNode> parent_scope ) {
@@ -26,13 +27,15 @@ public class SymbolNode extends ASTNode {
         this.scope_name = name;
         this.scope = scope;
         this.parent_scope = parent_scope;
+        this.layout = new Layout();
+
         super.setup_ASTNodeQueue();
         scopes.put( name, scope );
     }
     
     @Override
     public String getPrintableName() {
-        return "Symbol [" + scope_name + "] -> Vars: " + scope.get_variables() + " | Params: " + scope.get_parameters();
+        return "Symbol [" + scope_name + "] -> Vars: " + scope.get_variables() + " | Params: " + scope.get_parameters() + " | Pointers " + layout.bitfields();
     }
 
     @Override

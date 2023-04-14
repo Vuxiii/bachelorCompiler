@@ -116,28 +116,33 @@ public class AST_SymbolCollector extends VisitorBase {
         if ( visited_records.contains( record ) ) return;
         visited_records.add( record );
 
-        Layout layout_stack = Layout.stack( record );
-        Layout layout_heap = Layout.heap( record );
+        // Layout layout_stack = Layout.stack( record );
+        // Layout layout_heap = Layout.heap( record );
 
         long offset = 0;
 
-        Scope scope = current_scope(record);
+        SymbolNode symbol_node = current_symbol_node( record );
+
+        Scope scope = symbol_node.scope;
+        Layout layout = symbol_node.layout;
 
         scope.add_record(record);
 
         for ( Field f : record.fields.fields ) {
             Declaration fd = f.field;
-            layout_stack.register( fd.id.name, offset );
-            layout_heap.register( fd.id.name, offset );
-
+            // layout_stack.register( fd.id.name, offset );
+            // layout_heap.register( fd.id.name, offset );
+            layout.register( fd.id.name, offset );
             if ( fd.kind == DeclarationKind.HEAP ) {
-                layout_stack.pointer_at( offset+1 );
-                layout_heap.pointer_at( offset+1 );
+                // layout_stack.pointer_at( offset+1 );
+                // layout_heap.pointer_at( offset+1 );
+                layout.pointer_at( offset+1 );
             }
             offset++;
         }
-        layout_stack.num_of_fields = offset;
-        layout_heap.num_of_fields = offset;
+        layout.num_of_fields = offset;
+        // layout_stack.num_of_fields = offset;
+        // layout_heap.num_of_fields = offset;
     }
 
     @VisitorPattern( when = VisitOrder.ENTER_NODE, order = 2 )

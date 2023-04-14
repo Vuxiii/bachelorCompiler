@@ -142,7 +142,12 @@ public final class App {
                 b = 42;
                 print("%\\n", b);
                 """;
-            
+        input = """
+                let p: *int;
+                p = 2;
+
+                print("P is %\\n", p);
+                """;
         // let a: *int;
         // a = 3;
 

@@ -21,7 +21,7 @@ public class Layout {
     public String name;
 
 
-    private Layout() {}
+    public Layout() {}
 
     public static Layout heap( RecordType rec ) {
         Layout h = new Layout();
@@ -29,6 +29,14 @@ public class Layout {
         h.num_of_fields = 696969696;
 
         all_heap_layouts.put( rec, h );
+        return h;
+    }
+
+    public static Layout heap( String name ) {
+        Layout h = new Layout();
+        h.name = name;
+        h.num_of_fields = 696969696;
+
         return h;
     }
 

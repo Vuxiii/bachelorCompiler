@@ -1,6 +1,6 @@
 .section .data
 # [ String Buffers and Substitutes ]
-string0: .ascii "%\n"
+string0: .ascii "P is %\n"
 string0subs: .ascii ""
 
 # [ Pointers to Record Layouts ]
@@ -15,19 +15,16 @@ main:
     callq initialize_heap
     movq $1, %rdi
     leaq -8(%rbp), %rsi
-    pushq $2
     leaq (%rsp), %rdx
     callq new_scope_header
     addq $1, %rsp
     movq $1, %rdi
+    addq $0, %rsp
     pushq $2
-    movq $, %rsi
-    addq $1, %rsp
-    pushq $42
     popq %rax
     movq %rax, 16(%rbx)
     
-    # [[ Loading variable a ]] 
+    # [[ Loading variable p ]] 
     # [[ offset is -1 ]] 
     movq -8(%rbp), %rax
     
@@ -37,11 +34,11 @@ main:
 # Setup Print
 
     movq $string0, %rdi
-    movq $0, %rsi
+    movq $5, %rsi
     movq $0, %rdx
     call print_string
     
-    # [[ Loading variable a ]] 
+    # [[ Loading variable p ]] 
     # [[ offset is -1 ]] 
     movq -8(%rbp), %rdi
     
@@ -49,7 +46,7 @@ main:
     call print_num
     movq $string0, %rdi
     movq $1, %rsi
-    movq $1, %rdx
+    movq $6, %rdx
     call print_string
 
 # End Print
