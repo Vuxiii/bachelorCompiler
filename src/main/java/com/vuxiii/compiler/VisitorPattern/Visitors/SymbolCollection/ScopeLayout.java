@@ -1,7 +1,10 @@
 package com.vuxiii.compiler.VisitorPattern.Visitors.SymbolCollection;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -10,9 +13,11 @@ import com.vuxiii.compiler.Parser.Nodes.Declaration;
 import com.vuxiii.compiler.Parser.Nodes.Field;
 import com.vuxiii.compiler.Parser.Nodes.Types.RecordType;
 import com.vuxiii.compiler.Parser.Nodes.Types.Type;
+import com.vuxiii.compiler.VisitorPattern.ASTNode;
 
-public class Scope {
-    
+public class ScopeLayout {
+    public static Set<ScopeLayout> all_layouts = new HashSet<>();
+    private static long counter = 0;
     private Map<String, LexIdent> local_vars = new HashMap<>();
     private Map<String, LexIdent> parameters = new HashMap<>();
     private Set<RecordType> records = new HashSet<>();
@@ -26,14 +31,29 @@ public class Scope {
 
     private Map<String, LexIdent> capture_vars = new HashMap<>();
 
+    public List<Integer> pointer_pos = new ArrayList<>();
 
-    public void add_variable( LexIdent variable ) {
+    public final long id;
+
+    public ScopeLayout( ASTNode node ) {
+        all_layouts.add( this);
+
+        
+
+        this.id = counter++;
+    }
+
+    public void add_variable( LexIdent variable, boolean is_pointer ) {
         if ( local_vars.containsKey(variable.name) ) return;
         local_vars.put( variable.name, variable );
+
+        if ( is_pointer ) pointer_pos.add( current_variable_offset );
+
         variable_offsets.put( variable.name, current_variable_offset++ );
     }
 
-    public void add_parameter( LexIdent variable ) {
+    //TODO! Figure out how parameters should be regeistered as pointers
+    public void add_parameter( LexIdent variable, boolean is_pointer ) {
         if ( parameters.containsKey(variable.name) ) return;
         parameters.put( variable.name, variable );
         parameter_offsets.put( variable.name, current_parameter_offset++ );
@@ -46,6 +66,30 @@ public class Scope {
             local_vars.put( name, f.field.id );
             variable_offsets.put( name, current_variable_offset++ );
         }
+    }
+
+    private Long set_bit( Long field, int offset ) {
+        return field | (1 << offset);
+    }
+
+    public List<Long> bitfields() {
+        List<Long> fields = new ArrayList<>();
+
+        Long field = 0L;
+        pointer_pos.sort(Comparator.naturalOrder());
+        for ( int offset : pointer_pos ) {
+            field = set_bit(field, offset);
+
+            if ( offset / 64 != 0 ) {
+                field = set_bit(field, 0);
+                fields.add( field );
+                field = set_bit(0L, offset);
+            }
+        }
+        if ( !fields.contains(field) )
+            fields.add(field);
+        
+        return fields;
     }
 
     public void add_record( RecordType rec ) {

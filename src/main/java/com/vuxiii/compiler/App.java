@@ -14,7 +14,6 @@ import com.vuxiii.compiler.VisitorPattern.Visitors.CodeGeneration.StringCollecti
 import com.vuxiii.compiler.VisitorPattern.Visitors.Debug.AST_Printer;
 import com.vuxiii.compiler.VisitorPattern.Visitors.SymbolCollection.AST_FixTypes;
 import com.vuxiii.compiler.VisitorPattern.Visitors.SymbolCollection.AST_SymbolCollector;
-import com.vuxiii.compiler.VisitorPattern.Visitors.SymbolCollection.Layout;
 import com.vuxiii.compiler.VisitorPattern.Visitors.TreeCollaps.AST_Shrinker;
 
 import java.io.FileWriter;
@@ -43,19 +42,7 @@ public final class App {
         Settings.showParsingSteps = false;
         Settings.showGrammar = false;
         Settings.showParsingTable = false;
-        String input = """
-            a = 3;
-            print(a);
-            b=a+5;
-            print(a);
-            """;
-        input = """
-            a = 3;
-            a = a + 4;
-            a = 5 - a;
-            print(a);
-            """;
-        input = """   
+        String input = """   
             a = (3 + 1);
             {
                 c = 43;
@@ -118,23 +105,23 @@ public final class App {
         my_rec.field1 = 42;
         """;
         input = """
-        type nested: {
-            a: int;
-            b: int;
-            c: *int;
-        };
+                type nested: {
+                    a: int;
+                    b: int;
+                    c: *int;
+                };
 
-        let rec: nested;
+                let rec: nested;
 
-        rec.a = 42;
-        rec.b = 69;
-        rec.c = 512;
+                rec.a = 42;
+                rec.b = 69;
+                rec.c = 512;
 
 
-        print( "Field a is: %\\n", rec.a );
-        print( "Field b is: %\\n", rec.b );
-        print( "Field c is: %\\n", rec.c );
-        """;
+                print( "Field a is: %\\n", rec.a );
+                print( "Field b is: %\\n", rec.b );
+                print( "Field c is: %\\n", rec.c );
+                """;
 
         input = """
                 type a: { f: *int; };
@@ -143,10 +130,13 @@ public final class App {
                 print("%\\n", b);
                 """;
         input = """
-                let p: *int;
-                p = 2;
-
-                print("P is %\\n", p);
+                let p1: *int;
+                p1 = 2;
+                print( "p1 is %\\n", p1 );
+                let va: int;
+                let p2: *int;
+                p2 = p1 * 3;
+                print( "p2 is %\\n", p2 );
                 """;
         // let a: *int;
         // a = 3;

@@ -9,6 +9,7 @@ import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexLiteral;
 import com.vuxiii.compiler.Parser.Nodes.Expression;
 import com.vuxiii.compiler.Parser.Nodes.Print;
 import com.vuxiii.compiler.Parser.Nodes.Root;
+import com.vuxiii.compiler.Parser.Nodes.SymbolNode;
 import com.vuxiii.compiler.VisitorPattern.ASTNode;
 import com.vuxiii.compiler.VisitorPattern.Visitors.CodeGeneration.AddressingMode;
 import com.vuxiii.compiler.VisitorPattern.Visitors.CodeGeneration.FunctionBlock;
@@ -16,8 +17,7 @@ import com.vuxiii.compiler.VisitorPattern.Visitors.CodeGeneration.Instruction;
 import com.vuxiii.compiler.VisitorPattern.Visitors.CodeGeneration.Operand;
 import com.vuxiii.compiler.VisitorPattern.Visitors.CodeGeneration.Register;
 import com.vuxiii.compiler.VisitorPattern.Visitors.CodeGeneration.StringCollection.StringNode;
-import com.vuxiii.compiler.VisitorPattern.Visitors.SymbolCollection.Layout;
-import com.vuxiii.compiler.VisitorPattern.Visitors.SymbolCollection.Scope;
+import com.vuxiii.compiler.VisitorPattern.Visitors.SymbolCollection.ScopeLayout;
 
 /**
  * Stack machine!
@@ -28,7 +28,7 @@ public class X86Emitter {
 
     private List<Instruction> instructions;
     // private List<Scope> scopes;
-    private Map<String, Scope> scopes;
+    private Map<String, ScopeLayout> scopes;
     Map<String, FunctionBlock> functions;
 
     Map<String, Integer> var_offsets;
@@ -116,10 +116,9 @@ public class X86Emitter {
         push_no_offset("" );
         push_no_offset("# [ Pointers to Record Layouts ]" );
 
-        for ( Layout l : Layout.all_heap_layouts.values() ) {
-            String layout_name = l.name;
+        for ( ScopeLayout l : ScopeLayout.all_layouts ) {
 
-            push_no_offset(layout_name + ": .space 8" );
+            push_no_offset("heap" + l.id + ": .space 8" );
 
         }
         
@@ -152,7 +151,7 @@ public class X86Emitter {
     }
 
     
-    private void _run( List<Instruction> instructions, Scope current_scope ) {
+    private void _run( List<Instruction> instructions, ScopeLayout current_scope ) {
         
         for ( String var : current_scope.get_variables() ) {
             var_offsets.put( var, -current_scope.get_variable_offset(var) ); // Capture missing
