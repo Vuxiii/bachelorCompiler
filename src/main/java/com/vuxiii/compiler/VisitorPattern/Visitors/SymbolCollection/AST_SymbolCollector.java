@@ -36,6 +36,8 @@ public class AST_SymbolCollector extends VisitorBase {
 
     Set<RecordType> visited_records = new HashSet<>();
 
+    Set<ASTNode> ignore_decl = new HashSet<>();
+
     @VisitorPattern( when = VisitOrder.ENTER_NODE )
     public void init_root_scope( Root rootie ) {
         ScopeLayout new_scope = new ScopeLayout( rootie );
@@ -92,6 +94,8 @@ public class AST_SymbolCollector extends VisitorBase {
     @VisitorPattern( when = VisitOrder.ENTER_NODE, order = 1 )
     public void collect_var( Declaration decl ) {
         if ( decl.kind != DeclarationKind.VARIABLE && decl.kind != DeclarationKind.HEAP ) return;
+        if ( ignore_decl.contains(decl) ) return;
+
         ScopeLayout scope = current_scope( decl );
         if ( scope.has_record( decl.type ) ) {
             // Register the children
@@ -104,39 +108,34 @@ public class AST_SymbolCollector extends VisitorBase {
             }
             System.out.println( "Adding " + decl.id + " to scope " + current_scope(decl));
         }
-
-        
-        // if ( decl.kind == DeclarationKind.HEAP ) {
-        //     current_scope( decl ).identifier_is_heap_allocated( decl.id.name );
-        //     current_symbol_node( decl ).layout.pointer_at(2);
-        //     current_symbol_node( decl ).layout.pointer_at(3);
-        // }
     }
 
-    // @VisitorPattern( when = VisitOrder.ENTER_NODE, order = 3 )
-    // public void register_record_layout( RecordType record ) {
-    //     if ( visited_records.contains( record ) ) return;
-    //     visited_records.add( record );
+    @VisitorPattern( when = VisitOrder.ENTER_NODE, order = 3 )
+    public void register_record_layout( RecordType record ) {
+        if ( visited_records.contains( record ) ) return;
+        visited_records.add( record );
 
-    //     long offset = 0;
 
-    //     SymbolNode symbol_node = current_symbol_node( record );
+        long offset = 0;
 
-    //     ScopeLayout scope = symbol_node.scope;
+        SymbolNode symbol_node = current_symbol_node( record );
 
-    //     scope.add_record(record);
+        record.layout = new ScopeLayout();
+        ScopeLayout scope = symbol_node.scope;
+        symbol_node.re
+        scope.add_record(record);
 
-    //     for ( Field f : record.fields.fields ) {
-    //         Declaration fd = f.field;
-
-    //         layout.register( fd.id.name, offset );
-    //         if ( fd.kind == DeclarationKind.HEAP ) {
-    //             layout.pointer_at( offset+1 );
-    //         }
-    //         offset++;
-    //     }
-    //     layout.num_of_fields = offset;
-    // }
+        for ( Field f : record.fields.fields ) {
+            Declaration fd = f.field;
+            ignore_decl.add(fd);
+            layout.register( fd.id.name, offset );
+            if ( fd.kind == DeclarationKind.HEAP ) {
+                layout.pointer_at( offset+1 );
+            }
+            offset++;
+        }
+        layout.num_of_fields = offset;
+    }
 
     @VisitorPattern( when = VisitOrder.ENTER_NODE, order = 2 )
     public void collect_param( Declaration decl ) {

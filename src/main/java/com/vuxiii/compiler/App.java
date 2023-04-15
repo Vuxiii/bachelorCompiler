@@ -137,6 +137,22 @@ public final class App {
                 let p2: *int;
                 p2 = p1 * 3;
                 print( "p2 is %\\n", p2 );
+                let fun: () -> void;
+                fun = () -> void {
+                    let p42: *int;
+                    p42 = 42;
+                    print( "P42 %\\n", p42 );
+                };
+                fun();
+                """;
+        input = """
+                type rec: {
+                    f1: *int;
+                    f2: int;
+                    f3: *int;
+                };
+                let a: rec;
+                
                 """;
         // let a: *int;
         // a = 3;

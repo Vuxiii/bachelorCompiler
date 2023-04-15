@@ -285,6 +285,10 @@ void new_scope_header( size_t size, size_t **pointer_to_stack, size_t *bitfield 
     scope_offset++;
 }
 
+void release_scope_header() {
+    scope_offset--;
+}
+
 void free_ptr( size_t *p ) {
     // Check bounds
     

@@ -21,6 +21,9 @@ public class FunctionBlock {
     public void push( Instruction instruction ) {
         instructions.add( instruction );
     }
+    public void push( List<Instruction> instruction ) {
+        instructions.addAll( instruction );
+    }
 
     public void push_comment( String comment ) {
         instructions.add( new Instruction( Opcode.COMMENT, Arguments.comment(comment)) );

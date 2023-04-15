@@ -35,10 +35,10 @@ public class ScopeLayout {
 
     public final long id;
 
-    public ScopeLayout( ASTNode node ) {
+    public ScopeLayout() {
         all_layouts.add( this);
 
-        
+
 
         this.id = counter++;
     }

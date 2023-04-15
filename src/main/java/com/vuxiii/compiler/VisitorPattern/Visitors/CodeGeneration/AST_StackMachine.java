@@ -83,6 +83,9 @@ public class AST_StackMachine extends Visitor {
 
         fb.push( new Instruction( Opcode.SETUP_STACK ) );
 
+        fb.push( initialize_scope( (SymbolNode)function.parent.get() ) );
+
+
         parameters = current_scope.get_parameters();
 
         System.out.println( parameters );
@@ -96,6 +99,8 @@ public class AST_StackMachine extends Visitor {
         function.value.accept( stackMachine );
 
         fb.instructions.addAll( stackMachine.code );
+
+        fb.push( new Instruction( Opcode.CALL, Arguments.from_label( "release_scope_header" ) ) );
 
         fb.push( new Instruction( Opcode.RESTORE_STACK ) );
         fb.push( new Instruction( Opcode.RETURN ) );
@@ -136,46 +141,8 @@ public class AST_StackMachine extends Visitor {
 
         push( new Instruction( Opcode.CALL, Arguments.from_label( "initialize_heap" ) ) );
 
-        int total_pointers = 1;
-        push( new Instruction( Opcode.MOVE, new Arguments( List.of(
-            Operand.from_int( total_pointers ),
-            Operand.from_register( Register.RDI, AddressingMode.REGISER )
-        ))));
-
-        Operand scope_header = Operand.from_register( Register.RBP, AddressingMode.DIRECT_OFFSET );
-        scope_header.offset = -1;
-        push( new Instruction( Opcode.LEA, new Arguments( List.of( 
-            scope_header,
-            Operand.from_register( Register.RSI, AddressingMode.REGISER )
-        ))));
-
-        // Push the bitfield
-        int total_fields = 1;
-
-        //TODO! Implement me
-        // Layout.
-        // for ( long field : Layout.getLayout( "root" ) ) {
-        //     push( new Instruction( Opcode.PUSH, Arguments.from_long( field ) ) );
-        // }
-
-        SymbolNode symbol = (SymbolNode)root.node;
-
-        // System.out.println( "\n\n\n" + symbol.layout.toString() + "\n\n\n"  );
+        push( initialize_scope( (SymbolNode)root.node) );
         
-        Operand bitfield = Operand.from_register( Register.RSP, AddressingMode.DIRECT_OFFSET );
-        bitfield.offset = 0;
-        push( new Instruction( Opcode.LEA, new Arguments( List.of( 
-            bitfield,
-            Operand.from_register( Register.RDX, AddressingMode.REGISER )
-        ))));
-
-        
-        push( new Instruction( Opcode.CALL, Arguments.from_label( "new_scope_header" ) ) );
-
-        push( new Instruction( Opcode.ADD, new Arguments( List.of (
-            Operand.from_int( total_fields ),
-            Operand.from_register( Register.RSP, AddressingMode.REGISER )
-        ))));
 
         // Insert all the scope pointers.
         // We can then map them correctly afterwards.
@@ -226,6 +193,47 @@ public class AST_StackMachine extends Visitor {
             ))));
         }
     }   
+
+    private List<Instruction> initialize_scope( SymbolNode symbol ) {
+        List<Instruction> li = new ArrayList<>();
+        int total_pointers = symbol.scope.pointer_pos.size();
+
+        li.add( new Instruction( Opcode.MOVE, new Arguments( List.of(
+            Operand.from_int( total_pointers ),
+            Operand.from_register( Register.RDI, AddressingMode.REGISER )
+        ))));
+
+        Operand scope_header = Operand.from_register( Register.RBP, AddressingMode.DIRECT_OFFSET );
+        scope_header.offset = -1;
+        li.add( new Instruction( Opcode.LEA, new Arguments( List.of( 
+            scope_header,
+            Operand.from_register( Register.RSI, AddressingMode.REGISER )
+        ))));
+
+        // Push the bitfield
+        int total_fields = 0;
+
+        for ( long field : symbol.scope.bitfields() ) {
+            li.add( new Instruction( Opcode.PUSH, Arguments.from_long( field ) ) );
+            total_fields++;
+        }
+        
+        Operand bitfield = Operand.from_register( Register.RSP, AddressingMode.DIRECT_OFFSET );
+        bitfield.offset = 0;
+        li.add( new Instruction( Opcode.LEA, new Arguments( List.of( 
+            bitfield,
+            Operand.from_register( Register.RDX, AddressingMode.REGISER )
+        ))));
+
+        
+        li.add( new Instruction( Opcode.CALL, Arguments.from_label( "new_scope_header" ) ) );
+
+        li.add( new Instruction( Opcode.ADD, new Arguments( List.of (
+            Operand.from_int( total_fields ),
+            Operand.from_register( Register.RSP, AddressingMode.REGISER )
+        ))));
+        return li;
+    }
 
     @VisitorPattern( when = VisitOrder.EXIT_NODE, order = 1 ) 
     public void add_return( Statement ret ) {
