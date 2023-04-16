@@ -5,7 +5,8 @@ import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexIdent;
 import com.vuxiii.compiler.Parser.Nodes.Types.Type;
 import com.vuxiii.compiler.VisitorPattern.ASTNode;
 import com.vuxiii.compiler.VisitorPattern.Annotations.VisitNumber;
-import com.vuxiii.compiler.VisitorPattern.Visitors.SymbolCollection.ScopeLayout;
+import com.vuxiii.compiler.VisitorPattern.Visitors.SymbolCollection.HeapLayout;
+import com.vuxiii.compiler.VisitorPattern.Visitors.SymbolCollection.Symbols;
 
 public class Declaration extends ASTNode {
 
@@ -15,7 +16,9 @@ public class Declaration extends ASTNode {
 
     public DeclarationKind kind;
 
-    public ScopeLayout layout;
+    public Symbols layout;
+
+    public HeapLayout heap_layout;
 
     /**
      * This constructor constructs either a variable declaration or a type alias declaration, where:

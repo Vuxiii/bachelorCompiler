@@ -17,7 +17,8 @@ import com.vuxiii.compiler.VisitorPattern.Visitors.CodeGeneration.Instruction;
 import com.vuxiii.compiler.VisitorPattern.Visitors.CodeGeneration.Operand;
 import com.vuxiii.compiler.VisitorPattern.Visitors.CodeGeneration.Register;
 import com.vuxiii.compiler.VisitorPattern.Visitors.CodeGeneration.StringCollection.StringNode;
-import com.vuxiii.compiler.VisitorPattern.Visitors.SymbolCollection.ScopeLayout;
+import com.vuxiii.compiler.VisitorPattern.Visitors.SymbolCollection.HeapLayout;
+import com.vuxiii.compiler.VisitorPattern.Visitors.SymbolCollection.Symbols;
 
 /**
  * Stack machine!
@@ -28,7 +29,7 @@ public class X86Emitter {
 
     private List<Instruction> instructions;
     // private List<Scope> scopes;
-    private Map<String, ScopeLayout> scopes;
+    private Map<String, Symbols> scopes;
     Map<String, FunctionBlock> functions;
 
     Map<String, Integer> var_offsets;
@@ -116,9 +117,9 @@ public class X86Emitter {
         push_no_offset("" );
         push_no_offset("# [ Pointers to Record Layouts ]" );
 
-        for ( ScopeLayout l : ScopeLayout.all_layouts ) {
+        for ( HeapLayout l : HeapLayout.heap_layouts.values() ) {
 
-            push_no_offset("heap" + l.id + ": .space 8" );
+            push_no_offset(l.name + ": .space 8" );
 
         }
         
@@ -151,10 +152,10 @@ public class X86Emitter {
     }
 
     
-    private void _run( List<Instruction> instructions, ScopeLayout current_scope ) {
+    private void _run( List<Instruction> instructions, Symbols current_scope ) {
         
         for ( String var : current_scope.get_variables() ) {
-            var_offsets.put( var, -current_scope.get_variable_offset(var) ); // Capture missing
+            var_offsets.put( var, -current_scope.get_variable_offset(var) );
         }
 
         for ( String var : current_scope.get_parameters() ) {
@@ -214,7 +215,8 @@ public class X86Emitter {
                 case STORE_VARIABLE: {
                     String var = instruction.args.get().operands.get(0).get_string();
                     Operand src_1 = instruction.args.get().operands.get(1);
-
+                    System.out.println( var );
+                    System.out.println( var_offsets );
                     int offset = var_offsets.get( var );
 
                     push_code ( "" );
@@ -274,13 +276,13 @@ public class X86Emitter {
                     push_code( "leaq " + fst + ", " + snd );
                 } break;
                 case PRINT: {                    
-                    push_code( "call print_subs" );
+                    push_code( "callq print_subs" );
                 } break;
                 case PRINT_STRING: {
-                    push_code( "call print_string" );
+                    push_code( "callq print_string" );
                 } break;
                 case PRINT_NUM: {
-                    push_code( "call print_num" );
+                    push_code( "callq print_num" );
                 } break;
                 case COMMENT: {
                     push_no_offset( "" );

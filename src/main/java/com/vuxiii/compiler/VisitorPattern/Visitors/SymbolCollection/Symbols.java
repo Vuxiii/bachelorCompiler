@@ -10,17 +10,16 @@ import java.util.Set;
 
 import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexIdent;
 import com.vuxiii.compiler.Parser.Nodes.Declaration;
+import com.vuxiii.compiler.Parser.Nodes.DeclarationKind;
 import com.vuxiii.compiler.Parser.Nodes.Field;
 import com.vuxiii.compiler.Parser.Nodes.Types.RecordType;
 import com.vuxiii.compiler.Parser.Nodes.Types.Type;
-import com.vuxiii.compiler.VisitorPattern.ASTNode;
 
-public class ScopeLayout {
-    public static Set<ScopeLayout> all_layouts = new HashSet<>();
+public class Symbols {
+    public static Set<Symbols> all_layouts = new HashSet<>();
     private static long counter = 0;
     private Map<String, LexIdent> local_vars = new HashMap<>();
     private Map<String, LexIdent> parameters = new HashMap<>();
-    private Set<RecordType> records = new HashSet<>();
     private Map<String, Integer> parameter_offsets = new HashMap<>();
     private int current_parameter_offset = 2;
     
@@ -31,11 +30,9 @@ public class ScopeLayout {
 
     private Map<String, LexIdent> capture_vars = new HashMap<>();
 
-    public List<Integer> pointer_pos = new ArrayList<>();
-
     public final long id;
 
-    public ScopeLayout() {
+    public Symbols() {
         all_layouts.add( this);
 
 
@@ -47,7 +44,7 @@ public class ScopeLayout {
         if ( local_vars.containsKey(variable.name) ) return;
         local_vars.put( variable.name, variable );
 
-        if ( is_pointer ) pointer_pos.add( current_variable_offset );
+        // if ( is_pointer ) pointer_pos.add( current_variable_offset );
 
         variable_offsets.put( variable.name, current_variable_offset++ );
     }
@@ -64,36 +61,11 @@ public class ScopeLayout {
         for ( Field f : type.fields.fields ) {
             String name = decl.id.name + "." + f.field.id.name;
             local_vars.put( name, f.field.id );
-            variable_offsets.put( name, current_variable_offset++ );
+            if ( decl.kind != DeclarationKind.HEAP )
+                variable_offsets.put( name, current_variable_offset++ );
+            else
+                identifier_is_heap_allocated( name );
         }
-    }
-
-    private Long set_bit( Long field, int offset ) {
-        return field | (1 << offset);
-    }
-
-    public List<Long> bitfields() {
-        List<Long> fields = new ArrayList<>();
-
-        Long field = 0L;
-        pointer_pos.sort(Comparator.naturalOrder());
-        for ( int offset : pointer_pos ) {
-            field = set_bit(field, offset);
-
-            if ( offset / 64 != 0 ) {
-                field = set_bit(field, 0);
-                fields.add( field );
-                field = set_bit(0L, offset);
-            }
-        }
-        if ( !fields.contains(field) )
-            fields.add(field);
-        
-        return fields;
-    }
-
-    public void add_record( RecordType rec ) {
-        records.add( rec );
     }
 
     public void identifier_is_heap_allocated( String identifier ) {
@@ -114,7 +86,9 @@ public class ScopeLayout {
         return var;
     }
 
-    public boolean isHeapAllocated( String variable_name ) {
+    public boolean is_on_heap( String variable_name ) {
+        System.out.println( is_var_heap_allocated );
+        System.out.println( variable_name );
         return is_var_heap_allocated.contains( variable_name );
     }
 
@@ -139,11 +113,14 @@ public class ScopeLayout {
     public int get_parameter_offset( String parameter ) { 
         // Becaue I'm not pushing the variables in reverse order, 
         // I have to return the variables in reverse order.
-        return (current_parameter_offset+1) - parameter_offsets.getOrDefault(parameter, -1);
+        return (current_parameter_offset+1) - parameter_offsets.getOrDefault(parameter, -69);
     }
 
     public int get_variable_offset( String variable ) {
-        return variable_offsets.getOrDefault(variable, -1);
+        if ( variable.contains(".") )
+            return variable_offsets.getOrDefault(variable.substring(0, variable.indexOf(".")), -420);
+        else
+            return variable_offsets.getOrDefault(variable, -69);
     }
 
     public boolean can_access( String variable ) {
@@ -152,9 +129,5 @@ public class ScopeLayout {
 
     public String toString() {
         return "Params" + parameters.keySet().toString() + " | Vars: " + local_vars.keySet().toString() ;
-    }
-
-    public boolean has_record(Type type) {
-        return records.contains(type);
     }
 }

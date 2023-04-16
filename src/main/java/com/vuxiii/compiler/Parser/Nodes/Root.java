@@ -11,7 +11,7 @@ import com.vuxiii.LR.Records.Term;
 import com.vuxiii.compiler.VisitorPattern.ASTNode;
 import com.vuxiii.compiler.VisitorPattern.Annotations.VisitNumber;
 import com.vuxiii.compiler.VisitorPattern.Visitors.CodeGeneration.StringCollection.StringNode;
-import com.vuxiii.compiler.VisitorPattern.Visitors.SymbolCollection.ScopeLayout;
+import com.vuxiii.compiler.VisitorPattern.Visitors.SymbolCollection.Symbols;
 
 public class Root extends ASTNode {
 
@@ -20,7 +20,7 @@ public class Root extends ASTNode {
     public Map<Print, StringNode> strings;
     public List<Assignment> functions;
 
-    public Map<String, ScopeLayout> scope_map;
+    public Map<String, Symbols> scope_map;
 
 
     public Root( Term term, ASTNode node ) {

@@ -1,11 +1,14 @@
 .section .data
 # [ String Buffers and Substitutes ]
+string2: .ascii "a.f3: %\n"
+string2subs: .ascii ""
+string1: .ascii "a.f2: %\n"
+string1subs: .ascii ""
+string0: .ascii "a.f1: %\n"
+string0subs: .ascii ""
 
 # [ Pointers to Record Layouts ]
-heap3: .space 8
 heap2: .space 8
-heap4: .space 8
-heap0: .space 8
 heap1: .space 8
 
 .section .text
@@ -14,11 +17,11 @@ heap1: .space 8
 main:
     pushq %rbp
     movq %rsp, %rbp # Setup stackpointer
-    subq $24, %rsp
+    subq $32, %rsp
     callq initialize_heap
-    movq $2, %rdi
+    movq $1, %rdi
     leaq -8(%rbp), %rsi
-    pushq $6
+    pushq $16
     leaq (%rsp), %rdx
     callq new_scope_header
     addq $1, %rsp
@@ -29,19 +32,7 @@ main:
 
 # Bitfields
 
-    pushq $0
-    leaq (%rsp), %rsi
-    callq new_layout
-    addq $1, %rsp
-    movq %rax, heap3
-
-# Number of Bitfields
-
-    movq $1, %rdi
-
-# Bitfields
-
-    pushq $0
+    pushq $2
     leaq (%rsp), %rsi
     callq new_layout
     addq $1, %rsp
@@ -57,63 +48,102 @@ main:
     leaq (%rsp), %rsi
     callq new_layout
     addq $1, %rsp
-    movq %rax, heap4
-
-# Number of Bitfields
-
-    movq $1, %rdi
-
-# Bitfields
-
-    pushq $6
-    leaq (%rsp), %rsi
-    callq new_layout
-    addq $1, %rsp
-    movq %rax, heap0
-
-# Number of Bitfields
-
-    movq $1, %rdi
-
-# Bitfields
-
-    pushq $0
-    leaq (%rsp), %rsi
-    callq new_layout
-    addq $1, %rsp
     movq %rax, heap1
     movq $1, %rdi
-    movq $heap3, %rsi
+    movq $heap2, %rsi
     callq new_ptr_size
     
-    # [[ Storing variable f1 ]] 
+    # [[ Storing variable a ]] 
     # [[ offset is -1 ]] 
     movq %rax, -8(%rbp)
     
-    movq $1, %rdi
-    movq $heap4, %rsi
-    callq new_ptr_size
+    pushq $1
+    popq %rax
     
-    # [[ Storing variable f3 ]] 
-    # [[ offset is -2 ]] 
-    movq %rax, -16(%rbp)
-    
-    movq $1, %rdi
-    movq $heap3, %rsi
-    callq new_ptr_size
-    
-    # [[ Storing variable f1 ]] 
+    # [[ Loading variable a.f1 ]] 
     # [[ offset is -1 ]] 
-    movq %rax, -8(%rbp)
+    movq -8(%rbp), %rbx
     
-    movq $1, %rdi
-    movq $heap4, %rsi
-    callq new_ptr_size
+    movq %rax, 16(%rbx)
+    pushq $2
+    popq %rax
     
-    # [[ Storing variable f3 ]] 
-    # [[ offset is -2 ]] 
-    movq %rax, -16(%rbp)
+    # [[ Loading variable a.f2 ]] 
+    # [[ offset is -1 ]] 
+    movq -8(%rbp), %rbx
     
+    movq %rax, 24(%rbx)
+    pushq $3
+    popq %rax
+    
+    # [[ Loading variable a.f3 ]] 
+    # [[ offset is -1 ]] 
+    movq -8(%rbp), %rbx
+    
+    movq %rax, 32(%rbx)
+
+# Setup Print
+
+    movq $string0, %rdi
+    movq $6, %rsi
+    movq $0, %rdx
+    callq print_string
+    
+    # [[ Loading variable a.f1 ]] 
+    # [[ offset is -1 ]] 
+    movq -8(%rbp), %rdi
+    
+    movq 16(%rdi), %rdi
+    callq print_num
+    movq $string0, %rdi
+    movq $1, %rsi
+    movq $7, %rdx
+    callq print_string
+
+# End Print
+
+
+# Setup Print
+
+    movq $string1, %rdi
+    movq $6, %rsi
+    movq $0, %rdx
+    callq print_string
+    
+    # [[ Loading variable a.f2 ]] 
+    # [[ offset is -1 ]] 
+    movq -8(%rbp), %rdi
+    
+    movq 24(%rdi), %rdi
+    callq print_num
+    movq $string1, %rdi
+    movq $1, %rsi
+    movq $7, %rdx
+    callq print_string
+
+# End Print
+
+
+# Setup Print
+
+    movq $string2, %rdi
+    movq $6, %rsi
+    movq $0, %rdx
+    callq print_string
+    
+    # [[ Loading variable a.f3 ]] 
+    # [[ offset is -1 ]] 
+    movq -8(%rbp), %rdi
+    
+    movq 32(%rdi), %rdi
+    callq print_num
+    movq $string2, %rdi
+    movq $1, %rsi
+    movq $7, %rdx
+    callq print_string
+
+# End Print
+
     movq %rbp, %rsp # Restore stackpointer
     popq %rbp
     

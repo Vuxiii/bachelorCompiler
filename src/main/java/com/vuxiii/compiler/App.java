@@ -13,6 +13,8 @@ import com.vuxiii.compiler.VisitorPattern.Visitors.CodeGeneration.Instruction;
 import com.vuxiii.compiler.VisitorPattern.Visitors.CodeGeneration.StringCollection.StringCollector;
 import com.vuxiii.compiler.VisitorPattern.Visitors.Debug.AST_Printer;
 import com.vuxiii.compiler.VisitorPattern.Visitors.SymbolCollection.AST_FixTypes;
+import com.vuxiii.compiler.VisitorPattern.Visitors.SymbolCollection.AST_RegisterHeapLayout;
+import com.vuxiii.compiler.VisitorPattern.Visitors.SymbolCollection.AST_RegisterStackFrames;
 import com.vuxiii.compiler.VisitorPattern.Visitors.SymbolCollection.AST_SymbolCollector;
 import com.vuxiii.compiler.VisitorPattern.Visitors.TreeCollaps.AST_Shrinker;
 
@@ -146,13 +148,39 @@ public final class App {
                 fun();
                 """;
         input = """
+                let a: *int;
+                let b: int;
+                let c: *int;
+                let d: int;
+
+                a = 1;
+                b = 2;
+                c = 3;
+                d = 4;
+
+                print( "a: %\\n", a );
+                print( "b: %\\n", b );
+                print( "c: %\\n", c );
+                print( "d: %\\n", d );
+
+                """;
+        input = """
                 type rec: {
-                    f1: *int;
+                    f1: int;
                     f2: int;
-                    f3: *int;
+                    f3: int;
                 };
-                let a: rec;
-                
+
+                let a: *rec;
+
+                a.f1 = 1;
+                a.f2 = 2;
+                a.f3 = 3;
+
+                print( "a.f1: %\\n", a.f1 );
+                print( "a.f2: %\\n", a.f2 );
+                print( "a.f3: %\\n", a.f3 );
+
                 """;
         // let a: *int;
         // a = 3;
@@ -251,6 +279,12 @@ public final class App {
         AST_SymbolCollector v2 = new AST_SymbolCollector();
         ast.accept(v2);
         
+        AST_RegisterStackFrames frames = new AST_RegisterStackFrames();
+        ast.accept( frames );
+
+        AST_RegisterHeapLayout heaps = new AST_RegisterHeapLayout();
+        ast.accept( heaps );
+
         printer = new AST_Printer();
         ast.accept( printer );
         System.out.println( printer.get_ascii() );

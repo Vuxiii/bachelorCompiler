@@ -22,6 +22,7 @@ import com.vuxiii.compiler.Parser.Nodes.BinaryOperationKind;
 import com.vuxiii.compiler.Parser.Nodes.Declaration;
 import com.vuxiii.compiler.Parser.Nodes.DeclarationKind;
 import com.vuxiii.compiler.Parser.Nodes.Expression;
+import com.vuxiii.compiler.Parser.Nodes.Field;
 import com.vuxiii.compiler.Parser.Nodes.FunctionCall;
 import com.vuxiii.compiler.Parser.Nodes.IfElseNode;
 import com.vuxiii.compiler.Parser.Nodes.IfList;
@@ -35,6 +36,7 @@ import com.vuxiii.compiler.Parser.Nodes.Statement;
 import com.vuxiii.compiler.Parser.Nodes.StatementKind;
 import com.vuxiii.compiler.Parser.Nodes.SymbolNode;
 import com.vuxiii.compiler.Parser.Nodes.Types.FunctionType;
+import com.vuxiii.compiler.Parser.Nodes.Types.RecordType;
 import com.vuxiii.compiler.VisitorPattern.ASTNode;
 import com.vuxiii.compiler.VisitorPattern.Visitor;
 import com.vuxiii.compiler.VisitorPattern.Annotations.VisitOrder;
@@ -42,7 +44,8 @@ import com.vuxiii.compiler.VisitorPattern.Annotations.VisitorPattern;
 import com.vuxiii.compiler.VisitorPattern.Visitors.CodeGeneration.StringCollection.StringNode;
 import com.vuxiii.compiler.VisitorPattern.Visitors.Debug.AST_Printer;
 import com.vuxiii.compiler.VisitorPattern.Visitors.SymbolCollection.AST_SymbolCollector;
-import com.vuxiii.compiler.VisitorPattern.Visitors.SymbolCollection.ScopeLayout;
+import com.vuxiii.compiler.VisitorPattern.Visitors.SymbolCollection.HeapLayout;
+import com.vuxiii.compiler.VisitorPattern.Visitors.SymbolCollection.Symbols;
 
 public class AST_StackMachine extends Visitor {
     
@@ -61,13 +64,13 @@ public class AST_StackMachine extends Visitor {
 
     Set<String> parameters = new HashSet<>();
 
-    ScopeLayout current_scope;
+    Symbols current_scope;
 
     private String end_of_body_label = "";
 
     public AST_StackMachine() {}
 
-    private AST_StackMachine( ScopeLayout scope  ) {
+    private AST_StackMachine( Symbols scope  ) {
         this.parameters = scope.get_parameters();
         this.current_scope = scope;
     }
@@ -142,19 +145,22 @@ public class AST_StackMachine extends Visitor {
         push( new Instruction( Opcode.CALL, Arguments.from_label( "initialize_heap" ) ) );
 
         push( initialize_scope( (SymbolNode)root.node) );
+        push( initialize_heap_layouts() );
         
 
         // Insert all the scope pointers.
         // We can then map them correctly afterwards.
 
-        // TODO! Ensure that this also works for functions!!!!!
+        
+    }   
 
-        for ( ScopeLayout layout : ScopeLayout.all_layouts ) {
-            String layout_name = "heap" + layout.id;
+    private List<Instruction> initialize_heap_layouts() {
+        // TODO! Ensure that this also works for functions!!!!!
+        List<Instruction> li = new ArrayList<>();
+        for ( HeapLayout layout : HeapLayout.heap_layouts.values() ) {
+            String layout_name = layout.name;
             // Insert size -> rdi
             
-            // if ( layout.bitfields().size() == 0 ) continue;
-
             push( Instruction.comment("Number of Bitfields"));
             push( new Instruction( Opcode.MOVE, new Arguments( List.of(
                 Operand.from_long( layout.bitfields().size() ),
@@ -165,7 +171,7 @@ public class AST_StackMachine extends Visitor {
 
             System.out.println( layout );
             push( Instruction.comment("Bitfields"));
-             for ( long field : layout.bitfields() ) {
+            for ( long field : layout.bitfields() ) {
                 push( new Instruction( Opcode.PUSH, Arguments.from_long( field ) ));
             }
 
@@ -192,11 +198,12 @@ public class AST_StackMachine extends Visitor {
                 Operand.from_label( layout_name )
             ))));
         }
-    }   
+        return li;
+    }
 
     private List<Instruction> initialize_scope( SymbolNode symbol ) {
         List<Instruction> li = new ArrayList<>();
-        int total_pointers = symbol.scope.pointer_pos.size();
+        int total_pointers = symbol.stack_frame.pointer_offsets.size();
 
         li.add( new Instruction( Opcode.MOVE, new Arguments( List.of(
             Operand.from_int( total_pointers ),
@@ -213,7 +220,7 @@ public class AST_StackMachine extends Visitor {
         // Push the bitfield
         int total_fields = 0;
 
-        for ( long field : symbol.scope.bitfields() ) {
+        for ( long field : symbol.stack_frame.bitfields() ) {
             li.add( new Instruction( Opcode.PUSH, Arguments.from_long( field ) ) );
             total_fields++;
         }
@@ -474,18 +481,34 @@ public class AST_StackMachine extends Visitor {
                                     new Comment( "Storing computed value" ) ) );
     }
 
-    @VisitorPattern( when = VisitOrder.ENTER_NODE )
+    @VisitorPattern( when = VisitOrder.ENTER_NODE, order = 2 )
+    public void heap_decl_struct( Declaration decl ) {
+        if ( !(decl.type instanceof RecordType) ) return;
+
+        RecordType record = (RecordType)decl.type;
+        String prefix = decl.id.name + ".";
+        for ( Field field : record.fields.fields ) {
+            Declaration d = field.field;
+            if ( d.kind == DeclarationKind.HEAP ) {
+                _register_var_heap( prefix, d);
+            }
+        }
+    }
+
+    @VisitorPattern( when = VisitOrder.ENTER_NODE, order = 1 )
     public void heap_declaration( Declaration decl ) {
         if ( decl.kind != DeclarationKind.HEAP ) return;
-
-        //TODO! Make this dynamic. Currently we only support 64 bit integers
+        if ( decl.parent.get() instanceof Field ) return;
         
-        LexIdent id = decl.id;
 
-        // System.out.println( ScopeLayout.all_layouts.keySet() );
-        // System.out.println( ScopeLayout.all_layouts.values() );
+        _register_var_heap("", decl);
+    }
 
-        String layout_name = "heap" + decl.layout.id;
+    private void _register_var_heap( String prefix, Declaration var ) {
+        LexIdent id = var.id;
+        AST_SymbolCollector.current_scope(var).identifier_is_heap_allocated(prefix + id.name);
+
+        String layout_name = var.heap_layout.name;
 
         int size = 1;
         // How much space do we want for our heap_memory?
@@ -505,7 +528,7 @@ public class AST_StackMachine extends Visitor {
         // Move it to the correct location.
 
         push( new Instruction( Opcode.STORE_VARIABLE, new Arguments(List.of(
-            Operand.from_string( id.name ),
+            Operand.from_string( prefix + id.name ),
             Operand.from_register(Register.RAX, AddressingMode.REGISER )
         ))) );
     }
@@ -514,7 +537,6 @@ public class AST_StackMachine extends Visitor {
     public void assign_value_to_var( Assignment assignment_node ) {
         if ( assignment_node.value instanceof FunctionType ) { function_depth--; return; }
         if ( function_depth != 0 ) return;
-
 
 
         if ( assignment_node.value instanceof LexIdent ) {
@@ -528,10 +550,10 @@ public class AST_StackMachine extends Visitor {
                                 new Comment( "Fetching value" ) ) );
         }
 
-        if ( AST_SymbolCollector.current_scope( assignment_node.id ).isHeapAllocated( assignment_node.name() ) ) {
-            String var_name = ((LexIdent)assignment_node.id).name;
+        if ( AST_SymbolCollector.current_scope( assignment_node.id ).is_on_heap( assignment_node.name() ) ) {
+            String var_name = assignment_node.name();
             Operand var = new Operand( var_name, AddressingMode.IMMEDIATE );
-            ScopeLayout scope = AST_SymbolCollector.current_scope(assignment_node.id);
+            Symbols scope = AST_SymbolCollector.current_scope(assignment_node);
             boolean target_is_parameter = scope.get_parameters().contains( var_name );
 
             push( new Instruction( Opcode.LOAD_VARIABLE, 
@@ -540,7 +562,11 @@ public class AST_StackMachine extends Visitor {
                                 target_is_parameter ) );
             
             Operand rbx = Operand.from_register( Register.RBX, AddressingMode.DIRECT_OFFSET );
-            rbx.offset = 2; //TODO! Make dynamic for records.
+            HeapLayout heap_layout = AST_SymbolCollector.current_symbol_node(assignment_node).get_heap_layout(var_name);
+
+            String field = var_name.substring(var_name.lastIndexOf(".")+1);
+
+            rbx.offset = (int)(long)heap_layout.var_offset.get(field); 
 
             push( new Instruction( Opcode.MOVE, new Arguments( List.of( Operand.from_register( Register.RAX, AddressingMode.REGISER ), rbx ) ) ) );
         } else {
@@ -673,17 +699,24 @@ public class AST_StackMachine extends Visitor {
     private List<Instruction> _load_var( LexIdent id, Operand target ) {
         String var_name = id.name;
         Operand var = new Operand( var_name, AddressingMode.IMMEDIATE );
-        ScopeLayout scope = AST_SymbolCollector.current_scope(id);
+        Symbols scope = AST_SymbolCollector.current_scope(id);
         boolean target_is_parameter = scope.get_parameters().contains( var_name );
 
-        if ( scope.isHeapAllocated( var_name ) ) {
+        if ( scope.is_on_heap( var_name ) ) {
             List<Instruction> li = new ArrayList<>();
             li.add( new Instruction( Opcode.LOAD_VARIABLE, 
                                 new Arguments( List.of(var, target) ), 
                                 new Comment( "Load variable " + var_name ),
                                 target_is_parameter ) );
             Operand inter = Operand.from_register( target.get_reg(), AddressingMode.DIRECT_OFFSET );
-            inter.offset = 2;
+            
+            String field = var_name.substring(var_name.lastIndexOf(".")+1);
+            HeapLayout heap_layout = AST_SymbolCollector.current_symbol_node(id).get_heap_layout(var_name);
+            
+            
+            inter.offset = (int)(long)heap_layout.var_offset.get(field);
+            
+
             li.add( new Instruction( Opcode.MOVE, new Arguments( List.of( inter, target ) ) ) );
 
             return li;
@@ -702,17 +735,23 @@ public class AST_StackMachine extends Visitor {
     private List<Instruction> _load_var( NestedField id, Operand target ) {
         String var_name = id.name();
         Operand var = new Operand( var_name, AddressingMode.IMMEDIATE );
-        ScopeLayout scope = AST_SymbolCollector.current_scope(id);
+        Symbols scope = AST_SymbolCollector.current_scope(id);
         boolean target_is_parameter = scope.get_parameters().contains( var_name );
 
-        if ( scope.isHeapAllocated( var_name ) ) {
+        if ( scope.is_on_heap( var_name ) ) {
             List<Instruction> li = new ArrayList<>();
             li.add( new Instruction( Opcode.LOAD_VARIABLE, 
                                 new Arguments( List.of(var, target) ), 
                                 new Comment( "Load variable " + var_name ),
                                 target_is_parameter ) );
             Operand inter = Operand.from_register( target.get_reg(), AddressingMode.DIRECT_OFFSET );
-            inter.offset = 2;
+            
+            String field = var_name.substring(var_name.lastIndexOf(".")+1);
+            HeapLayout heap_layout = AST_SymbolCollector.current_symbol_node(id).get_heap_layout(var_name);
+            
+            
+            inter.offset = (int)(long)heap_layout.var_offset.get(field);
+            
             li.add( new Instruction( Opcode.MOVE, new Arguments( List.of( inter, target ) ) ) );
 
             return li;

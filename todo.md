@@ -1,3 +1,12 @@
+
+Registering the layout for the stack i need:
+    Store a pointer to the layout struct, which is a bunch of 64 bit integers,
+    that indicate with a 1 if that offset is a pointer.
+    This pointer is stored at -8(%rbp)
+    Let's call this a stack frame.
+
+---
+
 I need to update the readme, so it follows the newly updated visitor pattern.
 It is now more automatic and uses annotations.
 These annotations should also be documented!

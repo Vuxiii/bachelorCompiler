@@ -4,14 +4,17 @@ import com.vuxiii.LR.Records.Term;
 import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexIdent;
 import com.vuxiii.compiler.Parser.Nodes.FieldList;
 import com.vuxiii.compiler.VisitorPattern.Annotations.VisitNumber;
-import com.vuxiii.compiler.VisitorPattern.Visitors.SymbolCollection.ScopeLayout;
+import com.vuxiii.compiler.VisitorPattern.Visitors.SymbolCollection.HeapLayout;
+import com.vuxiii.compiler.VisitorPattern.Visitors.SymbolCollection.Symbols;
 
 public class RecordType extends Type {
     @VisitNumber( number = 1 ) public LexIdent identifier;
 
     @VisitNumber( number = 2 ) public FieldList fields; // Figure out what these should be.
 
-    public ScopeLayout layout;
+    public Symbols layout;
+
+    public HeapLayout heap_layout;
 
     public RecordType( Term term, LexIdent user_type, FieldList fields ) {
         super(term);

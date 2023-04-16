@@ -32,15 +32,16 @@ public class AST_SymbolCollector extends VisitorBase {
 
     List<String> scope_stack = new ArrayList<>();
 
-    Map<String, ScopeLayout> scope_map;
+    Map<String, Symbols> scope_map;
 
     Set<RecordType> visited_records = new HashSet<>();
 
     Set<ASTNode> ignore_decl = new HashSet<>();
 
+
     @VisitorPattern( when = VisitOrder.ENTER_NODE )
     public void init_root_scope( Root rootie ) {
-        ScopeLayout new_scope = new ScopeLayout( );
+        Symbols new_scope = new Symbols( );
         SymbolNode node = new SymbolNode( Symbol.n_Scope, rootie.node, "root", new_scope, Optional.empty() );
 
         rootie.node.parent = Optional.of( node );
@@ -62,7 +63,7 @@ public class AST_SymbolCollector extends VisitorBase {
         parent_scope.scope.add_variable( func_decl.id, func_decl.kind == DeclarationKind.HEAP );
 
 
-        ScopeLayout new_scope = new ScopeLayout(  );
+        Symbols new_scope = new Symbols(  );
         SymbolNode node = new SymbolNode( Symbol.n_Scope, func_decl, "function " + func_decl.id.name, new_scope, Optional.of(parent_scope) );
         node.parent = Optional.of( func_decl.parent.get() );
         func_decl.parent.get().replace_child_with(func_decl, node);
@@ -75,7 +76,7 @@ public class AST_SymbolCollector extends VisitorBase {
         if ( !(func_assignment.value instanceof FunctionType) ) return;
         if ( !(func_assignment.id instanceof LexIdent) ) return;
         SymbolNode parent_scope = current_symbol_node(func_assignment);
-        ScopeLayout new_scope = new ScopeLayout( );
+        Symbols new_scope = new Symbols( );
 
         new_scope.add_variable( (LexIdent)func_assignment.id, false ); // Name of function
         System.out.println( "Adding " + func_assignment.id + " to scope " + new_scope);
@@ -94,47 +95,20 @@ public class AST_SymbolCollector extends VisitorBase {
     @VisitorPattern( when = VisitOrder.ENTER_NODE, order = 1 )
     public void collect_var( Declaration decl ) {
         if ( decl.kind != DeclarationKind.VARIABLE && decl.kind != DeclarationKind.HEAP ) return;
-        if ( ignore_decl.contains(decl) ) return;
+        if ( decl.parent.get() instanceof Field ) return;
+        // if ( ignore_decl.contains(decl) ) return;
 
-        ScopeLayout scope = current_scope( decl );
-        if ( scope.has_record( decl.type ) ) {
-            // Register the children
-            scope.add_fields( decl );
-        } else { 
-            scope.add_variable( decl.id, decl.kind == DeclarationKind.HEAP );
-            if ( decl.kind == DeclarationKind.HEAP ) {
-                current_scope( decl ).identifier_is_heap_allocated( decl.id.name );
-                decl.layout = new ScopeLayout();
-            }
-            System.out.println( "Adding " + decl.id + " to scope " + current_scope(decl));
+        Symbols scope = current_scope( decl );
+
+        if ( decl.type instanceof RecordType ) {
+            scope.add_fields(decl);
         }
-    }
-
-    @VisitorPattern( when = VisitOrder.ENTER_NODE, order = 3 )
-    public void register_record_layout( RecordType record ) {
-        if ( visited_records.contains( record ) ) return;
-        visited_records.add( record );
-
-
-        long offset = 0;
-
-        SymbolNode symbol_node = current_symbol_node( record );
-
-        record.layout = new ScopeLayout();
-        ScopeLayout scope = symbol_node.scope;
-        // symbol_node.re
-        // scope.add_record(record);
-
-        for ( Field f : record.fields.fields ) {
-            Declaration fd = f.field;
-            ignore_decl.add(fd);
-            // layout.register( fd.id.name, offset );
-            if ( fd.kind == DeclarationKind.HEAP ) {
-                // layout.pointer_at( offset+1 );
-            }
-            offset++;
-        }
-        // layout.num_of_fields = offset;
+        
+        scope.add_variable( decl.id, decl.kind == DeclarationKind.HEAP );
+        // if ( decl.kind == DeclarationKind.HEAP ) {
+        //     current_scope( decl ).identifier_is_heap_allocated( decl.id.name );
+        //     decl.layout = new ScopeLayout();
+        // }
     }
 
     @VisitorPattern( when = VisitOrder.ENTER_NODE, order = 2 )
@@ -170,7 +144,7 @@ public class AST_SymbolCollector extends VisitorBase {
         return (SymbolNode)current;
     }
 
-    public static ScopeLayout current_scope( ASTNode current ) {
+    public static Symbols current_scope( ASTNode current ) {
         while ( !(current instanceof SymbolNode) ) {
             if ( current instanceof Root ) {
                 System.out.println( "At root. Lmao" );

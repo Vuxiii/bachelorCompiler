@@ -5,7 +5,7 @@ import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexIdent;
 import com.vuxiii.compiler.Parser.Nodes.Types.Type;
 import com.vuxiii.compiler.VisitorPattern.ASTNode;
 import com.vuxiii.compiler.VisitorPattern.Annotations.VisitNumber;
-import com.vuxiii.compiler.VisitorPattern.Visitors.SymbolCollection.ScopeLayout;
+import com.vuxiii.compiler.VisitorPattern.Visitors.SymbolCollection.Symbols;
 
 public class RecordMember extends ASTNode {
 
@@ -15,7 +15,7 @@ public class RecordMember extends ASTNode {
 
     public boolean is_pointer = false;
 
-    public ScopeLayout layout;
+    public Symbols layout;
 
     /**
      * This constructor constructs a RecordMember, where:
@@ -53,13 +53,14 @@ public class RecordMember extends ASTNode {
         super.setup_ASTNodeQueue();
     }
 
+    @Override
     public String toString() {
         return  "Record " + id.name + ": " + type;
     }
 
     @Override
     public String getPrintableName() {
-        return "RecordMember: " + is_pointer ? "Pointer" : "";
+        return "RecordMember: " + (is_pointer ? "Pointer" : "");
     }
 
     public String get_parameter_form() {
