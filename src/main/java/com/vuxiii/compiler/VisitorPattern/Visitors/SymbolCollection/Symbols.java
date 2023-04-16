@@ -14,6 +14,7 @@ import com.vuxiii.compiler.Parser.Nodes.DeclarationKind;
 import com.vuxiii.compiler.Parser.Nodes.Field;
 import com.vuxiii.compiler.Parser.Nodes.Types.RecordType;
 import com.vuxiii.compiler.Parser.Nodes.Types.Type;
+import com.vuxiii.compiler.VisitorPattern.Visitors.Debug.AST_Printer;
 
 public class Symbols {
     public static Set<Symbols> all_layouts = new HashSet<>();
@@ -23,7 +24,7 @@ public class Symbols {
     private Map<String, Integer> parameter_offsets = new HashMap<>();
     private int current_parameter_offset = 2;
     
-    private Map<String, Integer> variable_offsets = new HashMap<>();
+    public Map<String, Integer> variable_offsets = new HashMap<>();
     private int current_variable_offset = 1;
 
     private Set<String> is_var_heap_allocated = new HashSet<>();
@@ -58,14 +59,25 @@ public class Symbols {
 
     public void add_fields( Declaration decl ) {
         RecordType type = (RecordType)decl.type;
+        System.out.println( "=============REGISTER=============" );
+        AST_Printer prin = new AST_Printer();
+        decl.accept(prin);
+        System.out.println( prin.get_ascii() );
+        local_vars.put( decl.id.name, decl.id );
+        variable_offsets.put( decl.id.name, current_variable_offset );
+
         for ( Field f : type.fields.fields ) {
             String name = decl.id.name + "." + f.field.id.name;
             local_vars.put( name, f.field.id );
-            if ( decl.kind != DeclarationKind.HEAP )
+            if ( decl.kind != DeclarationKind.HEAP ) {
                 variable_offsets.put( name, current_variable_offset++ );
-            else
+                System.out.println( "ADDED " + name );
+            } else {
                 identifier_is_heap_allocated( name );
+                System.out.println( "It is on heap.... " + name );
+            }
         }
+        System.out.println( variable_offsets );
     }
 
     public void identifier_is_heap_allocated( String identifier ) {
@@ -117,9 +129,12 @@ public class Symbols {
     }
 
     public int get_variable_offset( String variable ) {
-        if ( variable.contains(".") )
-            return variable_offsets.getOrDefault(variable.substring(0, variable.indexOf(".")), -420);
-        else
+        // if ( variable.contains(".") )
+        //     return variable_offsets.getOrDefault(variable.substring(0, variable.indexOf(".")), -420);
+        // else
+        System.out.println("============================");
+        System.out.println( variable_offsets );
+        System.out.println("============================");
             return variable_offsets.getOrDefault(variable, -69);
     }
 

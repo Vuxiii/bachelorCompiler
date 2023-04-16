@@ -102,9 +102,10 @@ public class AST_SymbolCollector extends VisitorBase {
 
         if ( decl.type instanceof RecordType ) {
             scope.add_fields(decl);
+        } else {
+            scope.add_variable( decl.id, decl.kind == DeclarationKind.HEAP );
         }
         
-        scope.add_variable( decl.id, decl.kind == DeclarationKind.HEAP );
         // if ( decl.kind == DeclarationKind.HEAP ) {
         //     current_scope( decl ).identifier_is_heap_allocated( decl.id.name );
         //     decl.layout = new ScopeLayout();

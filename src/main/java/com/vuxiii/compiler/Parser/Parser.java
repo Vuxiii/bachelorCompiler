@@ -210,20 +210,79 @@ public class Parser {
             return null; // error!
         });
 
-        // n_Declaration_Variable -> t_Let t_Identifier t_Colon t_Times n_User_Type
-        g.addRuleWithReduceFunction( Symbol.n_Declaration_Variable, List.of( Symbol.t_Let, Symbol.t_Identifier, Symbol.t_Colon, Symbol.t_Times, Symbol.n_User_Type ), t -> {
+        // n_Declaration_Variable -> t_Let t_Identifier t_Colon t_Times n_Any_Type
+        g.addRuleWithReduceFunction( Symbol.n_Declaration_Variable, List.of( Symbol.t_Let, Symbol.t_Identifier, Symbol.t_Colon, Symbol.t_Times, Symbol.n_Any_Type ), t -> {
             LexIdent id = (LexIdent)t.get(1);
 
-            if ( t.get(4) instanceof RecordType ) {
+            if ( t.get(4) instanceof Field ) {
+                Field fields = (Field)t.get(4);             
+                UserType type = new UserType( Symbol.n_Declaration_Variable, id, fields );
+                
+                stored_user_types.putIfAbsent( id.matchInfo.str(), type );
+                
+                return new Declaration( Symbol.n_Declaration_Variable, id, type, DeclarationKind.HEAP );
+            } else if (t.get(4) instanceof StandardType ) { 
+                StandardType type = (StandardType)t.get(4); 
+                return new Declaration( Symbol.n_Declaration_Variable, id, type, DeclarationKind.HEAP );
+            } else if ( t.get(4) instanceof LexIdent ) {
+                LexIdent ident = (LexIdent)t.get(4);             
+                Type type = stored_user_types.get( ident.name );
+                
+                if ( type == null )
+                    return new Declaration( Symbol.n_Declaration_Variable, id, new UnknownType(Symbol.n_Declaration_Variable, ident ), DeclarationKind.HEAP );
+
+                return new Declaration( Symbol.n_Declaration_Variable, id, type, DeclarationKind.HEAP );
+            } else if ( t.get(4) instanceof FunctionType ) {
+                FunctionType type = (FunctionType)t.get(4);    
+                stored_user_types.putIfAbsent( id.matchInfo.str(), type );
+                
+                return new Declaration( Symbol.n_Declaration_Variable, id, type, DeclarationKind.FUNCTION );
+            }else if ( t.get(4) instanceof UnknownType ) {
+                UnknownType type = (UnknownType)t.get(4);    
+                stored_user_types.putIfAbsent( id.matchInfo.str(), type );
+                
+                return new Declaration( Symbol.n_Declaration_Variable, id, type, DeclarationKind.UNKNOWN );
+            } else if ( t.get(4) instanceof UserType ) {
+                UserType type = (UserType)t.get(4);
+                return new Declaration( Symbol.n_Declaration_Variable, id, type, DeclarationKind.HEAP );
+            } else if ( t.get(4) instanceof RecordType ) {
                 RecordType type = (RecordType)t.get(4);
                 return new Declaration( Symbol.n_Declaration_Variable, id, type, DeclarationKind.HEAP );
             }
-            System.out.println( new Error("--[[ Parser Error ]]--", "Only Records are allowed on the heap") );
+            System.out.println("--[[ Parser Error ]]--\nSomething happend trying to parse a user type. It is not a UserType or an Identifier. So what is it?" );
             System.out.println( t.get(4) );
             
             System.exit(-1);
             return null; // error!
         });
+
+
+        // n_Declaration_Type -> t_Type_Declare Symbol.t_Identifier t_Colon n_Any_Type
+        // g.addRuleWithReduceFunction( Symbol.n_Declaration_Type, List.of( Symbol.t_Type_Declare, Symbol.t_Identifier, Symbol.t_Colon, Symbol.n_Any_Type ), t -> {
+        //     LexIdent id = (LexIdent)t.get(1);
+        //     Type type = (Type)t.get(3);
+        //     DeclarationKind kind = DeclarationKind.UNKNOWN;
+        //     if ( type instanceof AliasType ) {
+        //         kind = DeclarationKind.ALIAS_TO_USER_TYPE; // Or maybe not lmao
+        //     } else if ( type instanceof FunctionType ) {
+        //         kind = DeclarationKind.FUNCTION;
+        //     } else if ( type instanceof StandardType ) {
+        //         kind = DeclarationKind.ALIAS_TO_STD_TYPE;
+        //     } else if ( type instanceof UserType ) {
+        //         stored_user_types.put( id.name, type );
+        //         kind = DeclarationKind.USER_TYPE;
+        //     } else if ( type instanceof UnknownType ) {
+        //         kind = DeclarationKind.UNKNOWN;
+        //     } else {
+        //         System.out.println( new Error("Parser error!", "Unexpected unknowntype!" ) );
+        //         AST_Printer p = new AST_Printer();
+        //         type.accept(p);
+        //         System.out.println( p.get_ascii() );
+        //         System.exit(-1);
+        //     }
+
+        //     return new Declaration( Symbol.n_Declaration_Type, id, type, kind );
+        // });
 
         // n_Declaration_Type -> t_Type_Declare Symbol.t_Identifier t_Colon t_LCurly n_Field_List t_RCurly
         g.addRuleWithReduceFunction( Symbol.n_Declaration_Type, List.of( Symbol.t_Type_Declare, Symbol.t_Identifier, Symbol.t_Colon, Symbol.t_LCurly, Symbol.n_Field_List, Symbol.t_RCurly ), t -> {

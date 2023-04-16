@@ -147,11 +147,6 @@ public class AST_StackMachine extends Visitor {
         push( initialize_scope( (SymbolNode)root.node) );
         push( initialize_heap_layouts() );
         
-
-        // Insert all the scope pointers.
-        // We can then map them correctly afterwards.
-
-        
     }   
 
     private List<Instruction> initialize_heap_layouts() {
@@ -552,19 +547,22 @@ public class AST_StackMachine extends Visitor {
 
         if ( AST_SymbolCollector.current_scope( assignment_node.id ).is_on_heap( assignment_node.name() ) ) {
             String var_name = assignment_node.name();
-            Operand var = new Operand( var_name, AddressingMode.IMMEDIATE );
+            Operand var = new Operand( var_name.substring(0, var_name.indexOf(".") ), AddressingMode.IMMEDIATE );
             Symbols scope = AST_SymbolCollector.current_scope(assignment_node);
             boolean target_is_parameter = scope.get_parameters().contains( var_name );
 
             push( new Instruction( Opcode.LOAD_VARIABLE, 
                                 new Arguments( List.of(var, Operand.from_register(Register.RBX, AddressingMode.REGISER)) ), 
-                                new Comment( "Load variable " + var_name ),
+                                new Comment( "Load variable " + var_name.substring(0, var_name.indexOf(".") )),
                                 target_is_parameter ) );
             
             Operand rbx = Operand.from_register( Register.RBX, AddressingMode.DIRECT_OFFSET );
             HeapLayout heap_layout = AST_SymbolCollector.current_symbol_node(assignment_node).get_heap_layout(var_name);
 
             String field = var_name.substring(var_name.lastIndexOf(".")+1);
+
+            System.out.println( assignment_node.name());
+            System.out.println(heap_layout.var_offset);
 
             rbx.offset = (int)(long)heap_layout.var_offset.get(field); 
 
@@ -583,11 +581,6 @@ public class AST_StackMachine extends Visitor {
         if ( function_def.value instanceof FunctionType ) 
             function_depth++;
     }
-
-    // @VisitorPattern( when = VisitOrder.ENTER_NODE )
-    // public void evaluate_argument( Argument arg ) {
-
-    // }
 
     @VisitorPattern( when = VisitOrder.EXIT_NODE )
     public void print( Print print_node ) {

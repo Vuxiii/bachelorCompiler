@@ -154,6 +154,8 @@ public class X86Emitter {
     
     private void _run( List<Instruction> instructions, Symbols current_scope ) {
         
+        System.out.println( current_scope.get_variables() );
+        System.out.println( current_scope.variable_offsets );
         for ( String var : current_scope.get_variables() ) {
             var_offsets.put( var, -current_scope.get_variable_offset(var) );
         }
