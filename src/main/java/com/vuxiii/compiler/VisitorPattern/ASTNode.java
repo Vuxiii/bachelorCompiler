@@ -20,6 +20,8 @@ public abstract class ASTNode implements ASTToken {
     
     public Term term;
 
+    public Optional<ASTNode> parent = Optional.empty();
+
     private final TreeSet<Field> ASTNodeQueue = new TreeSet<>( Comparator.comparing( field -> field.getAnnotation( VisitNumber.class ).number(), Comparator.naturalOrder() ) );
     
     private int children_count;
@@ -82,7 +84,7 @@ public abstract class ASTNode implements ASTToken {
                     maybe = (ASTNode) ((Optional<?>) field.get( this )).get(); // We are garuanteed that this optional is filled by (*)
 
                     if ( maybe == child ) {
-                        field.set(this, new_child);
+                        field.set(this, Optional.of(new_child));
                         return true;
                     }
 

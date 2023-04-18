@@ -4,32 +4,27 @@ import com.vuxiii.compiler.CodeEmit.X86Emitter;
 import com.vuxiii.compiler.InternalInterpreter.Interpreter;
 import com.vuxiii.compiler.Lexer.Lexer;
 import com.vuxiii.compiler.Parser.Parser;
-import com.vuxiii.compiler.Parser.Nodes.Assignment;
-import com.vuxiii.compiler.Parser.Nodes.Print;
-import com.vuxiii.compiler.Parser.Nodes.Statement;
-import com.vuxiii.compiler.Parser.Nodes.StatementKind;
+import com.vuxiii.compiler.Parser.Nodes.Root;
 import com.vuxiii.compiler.VisitorPattern.ASTNode;
+import com.vuxiii.compiler.VisitorPattern.Visitors.AST_Setup_Parents;
 import com.vuxiii.compiler.VisitorPattern.Visitors.CodeGeneration.AST_StackMachine;
 import com.vuxiii.compiler.VisitorPattern.Visitors.CodeGeneration.FunctionBlock;
 import com.vuxiii.compiler.VisitorPattern.Visitors.CodeGeneration.Instruction;
 import com.vuxiii.compiler.VisitorPattern.Visitors.CodeGeneration.StringCollection.StringCollector;
-import com.vuxiii.compiler.VisitorPattern.Visitors.CodeGeneration.StringCollection.StringNode;
 import com.vuxiii.compiler.VisitorPattern.Visitors.Debug.AST_Printer;
 import com.vuxiii.compiler.VisitorPattern.Visitors.SymbolCollection.AST_FixTypes;
+import com.vuxiii.compiler.VisitorPattern.Visitors.SymbolCollection.AST_RegisterHeapLayout;
+import com.vuxiii.compiler.VisitorPattern.Visitors.SymbolCollection.AST_RegisterStackFrames;
 import com.vuxiii.compiler.VisitorPattern.Visitors.SymbolCollection.AST_SymbolCollector;
-import com.vuxiii.compiler.VisitorPattern.Visitors.SymbolCollection.Scope;
 import com.vuxiii.compiler.VisitorPattern.Visitors.TreeCollaps.AST_Shrinker;
-import com.vuxiii.compiler.VisitorPattern.Visitors.TreeCollaps.AST_Shrinker_Statement;
-import com.vuxiii.compiler.VisitorPattern.Visitors.TreeCollaps.AST_Shrinker_Statement_Collector;
 
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import com.vuxiii.LR.Records.ASTToken;
+import com.vuxiii.LR.LRParser;
 import com.vuxiii.LR.Settings;
 
 /**
@@ -49,19 +44,7 @@ public final class App {
         Settings.showParsingSteps = false;
         Settings.showGrammar = false;
         Settings.showParsingTable = false;
-        String input = """
-            a = 3;
-            print(a);
-            b=a+5;
-            print(a);
-            """;
-        input = """
-            a = 3;
-            a = a + 4;
-            a = 5 - a;
-            print(a);
-            """;
-        input = """   
+        String input = """   
             a = (3 + 1);
             {
                 c = 43;
@@ -79,24 +62,6 @@ public final class App {
             }
             print(a);
             """;
-        // input = """
-        //     b = 1.0;
-        //     c = 5.;
-        //     a = 3 + b * (10 / 5);
-        //     b = 10 + a;
-        //     print( a );
-        //     print( b );
-        //     print( 45 );
-        //     """;
-        // input = """
-        //     b = 1;
-        //     a = 3 + 5 * (10 / 5);
-        //     b = 10 + a;
-        //     print( a );
-        //     print( b );
-        //     print( 45 );
-        //     """;
-        // Capture example.
         input = """
             let a: int;
             a = 3;
@@ -127,163 +92,134 @@ public final class App {
 
         """;
         input = """
-            type string: int;
-            type my_func: ();
-            type second: ( z: int ) -> int;
-            let a: my_func;
-            let b: second;
+        type nested: {
+            nested_field: int;
+        };
 
-            a = () {
-                print( 2 );
-            };
+        type my_rec: {
+            field1: int;
+            field2: int;
+            nested_records: nested;
+        };
 
-            b = ( z: int ) -> int {
-                print( z + 3 );
-            };
+        let rec: my_rec;
 
-            a();
-            b(3);
-
+        my_rec.field1 = 42;
         """;
         input = """
-            type functype: (x: int) -> int;
-            let a: ( z: int ) -> int;
-            let b: functype;
-
-            a = ( z: int ) -> int {
-                let inner_var: int;
-                inner_var = 2;
-                print( inner_var + z );
-            };
-        """;
-        input = """
-            let a: int;
-            a = 3;
-            let my_function: ( x: int ) -> int;
-            let b: int;
-
-            b = 2;
-
-            my_function = ( x: int ) -> int {
-                let inner_var: int;
-                inner_var = 3;
-                print( x );
-            };
-
-            let my_second_function: ( x: int, b: int ) -> int;
-            my_second_function = (x: int, b: int) -> int {
-                let inner_fn: ( z: int ) -> int;
-                inner_fn = ( z: int ) -> int {
-                    let inner_fn_var: int;
-                    print( z );
+                type nested: {
+                    a: int;
+                    b: int;
+                    c: *int;
                 };
-                print(x+b);
-            };
 
-            my_second_function( 2, 7 );
-        """;
+                let rec: nested;
+
+                rec.a = 42;
+                rec.b = 69;
+                rec.c = 512;
+
+
+                print( "Field a is: %\\n", rec.a );
+                print( "Field b is: %\\n", rec.b );
+                print( "Field c is: %\\n", rec.c );
+                """;
+
         input = """
-
-            let b: int;
-            b = 4;
-
-            print( b * 2 + 4);
-
-        """;
+                type a: { f: *int; };
+                let b: a;
+                b = 42;
+                print("%\\n", b);
+                """;
         input = """
-        let first: int;
-        first = 5;
-        let third: int;
-        third = 2 * first;
+                let p1: *int;
+                p1 = 2;
+                print( "p1 is %\\n", p1 );
+                let va: int;
+                let p2: *int;
+                p2 = p1 * 3;
+                print( "p2 is %\\n", p2 );
+                let fun: () -> void;
+                fun = () -> void {
+                    let p42: *int;
+                    p42 = 42;
+                    print( "P42 %\\n", p42 );
+                };
+                fun();
+                """;
+        input = """
+                let a: *int;
+                let b: int;
+                let c: *int;
+                let d: int;
 
-        let second: int;
-        second = 20;
-        print( first + second * third );
+                a = 1;
+                b = 2;
+                c = 3;
+                d = 4;
 
+                print( "a: %\\n", a );
+                print( "b: %\\n", b );
+                print( "c: %\\n", c );
+                print( "d: %\\n", d );
+
+                """;
+        input = """
+                type rec: {
+                    f1: int;
+                    f2: int;
+                    f3: int;
+                };
+
+                let a: *rec;
+                let b: rec;
+                
+                a.f1 = 1;
+                a.f2 = 2;
+                a.f3 = 3;
+
+                b.f1 = 6;
+                b.f2 = 7;
+                b.f3 = 8;
+
+
+                print( "a.f1: %\\n", a.f1 );
+                print( "a.f2: %\\n", a.f2 );
+                print( "a.f3: %\\n", a.f3 );
+
+                print( "b.f1: %\\n", b.f1 );
+                print( "b.f2: %\\n", b.f2 );
+                print( "b.f3: %\\n", b.f3 );
+
+                """;
+        input = """
+                type rec: {
+                    f1: int;
+                    f2: int;
+                    f3: int;
+                };
+
+                let b: *rec;
+
+                b.f1 = 6;
+                b.f2 = 7;
+                b.f3 = 8;
+
+                print( "b.f1: %\\n", b.f1 );
+                print( "b.f2: %\\n", b.f2 );
+                print( "b.f3: %\\n", b.f3 );
+
+                """;
+        // let a: *int;
+        // a = 3;
+
+        // print( "a has the value: %\\n", a );
         
+        // a = 42 - a;
 
-        """;
-        input = """
-        if ( 4 + 4 ) {
-            print( "If" );
-        } 
+        // print( "a has the value: %\\n", a );
 
-        if ( 4 + 4 ) {
-            print( "If" );
-        } else {
-            print( "Else" );
-        };
-
-        if ( 4 + 4 ) {
-            print( "If" );
-        } else if ( 5 + 5 ) {
-            print( "Else if " );
-        } else {
-            print( "Else" );
-        };
-
-        """;
-        input = """
-
-        if ( 4 + 4 ) {
-            print( "If" );
-        } else if ( 5 + 5 ) {
-            print( "Else if 1" );
-        } else if ( 5 + 50 ) {
-            print( "Else if 2" );
-        } else {
-            print( "Else" );
-        };
-
-        """;
-        input = """
-        let first: int;
-        first = 7;
-        let second: int;
-        
-        print( " %\\n", 4 + 2 * first );
-        print( " %\\n", 2 * first + 4 );
-
-        print( " %\\n", 2 + 3 * first );
-        """;
-        input = """
-
-        let bas: boolean;
-        bas = false;
-        let a: int;
-
-        if ( true ) {
-            a = 1;
-        } else if (false) {
-            a = 2;
-        } else {
-            a = 3;
-        };
-
-        print( " %\\n", a );
-
-        if ( false ) {
-            a = 1;
-        } else if (true) {
-            a = 2;
-        } else {
-            a = 3;
-        };
-
-        print( " %\\n", a );
-
-        if ( false ) {
-            a = 1;
-        } else if (false) {
-            a = 2;
-        } else {
-            a = 3;
-        };
-
-        print( " %\\n", a );
-        """;
-
-        
+        // """;
 
         System.out.println( input );
 
@@ -302,6 +238,7 @@ public final class App {
         // [[ Parser ]]
         
         ASTNode ast = Parser.getAST( tokens );
+
         System.out.println( ast );
         
         line_break();
@@ -320,6 +257,8 @@ public final class App {
         line_break();
         line_break();
 
+        AST_Setup_Parents setup_parents = new AST_Setup_Parents();
+        ast.accept(setup_parents);
         
         
         printer = new AST_Printer();
@@ -364,28 +303,25 @@ public final class App {
         line_break();
         System.out.println( "Symbol collector" );
         line_break();
-        AST_SymbolCollector symbolCollector = new AST_SymbolCollector();
-        ast.accept( symbolCollector );
-
-        List<Scope> scopes = symbolCollector.scopes;
         
-        int i = 0;
-        for ( Scope scope : scopes ) {
-            System.out.println( "Scope [" + (i++) + "]" );
-            System.out.println( "local vars:" );
-            for ( String var : scope.get_variables() )
-                System.out.println( "  " + var );
-            System.out.println( "captured vars:" );
-            for ( String capture : scope.get_captures() )
-                System.out.println( "  " + capture );
-                
-            System.out.println();
-        }
+        AST_SymbolCollector v2 = new AST_SymbolCollector();
+        ast.accept(v2);
+        
+        AST_RegisterStackFrames frames = new AST_RegisterStackFrames();
+        ast.accept( frames );
 
-        System.out.println( symbolCollector.scope_map.keySet() );
-        symbolCollector.scope_map.keySet().forEach( k -> { System.out.println( "Key: " + k + " -> " + symbolCollector.scope_map.get(k) ); } );
+        AST_RegisterHeapLayout heaps = new AST_RegisterHeapLayout();
+        ast.accept( heaps );
 
-        Map<String, Scope> scope_map = symbolCollector.scope_map; 
+        printer = new AST_Printer();
+        ast.accept( printer );
+        System.out.println( printer.get_ascii() );
+
+        // System.out.println( "Layouts:" );
+        // for ( Layout l : Layout.get_all_layouts() ) {
+        //     System.out.println( l );
+        // }
+
 
         line_break();
         System.out.println( "String collector" );
@@ -393,14 +329,8 @@ public final class App {
 
         StringCollector str_collector = new StringCollector();
         ast.accept( str_collector );
-
-        Map<Print, StringNode> strings = str_collector.strings;
-
-        // for ( String s : strings.keySet() ) {
-        //     System.out.println( s + " -> " + strings.get( s ) );
-        // }
-
-
+        
+        
 
         // [[ Type Checking ]]
 
@@ -413,7 +343,7 @@ public final class App {
 
 
         
-        AST_StackMachine generator = new AST_StackMachine( symbolCollector.functions, scope_map, strings );
+        AST_StackMachine generator = new AST_StackMachine();
         ast.accept(generator);
 
         line_break();
@@ -422,7 +352,7 @@ public final class App {
 
 
         List<Instruction> instructions = generator.code;
-        Map<String, FunctionBlock> fbs = generator.functions;
+        Map<String, FunctionBlock> fbs = AST_StackMachine.functions;
 
 
         System.out.println( "[[ Functions ]]" );
@@ -458,7 +388,7 @@ public final class App {
         System.out.println( "Passing instruction to CodeEmitter");
         line_break();
 
-        X86Emitter emitter = new X86Emitter( instructions, fbs, scope_map, strings );
+        X86Emitter emitter = new X86Emitter( instructions, fbs, (Root)ast );
 
         String asm_code = emitter.run();
         System.out.println( asm_code );
@@ -474,11 +404,53 @@ public final class App {
 
     }
 
+    public static void reset_compiler() {
+        LRParser.reset();
+    }
+
     private static void line_break() {
         System.out.println( "=".repeat(79) );
     }
 
-    private static void save_to_file( String asm_location, String filename, String body ) {
+    public static String runWithInput( String input ) {
+        Settings.showParsingSteps = false;
+        Settings.showGrammar = false;
+        Settings.showParsingTable = false;
+
+
+        List<ASTToken> tokens = Lexer.lex( input );
+
+        ASTNode ast = Parser.getAST( tokens );
+
+        AST_Shrinker cleaner = new AST_Shrinker();
+        ast.accept( cleaner );
+        
+        AST_Setup_Parents setup_parents = new AST_Setup_Parents();
+        ast.accept(setup_parents);
+        
+        AST_FixTypes type_fixer = new AST_FixTypes();
+        ast.accept( type_fixer );
+        
+        AST_SymbolCollector v2 = new AST_SymbolCollector();
+        ast.accept(v2);
+
+        StringCollector str_collector = new StringCollector();
+        ast.accept( str_collector );
+        
+        AST_StackMachine generator = new AST_StackMachine();
+        ast.accept(generator);
+
+        List<Instruction> instructions = generator.code;
+        Map<String, FunctionBlock> fbs = AST_StackMachine.functions;
+
+        X86Emitter emitter = new X86Emitter( instructions, fbs, (Root)ast );
+
+        String asm_code = emitter.run();
+
+        return asm_code;
+    } 
+
+    public static void save_to_file( String asm_location, String filename, String body ) {
         try {
             FileWriter fw = new FileWriter( asm_location + filename );
             fw.write( body );

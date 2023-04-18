@@ -37,31 +37,8 @@ public class Statement extends ASTNode {
     }
 
     @Override
-    public Optional<ASTNode> getChild1() {
-        return Optional.of(node);
-    }
-
-    @Override
-    public Optional<ASTNode> getChild2() {
-        if ( next.isPresent() )
-            return Optional.of( next.get() );
-
-        return Optional.empty();
-    }
-
-    @Override
-    public Optional<ASTNode> getChild3() {
-        return Optional.empty();
-    }
-
-    @Override
-    public Optional<ASTNode> getChild4() {
-        return Optional.empty();
-    }
-
-    @Override
     public String getPrintableName() {
-        return (next.isEmpty()  ? "Statement" 
+        return (next.isEmpty()  ? ( kind == StatementKind.RETURN ? "Return Statement" : "Statement " + kind ) 
                                 : "Statement_List");
     }
     

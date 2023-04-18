@@ -28,23 +28,26 @@ public class Parameter extends ASTNode {
         super.setup_ASTNodeQueue();
     }
 
+    public boolean equals( Object other ) {
+        if ( other == null ) return false;
+        if ( !(other instanceof Parameter) ) return false;
+        Parameter o = (Parameter)other;
+        boolean b = param.id.name.equals( o.param.id.name ) && param.type.equals( o.param.type );
+        if ( b == false ) return false;
+
+        if ( next.isPresent() && o.next.isPresent() ) {
+            return next.get().equals( o.next.get() );
+        } else if (next.isEmpty() && o.next.isEmpty()) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     public String toString() {
         if ( next.isEmpty() )
             return "(Parameter : " + param.toString() + ")";
         return "(Arg : " + param.toString() + "); " + next.get().toString();
-    }
-
-    @Override
-    public Optional<ASTNode> getChild1() {
-        return Optional.of(param);
-    }
-
-    @Override
-    public Optional<ASTNode> getChild2() {
-        if ( next.isPresent() )
-            return Optional.of( next.get() );
-
-        return Optional.empty();
     }
 
     @Override

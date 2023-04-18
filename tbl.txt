@@ -1,0 +1,644 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ----------------------< com.vuxiii.compiler:juhl >----------------------
+[INFO] Building juhl 1.0.3
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] >>> exec-maven-plugin:1.2.1:java (default-cli) > validate @ juhl >>>
+[INFO] 
+[INFO] --- maven-enforcer-plugin:3.0.0-M3:enforce (default) @ juhl ---
+[INFO] 
+[INFO] <<< exec-maven-plugin:1.2.1:java (default-cli) < validate @ juhl <<<
+[INFO] 
+[INFO] 
+[INFO] --- exec-maven-plugin:1.2.1:java (default-cli) @ juhl ---
+
+type my_rec: {
+    field1: int;
+    field2: int;
+};
+
+let a: *int;
+a = 3;
+
+print( "a has the value: %\n", a );
+
+a = 42 - a;
+
+print( "a has the value: %\n", a );
+
+
+Tokens:
+ASTTokenTypeDecl
+id: my_rec
+ASTTokenColon: ':'
+ASTTokenLCurly: '{'
+id: field1
+ASTTokenColon: ':'
+ASTTokenType: INT
+ASTTokenSemicolon: ;
+id: field2
+ASTTokenColon: ':'
+ASTTokenType: INT
+ASTTokenSemicolon: ;
+ASTTokenRCurly: '}'
+ASTTokenSemicolon: ;
+ASTTokenLet
+id: a
+ASTTokenColon: ':'
+ASTTokenPlus: TIMES
+ASTTokenType: INT
+ASTTokenSemicolon: ;
+id: a
+ASTTokenEqual: =
+Literal: 3 :: INT
+ASTTokenSemicolon: ;
+ASTTokenPrint
+ASTTokenLParen: '('
+Literal: "a has the value: %\n" :: STRING
+ASTTokenComma: ','
+id: a
+ASTTokenRParen: ')'
+ASTTokenSemicolon: ;
+id: a
+ASTTokenEqual: =
+Literal: 42 :: INT
+ASTTokenPlus: MINUS
+id: a
+ASTTokenSemicolon: ;
+ASTTokenPrint
+ASTTokenLParen: '('
+Literal: "a has the value: %\n" :: STRING
+ASTTokenComma: ','
+id: a
+ASTTokenRParen: ')'
+ASTTokenSemicolon: ;
+[$]
+===============================================================================
+Compiling the parser took: 24 milliseconds
+0] START -> STATEMENT_LIST$
+1] STATEMENT_LIST -> STATEMENTSTATEMENT_LIST
+2] STATEMENT_LIST -> STATEMENT
+3] STATEMENT -> IF_ELSE_BLOCK
+4] IF_ELSE_BLOCK -> IF
+5] IF_ELSE_BLOCK -> IFELIF_BLOCK
+6] ELIF_BLOCK -> ELSE
+7] IF -> if'('EXPRESSION')'STATEMENT
+8] ELSE -> elseSTATEMENT
+9] STATEMENT -> DECLARATION';'
+10] DECLARATION -> VARIABLE_DECLARATION
+11] DECLARATION -> TYPE_DECLARATION
+12] STATEMENT -> ASSIGNMENT';'
+13] STATEMENT -> PRINT';'
+14] STATEMENT -> SCOPE
+15] SCOPE -> CAPTURESCOPE_BLOCK
+16] SCOPE -> SCOPE_BLOCK
+17] SCOPE_BLOCK -> '{'STATEMENT_LIST'}'
+18] CAPTURE -> '['ARG_LIST']'
+19] CAPTURE -> '[''.''.'']'
+20] STATEMENT -> returnEXPRESSION';'
+21] FACTOR -> FUNCTION_CALL
+22] STATEMENT -> FUNCTION_CALL';'
+23] FUNCTION_CALL -> id'('')'
+24] FUNCTION_CALL -> id'('ARG_LIST')'
+25] ARG_LIST -> ARG','ARG_LIST
+26] ARG_LIST -> ARG
+27] ARG -> EXPRESSION
+28] ASSIGNMENT_FUNCTION -> FUNCTION_SIGNATURE'{'STATEMENT_LIST'}'
+29] DECLARATION_FUNCTION -> letid':'FUNCTION_SIGNATURE
+30] FUNCTION_SIGNATURE -> FUNCTION_PARAM_SIGNATURERETURN_TYPE
+31] FUNCTION_SIGNATURE -> FUNCTION_PARAM_SIGNATURE
+32] FUNCTION_PARAM_SIGNATURE -> '('PARAMETER_LIST')'
+33] FUNCTION_PARAM_SIGNATURE -> '('')'
+34] RETURN_TYPE -> '->'ANY_TYPE
+35] PARAMETER_LIST -> PARAMETER','PARAMETER_LIST
+36] PARAMETER_LIST -> PARAMETER
+37] PARAMETER -> id':'ANY_TYPE
+38] EXPRESSION -> ARITHMETIC_EXPRESSION
+39] ARITHMETIC_EXPRESSION -> TERM'+'ARITHMETIC_EXPRESSION
+40] ARITHMETIC_EXPRESSION -> TERM'-'ARITHMETIC_EXPRESSION
+41] ARITHMETIC_EXPRESSION -> TERM
+42] TERM -> VALUE'*'TERM
+43] TERM -> VALUE'/'TERM
+44] TERM -> VALUE
+45] VALUE -> '-'FACTOR
+46] VALUE -> FACTOR
+47] FACTOR -> '('ARITHMETIC_EXPRESSION')'
+48] FACTOR -> id
+49] FACTOR -> LITERAL
+50] LITERAL -> integer
+51] LITERAL -> double
+52] LITERAL -> bool
+53] LITERAL -> "string_literal"
+54] EXPRESSION -> ARITHMETIC_EXPRESSION'=='ARITHMETIC_EXPRESSION
+55] EXPRESSION -> ARITHMETIC_EXPRESSION'!='ARITHMETIC_EXPRESSION
+56] TYPE_USER -> '{'FIELD_LIST'}'
+57] TYPE_USER -> id
+58] TYPE_USER -> FUNCTION_SIGNATURE
+59] FIELD_LIST -> FIELD';'FIELD_LIST
+60] FIELD_LIST -> FIELD';'
+61] FIELD -> id':'TYPE_STD
+62] FIELD -> id':'TYPE_USER
+63] ANY_TYPE -> TYPE_STD
+64] ANY_TYPE -> TYPE_USER
+65] TYPE_STD -> type_int
+66] TYPE_STD -> type_double
+67] TYPE_STD -> type_bool
+68] TYPE_STD -> type_string
+69] TYPE_STD -> type_void
+70] VARIABLE_DECLARATION -> letid':'ANY_TYPE
+71] VARIABLE_DECLARATION -> letid':''*'ANY_TYPE
+72] TYPE_DECLARATION -> TYPE_BODY_DECLARATION ANY_TYPE
+73] TYPE_BODY_DECLARATION -> type_declid':'
+74] ASSIGNMENT -> id'='EXPRESSION
+75] ASSIGNMENT -> id'='ASSIGNMENT_FUNCTION
+76] PRINT -> 'print''('EXPRESSION')'
+77] PRINT -> 'print''('"string_literal"','ARG_LIST')'
+===============================================================================
+Root Node
+└── Statement_List
+    ├── Declaration: UNKNOWN
+    │   ├── id: my_rec ~ Line 2
+    │   └── User_Type
+    │       └── Field
+    │           └── Statement_List
+    │               ├── Declaration: VARIABLE
+    │               │   ├── id: field1 ~ Line 3
+    │               │   └── STD_Type
+    │               │       └── INT ~ Line 3
+    │               └── Statement DECLARATION
+    │                   └── Declaration: VARIABLE
+    │                       ├── id: field2 ~ Line 4
+    │                       └── STD_Type
+    │                           └── INT ~ Line 4
+    └── Statement_List
+        ├── Declaration: HEAP
+        │   ├── id: a ~ Line 7
+        │   └── STD_Type
+        │       └── INT ~ Line 7
+        └── Statement_List
+            ├── Assignment 2
+            │   ├── id: a ~ Line 8
+            │   └── Expression
+            │       └── Expression
+            │           └── Expression
+            │               └── Expression
+            │                   └── Expression
+            │                       └── Expression
+            │                           └── Literal: 3 :: INT
+            └── Statement_List
+                ├── Print
+                │   ├── Literal: "a has the value: %\n" :: STRING
+                │   └── Argument
+                │       └── Expression
+                │           └── Expression
+                │               └── Expression
+                │                   └── Expression
+                │                       └── Expression
+                │                           └── id: a ~ Line 10
+                └── Statement_List
+                    ├── Assignment 2
+                    │   ├── id: a ~ Line 12
+                    │   └── Expression
+                    │       └── BinaryOperation
+                    │           ├── MINUS ~ Line 12
+                    │           ├── Expression
+                    │           │   └── Expression
+                    │           │       └── Expression
+                    │           │           └── Expression
+                    │           │               └── Literal: 42 :: INT
+                    │           └── Expression
+                    │               └── Expression
+                    │                   └── Expression
+                    │                       └── Expression
+                    │                           └── id: a ~ Line 12
+                    └── Statement PRINT
+                        └── Print
+                            ├── Literal: "a has the value: %\n" :: STRING
+                            └── Argument
+                                └── Expression
+                                    └── Expression
+                                        └── Expression
+                                            └── Expression
+                                                └── Expression
+                                                    └── id: a ~ Line 14
+
+===============================================================================
+Root
+===============================================================================
+===============================================================================
+Root Node
+└── Statement_List
+    ├── Statement DECLARATION
+    │   └── Declaration: UNKNOWN
+    │       ├── id: my_rec ~ Line 2
+    │       └── User_Type
+    │           └── Field
+    │               └── Statement_List
+    │                   ├── Statement DECLARATION
+    │                   │   └── Declaration: VARIABLE
+    │                   │       ├── id: field1 ~ Line 3
+    │                   │       └── STD_Type
+    │                   │           └── INT ~ Line 3
+    │                   └── Statement DECLARATION
+    │                       └── Declaration: VARIABLE
+    │                           ├── id: field2 ~ Line 4
+    │                           └── STD_Type
+    │                               └── INT ~ Line 4
+    ├── Statement DECLARATION
+    │   └── Declaration: HEAP
+    │       ├── id: a ~ Line 7
+    │       └── STD_Type
+    │           └── INT ~ Line 7
+    ├── Statement ASSIGNMENT
+    │   └── Assignment 2
+    │       ├── id: a ~ Line 8
+    │       └── Literal: 3 :: INT
+    ├── Statement PRINT
+    │   └── Print
+    │       ├── Literal: "a has the value: %\n" :: STRING
+    │       └── Argument
+    │           └── Expression
+    │               └── id: a ~ Line 10
+    ├── Statement ASSIGNMENT
+    │   └── Assignment 2
+    │       ├── id: a ~ Line 12
+    │       └── BinaryOperation
+    │           ├── MINUS ~ Line 12
+    │           ├── Literal: 42 :: INT
+    │           └── id: a ~ Line 12
+    └── Statement PRINT
+        └── Print
+            ├── Literal: "a has the value: %\n" :: STRING
+            └── Argument
+                └── Expression
+                    └── id: a ~ Line 14
+
+Root
+===============================================================================
+TYPE_FIXER BEFORE
+===============================================================================
+Root Node
+└── Statement_List
+    ├── Statement DECLARATION
+    │   └── Declaration: UNKNOWN
+    │       ├── id: my_rec ~ Line 2
+    │       └── User_Type
+    │           └── Field
+    │               └── Statement_List
+    │                   ├── Statement DECLARATION
+    │                   │   └── Declaration: VARIABLE
+    │                   │       ├── id: field1 ~ Line 3
+    │                   │       └── STD_Type
+    │                   │           └── INT ~ Line 3
+    │                   └── Statement DECLARATION
+    │                       └── Declaration: VARIABLE
+    │                           ├── id: field2 ~ Line 4
+    │                           └── STD_Type
+    │                               └── INT ~ Line 4
+    ├── Statement DECLARATION
+    │   └── Declaration: HEAP
+    │       ├── id: a ~ Line 7
+    │       └── STD_Type
+    │           └── INT ~ Line 7
+    ├── Statement ASSIGNMENT
+    │   └── Assignment 2
+    │       ├── id: a ~ Line 8
+    │       └── Literal: 3 :: INT
+    ├── Statement PRINT
+    │   └── Print
+    │       ├── Literal: "a has the value: %\n" :: STRING
+    │       └── Argument
+    │           └── Expression
+    │               └── id: a ~ Line 10
+    ├── Statement ASSIGNMENT
+    │   └── Assignment 2
+    │       ├── id: a ~ Line 12
+    │       └── BinaryOperation
+    │           ├── MINUS ~ Line 12
+    │           ├── Literal: 42 :: INT
+    │           └── id: a ~ Line 12
+    └── Statement PRINT
+        └── Print
+            ├── Literal: "a has the value: %\n" :: STRING
+            └── Argument
+                └── Expression
+                    └── id: a ~ Line 14
+
+===============================================================================
+TYPE_FIXER AFTER
+===============================================================================
+Root Node
+└── Statement_List
+    ├── Statement DECLARATION
+    │   └── Declaration: UNKNOWN
+    │       ├── id: my_rec ~ Line 2
+    │       └── User_Type
+    │           └── Field
+    │               └── Statement_List
+    │                   ├── Statement DECLARATION
+    │                   │   └── Declaration: VARIABLE
+    │                   │       ├── id: field1 ~ Line 3
+    │                   │       └── STD_Type
+    │                   │           └── INT ~ Line 3
+    │                   └── Statement DECLARATION
+    │                       └── Declaration: VARIABLE
+    │                           ├── id: field2 ~ Line 4
+    │                           └── STD_Type
+    │                               └── INT ~ Line 4
+    ├── Statement DECLARATION
+    │   └── Declaration: HEAP
+    │       ├── id: a ~ Line 7
+    │       └── STD_Type
+    │           └── INT ~ Line 7
+    ├── Statement ASSIGNMENT
+    │   └── Assignment 2
+    │       ├── id: a ~ Line 8
+    │       └── Literal: 3 :: INT
+    ├── Statement PRINT
+    │   └── Print
+    │       ├── Literal: "a has the value: %\n" :: STRING
+    │       └── Argument
+    │           └── Expression
+    │               └── id: a ~ Line 10
+    ├── Statement ASSIGNMENT
+    │   └── Assignment 2
+    │       ├── id: a ~ Line 12
+    │       └── BinaryOperation
+    │           ├── MINUS ~ Line 12
+    │           ├── Literal: 42 :: INT
+    │           └── id: a ~ Line 12
+    └── Statement PRINT
+        └── Print
+            ├── Literal: "a has the value: %\n" :: STRING
+            └── Argument
+                └── Expression
+                    └── id: a ~ Line 14
+
+===============================================================================
+Symbol collector
+===============================================================================
+Found scope root
+Found scope root
+Adding id: field1 to scope Params[] | Vars: [field1]
+Found scope root
+Found scope root
+Adding id: field2 to scope Params[] | Vars: [field1, field2]
+Found scope root
+Found scope root
+Adding id: a to scope Params[] | Vars: [a, field1, field2]
+Found scope root
+Root Node
+└── Symbol [root] -> Vars: [a, field1, field2] | Params: []
+    └── Statement_List
+        ├── Statement DECLARATION
+        │   └── Declaration: UNKNOWN
+        │       ├── id: my_rec ~ Line 2
+        │       └── User_Type
+        │           └── Field
+        │               └── Statement_List
+        │                   ├── Statement DECLARATION
+        │                   │   └── Declaration: VARIABLE
+        │                   │       ├── id: field1 ~ Line 3
+        │                   │       └── STD_Type
+        │                   │           └── INT ~ Line 3
+        │                   └── Statement DECLARATION
+        │                       └── Declaration: VARIABLE
+        │                           ├── id: field2 ~ Line 4
+        │                           └── STD_Type
+        │                               └── INT ~ Line 4
+        ├── Statement DECLARATION
+        │   └── Declaration: HEAP
+        │       ├── id: a ~ Line 7
+        │       └── STD_Type
+        │           └── INT ~ Line 7
+        ├── Statement ASSIGNMENT
+        │   └── Assignment 2
+        │       ├── id: a ~ Line 8
+        │       └── Literal: 3 :: INT
+        ├── Statement PRINT
+        │   └── Print
+        │       ├── Literal: "a has the value: %\n" :: STRING
+        │       └── Argument
+        │           └── Expression
+        │               └── id: a ~ Line 10
+        ├── Statement ASSIGNMENT
+        │   └── Assignment 2
+        │       ├── id: a ~ Line 12
+        │       └── BinaryOperation
+        │           ├── MINUS ~ Line 12
+        │           ├── Literal: 42 :: INT
+        │           └── id: a ~ Line 12
+        └── Statement PRINT
+            └── Print
+                ├── Literal: "a has the value: %\n" :: STRING
+                └── Argument
+                    └── Expression
+                        └── id: a ~ Line 14
+
+===============================================================================
+String collector
+===============================================================================
+Found string: Literal: "a has the value: %\n" :: STRING
+[17, 19]
+Found string: Literal: "a has the value: %\n" :: STRING
+[17, 19]
+Found scope root
+Found scope root
+Found scope root
+Found scope root
+Found scope root
+===============================================================================
+Internal Low-Level Representation
+===============================================================================
+[[ Functions ]]
+[[ Main Code ]]
+MINUS               24, RSP, RSP        # Making room for local variables in main scope!
+CALL                initialize_heap     # 
+MOVE                1, RDI              # 
+LEA                 RBP, RSI            # 
+PUSH                unknown operand (Not implemented!)# 
+LEA                 RSP, RDX            # 
+CALL                new_scope_header    # 
+ADD                 1, RSP              # 
+MOVE                1, RDI              # 
+PUSH                unknown operand (Not implemented!)# 
+MOVE                , RSI               # 
+ADD                 1, RSP              # 
+PUSH                3                   # Pushing value 3
+POP                 RAX                 # Fetching value
+MOVE                RAX, RBX            # 
+LOAD_VARIABLE       a, RAX              # Load variable a
+MOVE                RAX, RAX            # 
+PUSH                RAX                 # 
+COMMENT             Setup Print         # 
+MOVE                string0, RDI        # The input text
+MOVE                17, RSI             # 
+MOVE                0, RDX              # 
+PRINT_STRING        %
+                  # 
+MOVE                RSP, RDI            # Fetching value Literal: "a has the value: %\n" :: STRING
+PRINT_NUM           %
+                  # 
+MOVE                string0, RDI        # The input text
+MOVE                1, RSI              # 
+MOVE                18, RDX             # 
+PRINT_STRING        %
+                  # 
+ADD                 8, RSP, RSP         # 
+COMMENT             End Print           # 
+PUSH                42                  # Pushing value 42
+LOAD_VARIABLE       a, RCX              # Load variable a
+MOVE                RCX, RCX            # 
+POP                 RBX                 # Retrieving first argument
+MINUS               RCX, RBX, RAX       # RAX = Literal: 42 :: INT MINUS id: a
+PUSH                RAX                 # Storing computed value
+POP                 RAX                 # Fetching value
+MOVE                RAX, RBX            # 
+LOAD_VARIABLE       a, RAX              # Load variable a
+MOVE                RAX, RAX            # 
+PUSH                RAX                 # 
+COMMENT             Setup Print         # 
+MOVE                string1, RDI        # The input text
+MOVE                17, RSI             # 
+MOVE                0, RDX              # 
+PRINT_STRING        %
+                  # 
+MOVE                RSP, RDI            # Fetching value Literal: "a has the value: %\n" :: STRING
+PRINT_NUM           %
+                  # 
+MOVE                string1, RDI        # The input text
+MOVE                1, RSI              # 
+MOVE                18, RDX             # 
+PRINT_STRING        %
+                  # 
+ADD                 8, RSP, RSP         # 
+COMMENT             End Print           # 
+===============================================================================
+Running interpreter on the above code
+===============================================================================
+===============================================================================
+Passing instruction to CodeEmitter
+===============================================================================
+
+.section .data
+string1: .ascii "a has the value: %\n"
+string1subs: .ascii ""
+string0: .ascii "a has the value: %\n"
+string0subs: .ascii ""
+.section .text
+.section .text
+.global main
+main:
+    pushq %rbp
+    movq %rsp, %rbp # Setup stackpointer
+    subq $24, %rsp
+    callq initialize_heap
+    movq $1, %rdi
+    leaq -8(%rbp), %rsi
+    pushq $2
+    leaq (%rsp), %rdx
+    callq new_scope_header
+    addq $1, %rsp
+    movq $1, %rdi
+    pushq $2
+    movq $, %rsi
+    addq $1, %rsp
+    pushq $3
+    popq %rax
+    movq %rax, 16(%rbx)
+    
+    # [[ Loading variable a ]] 
+    # [[ offset is -3 ]] 
+    movq -24(%rbp), %rax
+    
+    movq 16(%rax), %rax
+    pushq %rax
+
+# Setup Print
+
+    movq $string0, %rdi
+    movq $17, %rsi
+    movq $0, %rdx
+    call print_string
+    movq (%rsp), %rdi
+    call print_num
+    movq $string0, %rdi
+    movq $1, %rsi
+    movq $18, %rdx
+    call print_string
+    addq $8, %rsp
+
+# End Print
+
+    pushq $42
+    
+    # [[ Loading variable a ]] 
+    # [[ offset is -3 ]] 
+    movq -24(%rbp), %rcx
+    
+    movq 16(%rcx), %rcx
+    popq %rbx
+    subq %rcx, %rbx
+    pushq %rax
+    popq %rax
+    movq %rax, 16(%rbx)
+    
+    # [[ Loading variable a ]] 
+    # [[ offset is -3 ]] 
+    movq -24(%rbp), %rax
+    
+    movq 16(%rax), %rax
+    pushq %rax
+
+# Setup Print
+
+    movq $string1, %rdi
+    movq $17, %rsi
+    movq $0, %rdx
+    call print_string
+    movq (%rsp), %rdi
+    call print_num
+    movq $string1, %rdi
+    movq $1, %rsi
+    movq $18, %rdx
+    call print_string
+    addq $8, %rsp
+
+# End Print
+
+    movq %rbp, %rsp # Restore stackpointer
+    popq %rbp
+    
+# Exit call
+    movq $60, %rax
+    movq $0, %rdi
+    syscall
+
+===============================================================================
+Input was:
+===============================================================================
+
+type my_rec: {
+    field1: int;
+    field2: int;
+};
+
+let a: *int;
+a = 3;
+
+print( "a has the value: %\n", a );
+
+a = 42 - a;
+
+print( "a has the value: %\n", a );
+
+
+To compile and run the generated assembly code, run './comp.sh'
+
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  11.625 s
+[INFO] Finished at: 2023-04-05T22:21:10+02:00
+[INFO] ------------------------------------------------------------------------

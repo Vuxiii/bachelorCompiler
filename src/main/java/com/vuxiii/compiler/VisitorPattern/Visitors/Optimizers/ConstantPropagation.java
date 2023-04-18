@@ -51,14 +51,14 @@ public class ConstantPropagation extends Visitor {
         }
     }
 
-    @VisitorPattern( when = VisitOrder.EXIT_NODE, order = 0 )
-    public void register_variable( Assignment node ) {
-        if ( !node.value.isLeaf() ) return;
-        if ( !(node.value instanceof LexLiteral) ) return;
+    // @VisitorPattern( when = VisitOrder.EXIT_NODE, order = 0 )
+    // public void register_variable( Assignment node ) {
+    //     if ( !node.value.isLeaf() ) return;
+    //     if ( !(node.value instanceof LexLiteral) ) return;
         
-        scope.put( node.id.name, Integer.parseInt(((LexLiteral)node.value).val) );
+    //     scope.put( node.id.name, Integer.parseInt(((LexLiteral)node.value).val) );
 
-    }
+    // }
 
     @VisitorPattern( when = VisitOrder.EXIT_NODE, order = 2 )
     public void remove_binop( BinaryOperation node ) {

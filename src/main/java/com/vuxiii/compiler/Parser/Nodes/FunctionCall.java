@@ -11,7 +11,7 @@ import com.vuxiii.compiler.VisitorPattern.Annotations.VisitNumber;
 public class FunctionCall extends ASTNode {
 
     @VisitNumber( number = 1 ) public final LexIdent func_name;
-    @VisitNumber( number = 2 ) public final Optional<Argument> args;
+    @VisitNumber( number = 2 ) public Optional<Argument> args;
 
 
 

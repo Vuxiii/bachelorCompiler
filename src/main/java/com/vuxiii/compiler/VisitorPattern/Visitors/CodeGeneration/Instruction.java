@@ -36,6 +36,10 @@ public class Instruction {
         this.target_is_parameter = target_is_parameter;
     }
 
+    public static Instruction comment( String comment ) {
+        return new Instruction(Opcode.COMMENT, Arguments.comment(comment));
+    }
+
     public String toString() {
         String start = opcode.toString();
         String middle = "";

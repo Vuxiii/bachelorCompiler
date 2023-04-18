@@ -13,4 +13,7 @@ public abstract class Type extends ASTNode {
     }
 
     public abstract String simple_type_name();
+
+    public abstract int physical_size();
+    
 }

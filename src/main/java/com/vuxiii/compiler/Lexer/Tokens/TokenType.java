@@ -11,6 +11,8 @@ import com.vuxiii.compiler.Parser.Symbol;
  */
 public enum TokenType {
     EQUAL( Symbol.t_Equals ),
+    CHECK_EQUAL( Symbol.t_Check_Equal ),
+    CHECK_NOT_EQUAL( Symbol.t_Check_Not_Equal ),
     IDENTIFIER( Symbol.t_Identifier ),
     LEFT_PARENTHESIS( Symbol.t_LParen ),
     RIGHT_PARENTHESIS( Symbol.t_RParen ),
@@ -28,6 +30,8 @@ public enum TokenType {
     COMMA( Symbol.t_Comma ),
     DOT( Symbol.t_Dot ),
 
+    RETURN( Symbol.t_Return ),
+
     LET( Symbol.t_Let ),
     IF( Symbol.t_If ),
     ELSE( Symbol.t_Else ),
@@ -41,7 +45,8 @@ public enum TokenType {
     TYPE_INT( Symbol.t_Type_Int, PrimitiveType.INT ),
     TYPE_DOUBLE( Symbol.t_Type_Double, PrimitiveType.DOUBLE ),
     TYPE_BOOL( Symbol.t_Type_Bool, PrimitiveType.BOOL ),
-    TYPE_STRING( Symbol.t_Type_String, PrimitiveType.STRING );
+    TYPE_STRING( Symbol.t_Type_String, PrimitiveType.STRING ), 
+    TYPE_VOID( Symbol.t_Type_Void, PrimitiveType.VOID );
 
 
     public Term symbol;

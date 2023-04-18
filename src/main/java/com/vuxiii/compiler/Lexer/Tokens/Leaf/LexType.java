@@ -2,6 +2,7 @@ package com.vuxiii.compiler.Lexer.Tokens.Leaf;
 
 
 import com.vuxiii.DFANFA.MatchInfo;
+import com.vuxiii.LR.Records.Term;
 import com.vuxiii.compiler.Lexer.Tokens.PrimitiveType;
 import com.vuxiii.compiler.Lexer.Tokens.TokenType;
 import com.vuxiii.compiler.Parser.Nodes.Types.Type;
@@ -20,6 +21,16 @@ public class LexType extends Type {
         super.setup_ASTNodeQueue();
     }
 
+    public boolean equals( Object other ) {
+        if ( other == null ) return false;
+        if ( other instanceof LexType ) {
+            return type.equals( ((LexType)other).type );
+        } else if ( other instanceof PrimitiveType ) {
+            return type.equals(other);
+        }
+        return false;
+    }
+
     public String toString() {
         return "ASTTokenType: " + type;
     }
@@ -32,5 +43,17 @@ public class LexType extends Type {
     @Override
     public String simple_type_name() {
         return type.name;
+    }
+
+    @Override
+    public int physical_size() {
+        switch (type) {
+            case VOID:
+                return 0;
+            case STRING:
+                return matchInfo.str().length()-2; // Maybe not -2 for the '"'
+            default:
+                return 8;
+        }
     }
 }

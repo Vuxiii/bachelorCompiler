@@ -20,6 +20,7 @@ import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexPrint;
 import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexRBracket;
 import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexRCurly;
 import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexRParen;
+import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexReturn;
 import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexSemicolon;
 import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexType;
 import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexTypeDecl;
@@ -36,7 +37,7 @@ public class TokenConstructor {
             case INT_LITERAL: case DOUBLE_LITERAL: case BOOL_LITERAL: case STRING_LITERAL: {
                 return new LexLiteral( matchInfo, type );
             }
-            case TYPE_INT: case TYPE_DOUBLE: case TYPE_BOOL: case TYPE_STRING: {
+            case TYPE_INT: case TYPE_DOUBLE: case TYPE_BOOL: case TYPE_STRING: case TYPE_VOID: {
                 return new LexType( matchInfo, type );
             }
             case LEFT_PARENTHESIS: {
@@ -57,7 +58,7 @@ public class TokenConstructor {
             case RIGHT_CURLY: {
                 return new LexRCurly( matchInfo, type );
             }
-            case PLUS: case MINUS: case DIVISION: case TIMES: {
+            case PLUS: case MINUS: case DIVISION: case TIMES: case CHECK_EQUAL: case CHECK_NOT_EQUAL: {
                 return new LexOperator( matchInfo, type );
             }
             case PRINT: {
@@ -89,6 +90,9 @@ public class TokenConstructor {
             }
             case ELSE: {
                 return new LexElse( matchInfo, type );
+            }
+            case RETURN: {
+                return new LexReturn( matchInfo, type );
             }
             default: {
                 // Unkown. Not implemented yet. Throw error

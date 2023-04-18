@@ -25,6 +25,7 @@ public class Symbol {
     public static final NonTerminal n_Function_Signature = new NonTerminal( "FUNCTION_SIGNATURE" );
 
     public static final NonTerminal n_Function_Call = new NonTerminal( "FUNCTION_CALL" );
+    public static final NonTerminal n_Function_Body = new NonTerminal( "FUNCTION_BODY" );;
 
     public static final NonTerminal n_Function_Param_Signature = new NonTerminal( "FUNCTION_PARAM_SIGNATURE" );
     public static final NonTerminal n_Parameter_List = new NonTerminal( "PARAMETER_LIST" );
@@ -34,6 +35,8 @@ public class Symbol {
     public static final NonTerminal n_Declaration_Variable = new NonTerminal( "VARIABLE_DECLARATION" );
     public static final NonTerminal n_Declaration_Type = new NonTerminal( "TYPE_DECLARATION" );
     public static final NonTerminal n_Declaration_Type_Body = new NonTerminal( "TYPE_BODY_DECLARATION" );
+
+    public static final NonTerminal n_Nested_Field = new NonTerminal( "NESTED_FIELD_ACCESS" );
 
 
     public static final NonTerminal n_Return_Type = new NonTerminal( "RETURN_TYPE" );
@@ -71,6 +74,10 @@ public class Symbol {
     public static final NonTerminal n_Arg_List = new NonTerminal( "ARG_LIST" );
     public static final NonTerminal n_Arg = new NonTerminal( "ARG" );
     
+    public static final NonTerminal n_Equals = new NonTerminal( "Equals" );
+
+    public static final NonTerminal n_Record_Type = new NonTerminal( "RECORD" );
+
 
     // Used under lexical analysis. Tokenization.
     public static final Terminal t_Plus = new Terminal( "'+'" );
@@ -78,6 +85,8 @@ public class Symbol {
     public static final Terminal t_Times = new Terminal( "'*'" );
     public static final Terminal t_Division = new Terminal( "'/'" );
     public static final Terminal t_Equals = new Terminal( "'='" );
+    public static final Terminal t_Check_Equal = new Terminal( "'=='" );
+    public static final Terminal t_Check_Not_Equal = new Terminal( "'!='" );
     public static final Terminal t_Identifier = new Terminal( "id" );
     public static final Terminal t_Integer = new Terminal( "integer" );
     public static final Terminal t_Double = new Terminal( "double" );
@@ -88,6 +97,7 @@ public class Symbol {
     public static final Terminal t_Type_Double = new Terminal( "type_double" );
     public static final Terminal t_Type_Bool = new Terminal( "type_bool" );
     public static final Terminal t_Type_String = new Terminal( "type_string" );
+    public static final Terminal t_Type_Void = new Terminal( "type_void" );;
 
     public static final Terminal t_Semicolon = new Terminal( "';'" );
     public static final Terminal t_Colon = new Terminal( "':'" );
@@ -106,8 +116,12 @@ public class Symbol {
 
     public static final Terminal t_StringLiteral = new Terminal( "\"string_literal\"" );
 
+    public static final Terminal t_Return = new Terminal( "return" );
     public static final Terminal t_Let = new Terminal( "let" );
     public static final Terminal t_Arrow_Right = new Terminal( "'->'" );
+
+
+
 
 
 

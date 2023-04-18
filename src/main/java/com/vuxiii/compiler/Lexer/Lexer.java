@@ -19,7 +19,7 @@ public class Lexer {
             List<ASTToken> li = lexer.match( input );
             li.add( new TokenEOP( Symbol.t_Dollar ) );
 
-            return li;    
+            return li;
         } catch ( ParserException e ) {
             e.printStackTrace();
             System.out.println( new com.vuxiii.compiler.Error.Error( "Lexer Error", "Couldn't parse the input for some reason.\nThis is a mistake made by the developer of this compiler!" ).toString() );
@@ -36,6 +36,7 @@ public class Lexer {
 
         reg.addRegex( PrimitiveType.DOUBLE.name,          matchInfo -> TokenConstructor.construct( matchInfo, TokenType.TYPE_DOUBLE ) );
         reg.addRegex( PrimitiveType.BOOL.name,            matchInfo -> TokenConstructor.construct( matchInfo, TokenType.TYPE_BOOL ) );
+        reg.addRegex( PrimitiveType.VOID.name,            matchInfo -> TokenConstructor.construct( matchInfo, TokenType.TYPE_VOID ) );
         reg.addRegex( '"' + "(.| |\n)*" + '"',            matchInfo -> TokenConstructor.construct( matchInfo, TokenType.STRING_LITERAL ) );
         reg.addRegex( "[:digit:][:digit:]*",              matchInfo -> TokenConstructor.construct( matchInfo, TokenType.INT_LITERAL ) );
         reg.addRegex( "[:digit:][:digit:]*\\.[:digit:]*", matchInfo -> TokenConstructor.construct( matchInfo, TokenType.DOUBLE_LITERAL ) );
@@ -44,10 +45,13 @@ public class Lexer {
         reg.addRegex( ";",                                matchInfo -> TokenConstructor.construct( matchInfo, TokenType.SEMICOLON ) );
         reg.addRegex( ":",                                matchInfo -> TokenConstructor.construct( matchInfo, TokenType.COLON ) );
         reg.addRegex( "=",                                matchInfo -> TokenConstructor.construct( matchInfo, TokenType.EQUAL ) );
+        reg.addRegex( "==",                               matchInfo -> TokenConstructor.construct( matchInfo, TokenType.CHECK_EQUAL ) );
+        reg.addRegex( "!=",                               matchInfo -> TokenConstructor.construct( matchInfo, TokenType.CHECK_NOT_EQUAL ) );
         reg.addRegex( "+",                                matchInfo -> TokenConstructor.construct( matchInfo, TokenType.PLUS ) );
         reg.addRegex( "\\-",                              matchInfo -> TokenConstructor.construct( matchInfo, TokenType.MINUS ) );
         reg.addRegex( "\\*",                              matchInfo -> TokenConstructor.construct( matchInfo, TokenType.TIMES ) );
         reg.addRegex( "/",                                matchInfo -> TokenConstructor.construct( matchInfo, TokenType.DIVISION ) );
+        reg.addRegex( "return",                           matchInfo -> TokenConstructor.construct( matchInfo, TokenType.RETURN ) );
         reg.addRegex( "print",                            matchInfo -> TokenConstructor.construct( matchInfo, TokenType.PRINT ) );
         reg.addRegex( "let",                              matchInfo -> TokenConstructor.construct( matchInfo, TokenType.LET ) );
         reg.addRegex( "if",                               matchInfo -> TokenConstructor.construct( matchInfo, TokenType.IF ) );

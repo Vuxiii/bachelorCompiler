@@ -1,60 +1,11 @@
-# Garbage Collector
 
-Compiler provides the information about where the pointers are in this `scope`
-The first field in the stack, is a pointer to the heap, in which there is a set of 64 bits.
+Registering the layout for the stack i need:
+    Store a pointer to the layout struct, which is a bunch of 64 bit integers,
+    that indicate with a 1 if that offset is a pointer.
+    This pointer is stored at -8(%rbp)
+    Let's call this a stack frame.
 
-1. The first bit denotes whether or not we should continue to read the next 64 bits
-2. The next 63 bits denotes whehter or not that index is a pointer. 1 indicates pointer 0 indicates no.
-
-## Compiler
-
-The compiler should call the gc to setup this heap-record. It provides the bits, the gc just fills it in.
-
-## GC
-
-The gc should have a function that creates a new record, based on how many pointers there are.
-
-```C
-// We have everything on the stack
-// Pro: Everything is on the stack. Don't need to access another memory location
-// Con: Uses a lot of stack-space, (recursion)
-struct stack_pointer_layout {
-    size_t length_of_header;
-    size_t pointer_bit_field[ #local_vars / 64 ];
-    size_t local_vars[ length_of_header - 1 - #pointer_bit_field ];
-}
-
-```
-
-OR
-
-```C
-// We reduce the amount of used stack space.
-// Pro: Usefull in recursion
-// Con: We need to access another pointer..
-struct stack_pointer_layout {
-    size_t length_of_header;
-    struct pointer_bit_field *layout;
-    size_t local_vars[ length_of_header - 1 - #pointer_bit_field ];
-}
-// This can be reused for every identical scope. IE recursion
-struct pointer_bit_field {
-    size_t pointer_bit_field[ #local_vars / 64 ];
-}
-
-// Example
-
-movq $4, %rdi
-movq $1, %rsi
-callq new_ptr_size 
-movq %rax, 8(%rbp) // Maybe 8.
-addq $8, %rax
-movq $0, (%rax)
-
-// This is the following memory: [4, 000...64...000, some data, some data]
-```
-
-# TODO
+---
 
 I need to update the readme, so it follows the newly updated visitor pattern.
 It is now more automatic and uses annotations.
@@ -65,11 +16,6 @@ Note for jump instructions
     The fall-through path is often faster than the taken path (Engineering a COmpiler p. 176)
     That is not taking the jump is faster.
 
-Husk at tjekke om en variable bliver brugt inden den er blevet assignet noget!!!!
-
-
-
-Lmao. Har glemt at gøre plads til lokale variabler i main. Åbenbart.....
 
 Print funktion i assembly:
     For hvert et print skal jeg angive:

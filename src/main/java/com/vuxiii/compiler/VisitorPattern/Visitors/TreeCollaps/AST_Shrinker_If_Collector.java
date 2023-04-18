@@ -34,6 +34,7 @@ public class AST_Shrinker_If_Collector extends VisitorBase {
         list.push( if_else.if_block );
 
         if ( !(if_else.else_block.body instanceof Statement) ) return;
+        
         Statement stm = (Statement) if_else.else_block.body;
         if ( stm.node instanceof IfNode ) {
             list.push( stm.node );

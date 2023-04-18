@@ -29,5 +29,5 @@ public enum Opcode {
 
     LABEL,
 
-    PRINT, LEA, COMMENT,
+    PRINT, PRINT_STRING, LEA, COMMENT, PRINT_NUM, EQUALS,
 }

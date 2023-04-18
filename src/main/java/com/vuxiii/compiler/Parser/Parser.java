@@ -34,14 +34,17 @@ import com.vuxiii.compiler.Parser.Nodes.Statement;
 import com.vuxiii.compiler.Parser.Nodes.StatementKind;
 import com.vuxiii.compiler.Parser.Nodes.Types.AliasType;
 import com.vuxiii.compiler.Parser.Nodes.Types.FunctionType;
+import com.vuxiii.compiler.Parser.Nodes.Types.RecordType;
 import com.vuxiii.compiler.Parser.Nodes.Types.StandardType;
 import com.vuxiii.compiler.Parser.Nodes.Types.Type;
 import com.vuxiii.compiler.Parser.Nodes.Types.UnknownType;
 import com.vuxiii.compiler.Parser.Nodes.Types.UserType;
 import com.vuxiii.compiler.Parser.Nodes.Field;
+import com.vuxiii.compiler.Parser.Nodes.FieldList;
 import com.vuxiii.compiler.Parser.Nodes.FunctionCall;
 import com.vuxiii.compiler.Parser.Nodes.IfElseNode;
 import com.vuxiii.compiler.Parser.Nodes.IfNode;
+import com.vuxiii.compiler.Parser.Nodes.NestedField;
 import com.vuxiii.compiler.Parser.Nodes.Parameter;
 import com.vuxiii.compiler.VisitorPattern.ASTNode;
 import com.vuxiii.compiler.VisitorPattern.Visitors.Debug.AST_Printer;
@@ -105,10 +108,11 @@ public class Parser {
         // n_Start -> n_StatementList t_Dollar
         g.addRuleWithReduceFunction( Symbol.n_Start, List.of( Symbol.n_StatementList, Symbol.t_Dollar ), t -> {
             return t.get(0);
-        });        
-
-        // n_StatementList -> n_StatementList n_Statement
+        });
+        
+        // n_StatementList -> n_Statement n_StatementList
         g.addRuleWithReduceFunction( Symbol.n_StatementList, List.of( Symbol.n_Statement, Symbol.n_StatementList ), t -> {
+            System.out.println( "IM IN LIST" );
             Statement stm1 = (Statement)t.get(0);
             Statement stm2 = (Statement)t.get(1);
             return new Statement( Symbol.n_StatementList, stm1.node, stm2, stm1.kind );
@@ -116,6 +120,7 @@ public class Parser {
 
         // n_StatementList -> n_Statement
         g.addRuleWithReduceFunction( Symbol.n_StatementList, List.of( Symbol.n_Statement ), t -> {
+            System.out.println( "IM IN SINGLE" );
             Statement stm1 = (Statement)t.get(0);
             return new Statement( Symbol.n_StatementList, stm1.node, stm1.kind );
         });
@@ -124,16 +129,8 @@ public class Parser {
 
         // n_Statement -> n_Declaration t_Semicolon
         g.addRuleWithReduceFunction( Symbol.n_Statement, List.of( Symbol.n_Declaration, Symbol.t_Semicolon ), t -> {
-            return new Statement( Symbol.n_Statement, (Declaration)t.get(0), StatementKind.DECLARATION );
+            return new Statement( Symbol.n_Statement, (ASTNode)t.get(0), StatementKind.DECLARATION );
         });
-
-        // n_Declaration -> n_Declaration_Function 
-        g.addRuleWithReduceFunction( Symbol.n_Declaration, List.of( Symbol.n_Declaration_Function ), t -> {
-            Declaration decl = (Declaration)t.get(0);
-            decl.term = Symbol.n_Declaration;
-            return decl;
-        });
-
 
         // n_Declaration -> n_Declaration_Variable
         g.addRuleWithReduceFunction( Symbol.n_Declaration, List.of( Symbol.n_Declaration_Variable ), t -> {
@@ -144,12 +141,11 @@ public class Parser {
 
         // n_Declaration -> n_Declaration_Type 
         g.addRuleWithReduceFunction( Symbol.n_Declaration, List.of( Symbol.n_Declaration_Type ), t -> {
-            Declaration decl = (Declaration)t.get(0);
+            RecordType decl = (RecordType)t.get(0);
             decl.term = Symbol.n_Declaration;
             return decl;
         });
 
-        
         // n_Statement -> n_Assignment t_Semicolon
         g.addRuleWithReduceFunction( Symbol.n_Statement, List.of( Symbol.n_Assignment, Symbol.t_Semicolon ), t -> {
             return new Statement( Symbol.n_Statement, (ASTNode)t.get(0), StatementKind.ASSIGNMENT );
@@ -161,26 +157,17 @@ public class Parser {
         });
 
 
-        
-
-
-
-
         init_scope_capture();
 
         init_functions();
 
-
         init_arithmetic();
+
+        init_guards();
 
         init_types();
 
-        
-
-
-        
-
-        // n_Declaration_Variable -> t_Let t_Identifier t_Colon n_User_Type
+        // n_Declaration_Variable -> t_Let t_Identifier t_Colon n_Any_Type
         g.addRuleWithReduceFunction( Symbol.n_Declaration_Variable, List.of( Symbol.t_Let, Symbol.t_Identifier, Symbol.t_Colon, Symbol.n_Any_Type ), t -> {
             LexIdent id = (LexIdent)t.get(1);
 
@@ -207,52 +194,144 @@ public class Parser {
                 stored_user_types.putIfAbsent( id.matchInfo.str(), type );
                 
                 return new Declaration( Symbol.n_Declaration_Variable, id, type, DeclarationKind.FUNCTION );
-            }else if ( t.get(3) instanceof UnknownType ) {
+            } else if ( t.get(3) instanceof UnknownType ) {
                 UnknownType type = (UnknownType)t.get(3);    
                 stored_user_types.putIfAbsent( id.matchInfo.str(), type );
                 
-                return new Declaration( Symbol.n_Declaration_Variable, id, type, DeclarationKind.FUNCTION );
+                return new Declaration( Symbol.n_Declaration_Variable, id, type, DeclarationKind.UNKNOWN );
+            } else if ( t.get(3) instanceof RecordType ) {
+                RecordType type = (RecordType)t.get(3);
+                return new Declaration( Symbol.n_Declaration_Variable, id, type, DeclarationKind.VARIABLE );
             }
-            System.out.println("--[[ Parser Error ]]--\nSomething happend trying to parse a user type. It is not a UserType or an Identifier. So what is it?" );
+            System.out.println("--[[ Parser Error ]]--\nSomething happend trying to parse a user type. So what is it?" );
             System.out.println( t.get(3) );
             
             System.exit(-1);
             return null; // error!
         });
 
+        // n_Declaration_Variable -> t_Let t_Identifier t_Colon t_Times n_Any_Type
+        g.addRuleWithReduceFunction( Symbol.n_Declaration_Variable, List.of( Symbol.t_Let, Symbol.t_Identifier, Symbol.t_Colon, Symbol.t_Times, Symbol.n_Any_Type ), t -> {
+            LexIdent id = (LexIdent)t.get(1);
 
-        // Make an 'alias' for a standard type. Like person -> int.
-        // n_Declaration_Type -> n_Declaration_Type_Body n_Standard_Type
-        g.addRuleWithReduceFunction( Symbol.n_Declaration_Type, List.of( Symbol.n_Declaration_Type_Body, Symbol.n_Any_Type ), t -> {
-            LexIdent id = (LexIdent)t.get(0);
-            Type type = (Type)t.get(1);
-                        
-            return new Declaration( Symbol.n_Declaration_Type, id, type, DeclarationKind.UNKNOWN );
-        });
-        
-        
-        // n_Declaration_Type_Body -> t_Type_Declare t_Identifer t_Colon
-        g.addRuleWithReduceFunction( Symbol.n_Declaration_Type_Body, List.of( Symbol.t_Type_Declare, Symbol.t_Identifier, Symbol.t_Colon ), t -> {
+            if ( t.get(4) instanceof Field ) {
+                Field fields = (Field)t.get(4);             
+                UserType type = new UserType( Symbol.n_Declaration_Variable, id, fields );
+                
+                stored_user_types.putIfAbsent( id.matchInfo.str(), type );
+                
+                return new Declaration( Symbol.n_Declaration_Variable, id, type, DeclarationKind.HEAP );
+            } else if (t.get(4) instanceof StandardType ) { 
+                StandardType type = (StandardType)t.get(4); 
+                return new Declaration( Symbol.n_Declaration_Variable, id, type, DeclarationKind.HEAP );
+            } else if ( t.get(4) instanceof LexIdent ) {
+                LexIdent ident = (LexIdent)t.get(4);             
+                Type type = stored_user_types.get( ident.name );
+                
+                if ( type == null )
+                    return new Declaration( Symbol.n_Declaration_Variable, id, new UnknownType(Symbol.n_Declaration_Variable, ident ), DeclarationKind.HEAP );
+
+                return new Declaration( Symbol.n_Declaration_Variable, id, type, DeclarationKind.HEAP );
+            } else if ( t.get(4) instanceof FunctionType ) {
+                FunctionType type = (FunctionType)t.get(4);    
+                stored_user_types.putIfAbsent( id.matchInfo.str(), type );
+                
+                return new Declaration( Symbol.n_Declaration_Variable, id, type, DeclarationKind.FUNCTION );
+            }else if ( t.get(4) instanceof UnknownType ) {
+                UnknownType type = (UnknownType)t.get(4);    
+                stored_user_types.putIfAbsent( id.matchInfo.str(), type );
+                
+                return new Declaration( Symbol.n_Declaration_Variable, id, type, DeclarationKind.UNKNOWN );
+            } else if ( t.get(4) instanceof UserType ) {
+                UserType type = (UserType)t.get(4);
+                return new Declaration( Symbol.n_Declaration_Variable, id, type, DeclarationKind.HEAP );
+            } else if ( t.get(4) instanceof RecordType ) {
+                RecordType type = (RecordType)t.get(4);
+                return new Declaration( Symbol.n_Declaration_Variable, id, type, DeclarationKind.HEAP );
+            }
+            System.out.println("--[[ Parser Error ]]--\nSomething happend trying to parse a user type. It is not a UserType or an Identifier. So what is it?" );
+            System.out.println( t.get(4) );
             
-            LexIdent body = (LexIdent)t.get(1);
-            body.term = Symbol.n_Declaration_Type_Body;
-            return body;
-        });
-        
-        // n_Assignment -> t_Identifier t_Equals n_Expression
-        g.addRuleWithReduceFunction( Symbol.n_Assignment, List.of( Symbol.t_Identifier, Symbol.t_Equals, Symbol.n_Expression ), t -> {
-            return new Assignment( Symbol.n_Assignment, (LexIdent)t.get(0), (ASTNode)t.get(2)  );
-        });
-        
-        // n_Assignment -> t_Identifier t_Equals n_Literal
-        g.addRuleWithReduceFunction( Symbol.n_Assignment, List.of( Symbol.t_Identifier, Symbol.t_Equals, Symbol.n_Literal ), t -> {
-            return new Assignment( Symbol.n_Assignment, (LexIdent)t.get(0), (ASTNode)t.get(2)  );
+            System.exit(-1);
+            return null; // error!
         });
 
-        // n_Assignment -> t_Identifier t_Equals n_Assignment_Function
-        g.addRuleWithReduceFunction( Symbol.n_Assignment, List.of( Symbol.t_Identifier, Symbol.t_Equals, Symbol.n_Assignment_Function ), t -> {
-            return new Assignment( Symbol.n_Assignment, (LexIdent)t.get(0), (ASTNode)t.get(2)  );
+
+        // n_Declaration_Type -> t_Type_Declare Symbol.t_Identifier t_Colon n_Any_Type
+        // g.addRuleWithReduceFunction( Symbol.n_Declaration_Type, List.of( Symbol.t_Type_Declare, Symbol.t_Identifier, Symbol.t_Colon, Symbol.n_Any_Type ), t -> {
+        //     LexIdent id = (LexIdent)t.get(1);
+        //     Type type = (Type)t.get(3);
+        //     DeclarationKind kind = DeclarationKind.UNKNOWN;
+        //     if ( type instanceof AliasType ) {
+        //         kind = DeclarationKind.ALIAS_TO_USER_TYPE; // Or maybe not lmao
+        //     } else if ( type instanceof FunctionType ) {
+        //         kind = DeclarationKind.FUNCTION;
+        //     } else if ( type instanceof StandardType ) {
+        //         kind = DeclarationKind.ALIAS_TO_STD_TYPE;
+        //     } else if ( type instanceof UserType ) {
+        //         stored_user_types.put( id.name, type );
+        //         kind = DeclarationKind.USER_TYPE;
+        //     } else if ( type instanceof UnknownType ) {
+        //         kind = DeclarationKind.UNKNOWN;
+        //     } else {
+        //         System.out.println( new Error("Parser error!", "Unexpected unknowntype!" ) );
+        //         AST_Printer p = new AST_Printer();
+        //         type.accept(p);
+        //         System.out.println( p.get_ascii() );
+        //         System.exit(-1);
+        //     }
+
+        //     return new Declaration( Symbol.n_Declaration_Type, id, type, kind );
+        // });
+
+        // n_Declaration_Type -> t_Type_Declare Symbol.t_Identifier t_Colon t_LCurly n_Field_List t_RCurly
+        g.addRuleWithReduceFunction( Symbol.n_Declaration_Type, List.of( Symbol.t_Type_Declare, Symbol.t_Identifier, Symbol.t_Colon, Symbol.t_LCurly, Symbol.n_Field_List, Symbol.t_RCurly ), t -> {
+            LexIdent id = (LexIdent)t.get(1);
+            FieldList field = (FieldList)t.get(4);
+            RecordType type = new RecordType( Symbol.n_Declaration_Type, id, field );
+            stored_user_types.put( id.name, type );
+            return type;
         });
+
+        // n_Assignment -> n_Nested_Field t_Equals n_Expression
+        g.addRuleWithReduceFunction( Symbol.n_Assignment, List.of( Symbol.n_Nested_Field, Symbol.t_Equals, Symbol.n_Expression ), t -> {
+            if ( t.get(0) instanceof LexIdent ) {
+                return new Assignment( Symbol.n_Assignment, (LexIdent)t.get(0), (ASTNode)t.get(2) );
+            } else {
+                return new Assignment( Symbol.n_Assignment, (NestedField)t.get(0), (ASTNode)t.get(2) );
+            }
+        });
+
+        // n_Assignment -> n_Nested_Field t_Equals n_Assignment_Function
+        g.addRuleWithReduceFunction( Symbol.n_Assignment, List.of( Symbol.n_Nested_Field, Symbol.t_Equals, Symbol.n_Assignment_Function ), t -> {
+            if ( t.get(0) instanceof LexIdent ) {
+                return new Assignment( Symbol.n_Assignment, (LexIdent)t.get(0), (ASTNode)t.get(2)  );                 
+            } else {
+                return new Assignment( Symbol.n_Assignment, (NestedField)t.get(0), (ASTNode)t.get(2) );
+            }
+        });
+
+        // n_Nested_Field -> t_Identifer t_Dot n_Nested_Field
+        g.addRuleWithReduceFunction( Symbol.n_Nested_Field, List.of( Symbol.t_Identifier, Symbol.t_Dot, Symbol.n_Nested_Field ), t -> {
+            if ( t.get(2) instanceof LexIdent ) {
+                NestedField fields = new NestedField( Symbol.n_Nested_Field, (LexIdent)t.get(0) );
+                fields.push( (LexIdent)t.get(2) );
+                return fields;
+            } else {
+                NestedField fields = (NestedField)t.get(2);
+                fields.addFront( (LexIdent)t.get(0) );
+                return fields;
+            }
+        });
+
+
+        // n_Nested_Field -> t_Identifier
+        g.addRuleWithReduceFunction( Symbol.n_Nested_Field, List.of( Symbol.t_Identifier ), t -> {
+            LexIdent id = (LexIdent)t.get(0);
+            id.term = Symbol.n_Nested_Field;
+            return id;
+        });
+
 
         // n_Print -> t_Print t_LParen n_Expression t_RParen
         g.addRuleWithReduceFunction( Symbol.n_Print, List.of( Symbol.t_Print, Symbol.t_LParen, Symbol.n_Expression, Symbol.t_RParen ), t -> {
@@ -263,17 +342,14 @@ public class Parser {
         g.addRuleWithReduceFunction( Symbol.n_Print, List.of( Symbol.t_Print, Symbol.t_LParen, Symbol.t_StringLiteral, Symbol.t_Comma, Symbol.n_Arg_List, Symbol.t_RParen ), t -> {
             return new Print( Symbol.n_Print, (ASTNode)t.get(2), (Argument)t.get(4) );
         });
-        // n_Print -> t_Print t_LParen t_StringLiteral t_RParen
-        g.addRuleWithReduceFunction( Symbol.n_Print, List.of( Symbol.t_Print, Symbol.t_LParen, Symbol.t_StringLiteral, Symbol.t_RParen ), t -> {
-            return new Print( Symbol.n_Print, (ASTNode)t.get(2) );
-        });
+
         
     }
 
     private static void init_if_statements() {
 
-        // n_Statement -> n_If_Blocks
-        g.addRuleWithReduceFunction( Symbol.n_Statement, List.of( Symbol.n_If_Blocks, Symbol.t_Semicolon ), t -> {
+        // n_Statement -> n_If_Blocks t_Semicolon
+        g.addRuleWithReduceFunction( Symbol.n_Statement, List.of( Symbol.n_If_Blocks ), t -> {
             Statement iff = (Statement)t.get(0);
             iff.term = Symbol.n_Statement;
             return iff;
@@ -285,15 +361,6 @@ public class Parser {
             IfNode iff = (IfNode)t.get(0);
             return new Statement( Symbol.n_If_Blocks, iff, StatementKind.IF );
         });
-
-        // n_If_Blocks -> n_If n_Else
-        // g.addRuleWithReduceFunction( Symbol.n_If_Blocks, List.of( Symbol.n_If, Symbol.n_Else ), t -> {
-        //     IfNode if_block = (IfNode)t.get(0);
-        //     ElseNode else_block = (ElseNode)t.get(1);
-        //     IfElseNode if_else = new IfElseNode( Symbol.t_If, if_block, else_block );
-
-        //     return new Statement( Symbol.n_If_Blocks, if_else, StatementKind.IF_ELSE );
-        // });
 
         // n_If_Blocks -> n_If n_Elif
         g.addRuleWithReduceFunction( Symbol.n_If_Blocks, List.of( Symbol.n_If, Symbol.n_Elif ), t -> {
@@ -315,32 +382,16 @@ public class Parser {
             return else_block;
         });
 
-        // n_Elif -> t_Else n_If
-        g.addRuleWithReduceFunction( Symbol.n_Elif, List.of( Symbol.t_Else, Symbol.n_If ), t -> {
-            IfNode if_block = (IfNode)t.get(1);
-            if_block.term = Symbol.n_Elif;
-            return if_block;
-        });
-
-        // n_Elif -> t_Else n_If n_Elif
-        g.addRuleWithReduceFunction( Symbol.n_Elif, List.of( Symbol.t_Else, Symbol.n_If, Symbol.n_Elif ), t -> {
-            IfNode if_block = (IfNode)t.get(1);
-            ASTNode rest = (ASTNode)t.get(2);
-            
-            return new IfElseNode( Symbol.n_Elif, if_block, new ElseNode( Symbol.n_Elif, new Statement( Symbol.n_Statement, rest, StatementKind.IF_ELSE ) ) );
-        });
-
-
-        // n_If -> t_If t_LParen n_Expression t_RParen t_LCurly n_StatementList t_RCurly
-        g.addRuleWithReduceFunction( Symbol.n_If, List.of( Symbol.t_If, Symbol.t_LParen, Symbol.n_Expression, Symbol.t_RParen, Symbol.t_LCurly, Symbol.n_StatementList, Symbol.t_RCurly ), t -> {
+        // n_If -> t_If t_LParen n_Expression t_RParen n_Statement
+        g.addRuleWithReduceFunction( Symbol.n_If, List.of( Symbol.t_If, Symbol.t_LParen, Symbol.n_Expression, Symbol.t_RParen, Symbol.n_Statement ), t -> {
             Expression guard = (Expression)t.get(2);
-            Statement body = (Statement)t.get(5);
+            Statement body = (Statement)t.get(4);
             return new IfNode( Symbol.n_If, guard, body );
         });
 
-        // n_Else -> t_Else t_LCurly n_StatementList t_RCurly
-        g.addRuleWithReduceFunction( Symbol.n_Else, List.of( Symbol.t_Else, Symbol.t_LCurly, Symbol.n_StatementList, Symbol.t_RCurly ), t -> {
-            Statement body = (Statement)t.get(2);
+        // n_Else -> t_Else n_Statement
+        g.addRuleWithReduceFunction( Symbol.n_Else, List.of( Symbol.t_Else, Symbol.n_Statement ), t -> {
+            Statement body = (Statement)t.get(1);
             return new ElseNode( Symbol.n_Else, body );
         });
     }
@@ -388,16 +439,23 @@ public class Parser {
 
     private static void init_types() {
         // n_User_Type -> t_LCurly n_Field_List t_RCurly
-        g.addRuleWithReduceFunction( Symbol.n_User_Type, List.of( Symbol.t_LCurly, Symbol.n_Field_List, Symbol.t_RCurly ), t -> {
-            return new Field( Symbol.n_User_Type, (ASTNode)t.get(1) );
-        });
-        
+        // g.addRuleWithReduceFunction( Symbol.n_User_Type, List.of( Symbol.t_LCurly, Symbol.n_Field_List, Symbol.t_RCurly ), t -> {
+        //     Field f = (Field)t.get(1);
+        //     return new UserType(Symbol.n_User_Type, f);
+        // });
         
         // n_User_Type -> t_Identifier
         g.addRuleWithReduceFunction( Symbol.n_User_Type, List.of( Symbol.t_Identifier ), t -> {
             LexIdent id = (LexIdent)t.get(0);
             // id.term = Symbol.n_User_Type;
-            return new UnknownType( Symbol.n_User_Type, id );
+            Type typ = stored_user_types.get(id.name);
+            if ( typ == null ) 
+                return new AliasType( Symbol.n_User_Type, id.matchInfo );
+            else {
+                typ.term = Symbol.n_User_Type;
+                return typ;
+                // return typ.clone( Symbol.n_User_Type );
+            }
         });
 
         // n_User_Type -> n_Function_Signature
@@ -412,13 +470,37 @@ public class Parser {
 
         // n_Field_List -> n_Field t_Semicolon n_Field_List
         g.addRuleWithReduceFunction( Symbol.n_Field_List, List.of( Symbol.n_Field, Symbol.t_Semicolon, Symbol.n_Field_List ), t -> {
-            Declaration decl = (Declaration)t.get(0);
-            return new Statement( Symbol.n_Field_List, decl, (Statement)t.get(2), StatementKind.DECLARATION );
+            if ( t.get(2) instanceof Field ) {
+                FieldList list = new FieldList( Symbol.n_Field_List );
+
+                Declaration decl1 = (Declaration)t.get(0);
+                Field f1 = new Field( Symbol.n_Field_List, decl1 );
+
+                list.push( f1 );
+
+                Field f2 = (Field)t.get(2);
+                
+                list.push( f2 );
+
+                return list;
+            } else { // FieldList
+                FieldList list = (FieldList)t.get(2);
+
+                Declaration decl = (Declaration)t.get(0);
+                Field f = new Field( Symbol.n_Field_List, decl );
+
+                list.push_front( f );
+                
+                return list;
+            }
+            
         });
         
         // n_Field_List -> n_Field t_Semicolon
         g.addRuleWithReduceFunction( Symbol.n_Field_List, List.of( Symbol.n_Field, Symbol.t_Semicolon ), t -> {
-            return new Statement( Symbol.n_Field_List, (Declaration)t.get(0), StatementKind.DECLARATION );
+            FieldList list = new FieldList( Symbol.n_Field_List );
+            list.push( new Field( Symbol.n_Field_List, (Declaration)t.get(0) ) );
+            return list;
         });
         
         // n_Field -> t_Identifier t_Colon n_Standard_Type
@@ -426,7 +508,15 @@ public class Parser {
             LexIdent id = (LexIdent)t.get(0);
             StandardType type = (StandardType)t.get(2);
             
-            return new Declaration( Symbol.n_Field, id, type, DeclarationKind.VARIABLE );
+            return new Declaration( Symbol.n_Field, id, type, DeclarationKind.FIELD );
+        });
+
+        // n_Field -> t_Identifier t_Colon t_Times n_Standard_Type
+        g.addRuleWithReduceFunction( Symbol.n_Field, List.of( Symbol.t_Identifier, Symbol.t_Colon, Symbol.t_Times, Symbol.n_Standard_Type ), t -> {
+            LexIdent id = (LexIdent)t.get(0);
+            StandardType type = (StandardType)t.get(3);
+            
+            return new Declaration( Symbol.n_Field, id, type, DeclarationKind.HEAP );
         });
 
 
@@ -439,12 +529,12 @@ public class Parser {
                 Type type = stored_user_types.get(((LexIdent)t.get(2)).name);
                 
                 if ( type == null ) {
-                    return new Declaration( Symbol.n_Field, id, new UnknownType(Symbol.n_Field, (LexIdent)t.get(2) ), DeclarationKind.ALIAS_TO_USER_TYPE );
+                    return new Declaration( Symbol.n_Field, id, new UnknownType(Symbol.n_Field, (LexIdent)t.get(2) ), DeclarationKind.FIELD );
                 }
 
                 stored_user_types.putIfAbsent( id.matchInfo.str(), type );
                 
-                return new Declaration( Symbol.n_Field, id, type, DeclarationKind.ALIAS_TO_USER_TYPE );
+                return new Declaration( Symbol.n_Field, id, type, DeclarationKind.FIELD );
                 
             } else if ( t.get(2) instanceof Field ) {
 
@@ -453,17 +543,64 @@ public class Parser {
                 
                 stored_user_types.putIfAbsent( id.matchInfo.str(), type );
                 
-                return new Declaration( Symbol.n_Field, id, type, DeclarationKind.USER_TYPE );
+                return new Declaration( Symbol.n_Field, id, type, DeclarationKind.FIELD );
 
+            } else if ( t.get(2) instanceof UserType ) {
+                UserType type = (UserType)t.get(2);
+                return new Declaration( Symbol.n_Field, id, type, DeclarationKind.FIELD );
+            } else {
+                System.out.println( t.get(2));
+                AST_Printer printer = new AST_Printer();
+                Type typ = (Type)t.get(2);
+                typ.accept(printer);
+                System.out.println(printer.get_ascii());
             }
             
             System.out.println( "Something bad happend in parsin n_Field -> t_Identifier t_Colon n_User_Type" );
             System.exit(-1);
             return null;
-
-    
         });
 
+        // n_Field -> t_Identifier t_Colon t_Times n_User_Type
+        g.addRuleWithReduceFunction( Symbol.n_Field, List.of( Symbol.t_Identifier, Symbol.t_Colon, Symbol.t_Times, Symbol.n_User_Type ), t -> {
+            LexIdent id = (LexIdent)t.get(0);
+            
+            if ( t.get(3) instanceof LexIdent ) {
+                
+                Type type = stored_user_types.get(((LexIdent)t.get(3)).name);
+                
+                if ( type == null ) {
+                    return new Declaration( Symbol.n_Field, id, new UnknownType(Symbol.n_Field, (LexIdent)t.get(3) ), DeclarationKind.FIELD );
+                }
+
+                stored_user_types.putIfAbsent( id.matchInfo.str(), type );
+                
+                return new Declaration( Symbol.n_Field, id, type, DeclarationKind.HEAP );
+                
+            } else if ( t.get(3) instanceof Field ) {
+
+                Field fields = (Field)t.get(3);
+                UserType type = new UserType(Symbol.n_Declaration_Type, id, fields );
+                
+                stored_user_types.putIfAbsent( id.matchInfo.str(), type );
+                
+                return new Declaration( Symbol.n_Field, id, type, DeclarationKind.HEAP );
+
+            } else if ( t.get(3) instanceof UserType ) {
+                UserType type = (UserType)t.get(3);
+                return new Declaration( Symbol.n_Field, id, type, DeclarationKind.HEAP );
+            } else {
+                System.out.println( t.get(3));
+                AST_Printer printer = new AST_Printer();
+                Type typ = (Type)t.get(3);
+                typ.accept(printer);
+                System.out.println(printer.get_ascii());
+            }
+            
+            System.out.println( "Something bad happend in parsin n_Field -> t_Identifier t_Colon n_User_Type" );
+            System.exit(-1);
+            return null;
+        });
 
         // --[[ TYPES ]]--
         
@@ -475,9 +612,14 @@ public class Parser {
         });
         // n_Any_Type -> n_User_type
         g.addRuleWithReduceFunction( Symbol.n_Any_Type, List.of( Symbol.n_User_Type ), t -> {
-            Type st = (Type)t.get(0);
-            st.term = Symbol.n_Any_Type;
-            return st;
+            if ( t.get(0) instanceof Field ) {
+                Field f = (Field)t.get(0);
+                return new UserType( Symbol.n_Any_Type, f );
+            } else {
+                Type st = (Type)t.get(0);
+                st.term = Symbol.n_Any_Type;
+                return st;
+            }
         });
 
         // n_Standard_Type -> t_Type_Int
@@ -496,6 +638,29 @@ public class Parser {
         g.addRuleWithReduceFunction( Symbol.n_Standard_Type, List.of( Symbol.t_Type_String ), t -> {
             return new StandardType( Symbol.n_Standard_Type, (LexType)t.get(0)  );
         });
+        // n_Standard_Type -> t_Type_Void
+        g.addRuleWithReduceFunction( Symbol.n_Standard_Type, List.of( Symbol.t_Type_Void ), t -> {
+            return new StandardType( Symbol.n_Standard_Type, (LexType)t.get(0)  );
+        });
+    }
+
+    private static void init_guards() {
+
+        // n_Expression -> n_Equals
+        // g.addRuleWithReduceFunction( Symbol.n_Expression, List.of( Symbol.n_Equals ), t -> {
+        //     return new Expression( Symbol.n_Expression, (ASTNode)t.get(0) );
+        // });
+
+        // n_Equals -> n_Expression t_Check_Equal n_Expression 
+        g.addRuleWithReduceFunction( Symbol.n_Expression, List.of( Symbol.n_Expression_Arithmetic, Symbol.t_Check_Equal, Symbol.n_Expression_Arithmetic ), t -> {
+            return new Expression( Symbol.n_Expression, new BinaryOperation( Symbol.n_Equals, (ASTNode)t.get(0), (ASTNode)t.get(2), (ASTNode)t.get(1), BinaryOperationKind.EQUALS ) );
+        });
+
+        // n_Equals -> n_Expression t_Check_Not_Equal n_Expression 
+        g.addRuleWithReduceFunction( Symbol.n_Expression, List.of( Symbol.n_Expression_Arithmetic, Symbol.t_Check_Not_Equal, Symbol.n_Expression_Arithmetic ), t -> {
+            return new Expression( Symbol.n_Expression, new BinaryOperation( Symbol.n_Equals, (ASTNode)t.get(0), (ASTNode)t.get(2), (ASTNode)t.get(1), BinaryOperationKind.NOT_EQUALS ) );
+        });
+
     }
 
     private static void init_arithmetic() {
@@ -560,8 +725,8 @@ public class Parser {
             return new Expression( Symbol.n_Factor, (ASTNode)t.get(1) );
         });
 
-        // n_Factor -> n_Identifier
-        g.addRuleWithReduceFunction( Symbol.n_Factor, List.of( Symbol.t_Identifier ), t -> {
+        // n_Factor -> n_NestedField
+        g.addRuleWithReduceFunction( Symbol.n_Factor, List.of( Symbol.n_Nested_Field ), t -> {
             return new Expression( Symbol.n_Factor, (ASTNode)t.get(0) );
         });
 
@@ -594,6 +759,18 @@ public class Parser {
     private static void init_functions() {
         // --[[ Functions ]]--
         
+        // n_Statement -> t_Return n_Expression t_Semicolon
+        g.addRuleWithReduceFunction( Symbol.n_Statement, List.of( Symbol.t_Return, Symbol.n_Expression, Symbol.t_Semicolon ), t -> {
+            Expression ret = (Expression)t.get(1);
+            return new Statement( Symbol.n_Statement, ret, StatementKind.RETURN );
+        });
+
+        // n_Factor -> n_Function_Call
+        g.addRuleWithReduceFunction( Symbol.n_Factor, List.of( Symbol.n_Function_Call ), t -> {
+            FunctionCall function_name = (FunctionCall)t.get(0);
+            return new Expression( Symbol.n_Factor, function_name );
+        });
+
         // n_Statement -> t_Identifier t_LParen t_RParen t_Semicolon
         g.addRuleWithReduceFunction( Symbol.n_Statement, List.of( Symbol.n_Function_Call, Symbol.t_Semicolon ), t -> {
             FunctionCall function_name = (FunctionCall)t.get(0);
@@ -625,18 +802,6 @@ public class Parser {
             Argument arg = (Argument)t.get(0);
             return new Argument( Symbol.n_Arg_List, arg.node, arg.kind );
         });
-
-        // n_Arg -> t_Identifier
-        g.addRuleWithReduceFunction( Symbol.n_Arg, List.of( Symbol.t_Identifier ), t -> {
-            return new Argument( Symbol.n_Arg, (ASTNode)t.get(0), ArgumentKind.IDENTIFIER );
-        });
-
-        //TODO: Fix me. 
-        // n_Arg -> t_Literal
-        // g.addRuleWithReduceFunction( Symbol.n_Arg, List.of( Symbol.n_Literal ), t -> {
-        //     return new Argument( Symbol.n_Arg, (ASTNode)t.get(0), ArgumentKind.LITERAL );
-        // });
-        
         // n_Arg -> n_Expression
         g.addRuleWithReduceFunction( Symbol.n_Arg, List.of( Symbol.n_Expression ), t -> {
             return new Argument( Symbol.n_Arg, (ASTNode)t.get(0), ArgumentKind.EXPRESSION );

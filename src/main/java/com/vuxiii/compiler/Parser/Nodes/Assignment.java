@@ -9,7 +9,7 @@ import com.vuxiii.compiler.VisitorPattern.Annotations.VisitNumber;
 
 public class Assignment extends ASTNode {
 
-    @VisitNumber( number = 1 ) public final LexIdent id;
+    @VisitNumber( number = 1 ) public ASTNode id;
     @VisitNumber( number = 2 ) public ASTNode value;
 
     public Assignment( Term term, LexIdent id, ASTNode value ) {
@@ -19,28 +19,25 @@ public class Assignment extends ASTNode {
         super.setup_ASTNodeQueue();
     }
 
+    public Assignment( Term term, NestedField id, ASTNode value ) {
+        super( term ); 
+        this.id = id;
+        this.value = value;
+        super.setup_ASTNodeQueue();
+    }
+
+    public String name() {
+        if ( id instanceof LexIdent )
+            return ((LexIdent)id).name;
+        NestedField f = (NestedField)id;
+
+        return f.name();
+    }
+
     public String toString() {
-        return id.name + " = " + value.toString();
-    }
-
-    @Override
-    public Optional<ASTNode> getChild1() {
-        return Optional.of(id);
-    }
-
-    @Override
-    public Optional<ASTNode> getChild2() {
-        return Optional.of(value);
-    }
-
-    @Override
-    public Optional<ASTNode> getChild3() {
-        return Optional.empty();
-    }
-
-    @Override
-    public Optional<ASTNode> getChild4() {
-        return Optional.empty();
+        if ( id instanceof LexIdent )
+            return ((LexIdent)id).name + " = " + value.toString();
+        return ((NestedField)id).toString() + " = " + value.toString();
     }
 
     @Override

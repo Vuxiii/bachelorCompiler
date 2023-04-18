@@ -1,6 +1,7 @@
 package com.vuxiii.compiler.Parser.Nodes;
 
 public enum DeclarationKind {
+    HEAP,
     VARIABLE,
     PARAMETER,
     FUNCTION,
@@ -8,5 +9,6 @@ public enum DeclarationKind {
     USER_TYPE,
     ALIAS_TO_USER_TYPE,
     ALIAS_TO_STD_TYPE,
+    FIELD,
     UNKNOWN,
 }
