@@ -140,7 +140,6 @@ void new_scope( size_t num_of_ptrs, struct scope **address_to_store_scope ) {
     append_scope( scp );
 
     *address_to_store_scope = scp;
-
 }
 
 size_t get_size_of_record( void *record ) {

@@ -1,13 +1,13 @@
 .section .data
-string1: .ascii " %\n"
-string1_stops: .space 16
-string1_subs: .space 8
-string0: .ascii " %\n"
-string0_stops: .space 16
-string0_subs: .space 8
 string2: .ascii " %\n"
 string2_stops: .space 16
 string2_subs: .space 8
+string0: .ascii " %\n"
+string0_stops: .space 16
+string0_subs: .space 8
+string1: .ascii " %\n"
+string1_stops: .space 16
+string1_subs: .space 8
 .section .text
 .section .data
 .section .text
