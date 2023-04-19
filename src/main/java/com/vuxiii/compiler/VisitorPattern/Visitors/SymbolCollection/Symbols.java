@@ -24,7 +24,7 @@ public class Symbols {
     private Map<String, Integer> parameter_offsets = new HashMap<>();
     private int current_parameter_offset = 2;
     
-    public Map<String, Integer> variable_offsets = new HashMap<>();
+    public Map<String, OffsetLogic> variable_offsets = new HashMap<>();
     private int current_variable_offset = 1;
 
     private Set<String> is_var_heap_allocated = new HashSet<>();
@@ -46,15 +46,22 @@ public class Symbols {
         local_vars.put( variable.name, variable );
 
         // if ( is_pointer ) pointer_pos.add( current_variable_offset );
-
-        variable_offsets.put( variable.name, current_variable_offset++ );
+        OffsetLogic offlogic = new OffsetLogic();
+        int off = current_variable_offset++;
+        offlogic.add( -off, false );
+        variable_offsets.put( variable.name, offlogic );
     }
 
     //TODO! Figure out how parameters should be regeistered as pointers
     public void add_parameter( LexIdent variable, boolean is_pointer ) {
         if ( parameters.containsKey(variable.name) ) return;
-        parameters.put( variable.name, variable );
-        parameter_offsets.put( variable.name, current_parameter_offset++ );
+        OffsetLogic offlogic = new OffsetLogic();
+        offlogic.add( current_parameter_offset++, false );
+        
+        variable_offsets.put( variable.name, offlogic );
+        
+        // parameters.put( variable.name, variable );
+        // parameter_offsets.put( variable.name, current_parameter_offset++ );
     }
 
     public void add_fields( Declaration decl ) {
@@ -64,16 +71,26 @@ public class Symbols {
         decl.accept(prin);
         System.out.println( prin.get_ascii() );
         local_vars.put( decl.id.name, decl.id );
-        variable_offsets.put( decl.id.name, current_variable_offset );
+        OffsetLogic off = new OffsetLogic();
+        off.add( -current_variable_offset, false );
+        variable_offsets.put( decl.id.name, off );
 
+        int fieldOffset = 2;
         for ( Field f : type.fields.fields ) {
             String name = decl.id.name + "." + f.field.id.name;
             local_vars.put( name, f.field.id );
             if ( decl.kind != DeclarationKind.HEAP ) {
-                variable_offsets.put( name, current_variable_offset++ );
+                OffsetLogic offlogic = new OffsetLogic();
+                offlogic.add( current_variable_offset++, false );
+                
+                variable_offsets.put( name, offlogic );
                 System.out.println( "ADDED " + name );
             } else {
                 identifier_is_heap_allocated( name );
+                OffsetLogic offlogic = new OffsetLogic();
+                offlogic.add( off.offsets.get(0), false );
+                offlogic.add( fieldOffset++, true );
+                variable_offsets.put( name, offlogic );
                 System.out.println( "It is on heap.... " + name );
             }
         }
@@ -128,14 +145,17 @@ public class Symbols {
         return (current_parameter_offset+1) - parameter_offsets.getOrDefault(parameter, -69);
     }
 
-    public int get_variable_offset( String variable ) {
+    // This function needs to check if it is on the stack or on the heap
+    // On stack: If record: Lookup the name. Find the offset for the field
+    // On heap: Find the pointer on the stack, find the offset for the field on the heap.
+    public OffsetLogic get_variable_offset( String variable ) {
         // if ( variable.contains(".") )
         //     return variable_offsets.getOrDefault(variable.substring(0, variable.indexOf(".")), -420);
         // else
         System.out.println("============================");
         System.out.println( variable_offsets );
         System.out.println("============================");
-            return variable_offsets.getOrDefault(variable, -69);
+            return variable_offsets.get(variable);
     }
 
     public boolean can_access( String variable ) {

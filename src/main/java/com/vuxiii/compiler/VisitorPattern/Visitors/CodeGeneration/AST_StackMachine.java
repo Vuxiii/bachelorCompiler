@@ -504,8 +504,8 @@ public class AST_StackMachine extends Visitor {
         AST_SymbolCollector.current_scope(var).identifier_is_heap_allocated(prefix + id.name);
 
         String layout_name = var.heap_layout.name;
-
-        int size = 1;
+        
+        int size = var.size();
         // How much space do we want for our heap_memory?
         push( new Instruction( Opcode.MOVE, new Arguments( List.of( 
             Operand.from_int( size ),
@@ -545,34 +545,34 @@ public class AST_StackMachine extends Visitor {
                                 new Comment( "Fetching value" ) ) );
         }
 
-        if ( AST_SymbolCollector.current_scope( assignment_node.id ).is_on_heap( assignment_node.name() ) ) {
-            String var_name = assignment_node.name();
-            Operand var = new Operand( var_name.substring(0, var_name.indexOf(".") ), AddressingMode.IMMEDIATE );
-            Symbols scope = AST_SymbolCollector.current_scope(assignment_node);
-            boolean target_is_parameter = scope.get_parameters().contains( var_name );
+        // if ( AST_SymbolCollector.current_scope( assignment_node.id ).is_on_heap( assignment_node.name() ) ) {
+        //     String var_name = assignment_node.name();
+        //     Operand var = new Operand( var_name.substring(0, var_name.indexOf(".") ), AddressingMode.IMMEDIATE );
+        //     Symbols scope = AST_SymbolCollector.current_scope(assignment_node);
+        //     boolean target_is_parameter = scope.get_parameters().contains( var_name );
 
-            push( new Instruction( Opcode.LOAD_VARIABLE, 
-                                new Arguments( List.of(var, Operand.from_register(Register.RBX, AddressingMode.REGISER)) ), 
-                                new Comment( "Load variable " + var_name.substring(0, var_name.indexOf(".") )),
-                                target_is_parameter ) );
+        //     push( new Instruction( Opcode.LOAD_VARIABLE, 
+        //                         new Arguments( List.of(var, Operand.from_register(Register.RBX, AddressingMode.REGISER)) ), 
+        //                         new Comment( "Load variable " + var_name.substring(0, var_name.indexOf(".") )),
+        //                         target_is_parameter ) );
             
-            Operand rbx = Operand.from_register( Register.RBX, AddressingMode.DIRECT_OFFSET );
-            HeapLayout heap_layout = AST_SymbolCollector.current_symbol_node(assignment_node).get_heap_layout(var_name);
+        //     Operand rbx = Operand.from_register( Register.RBX, AddressingMode.DIRECT_OFFSET );
+        //     HeapLayout heap_layout = AST_SymbolCollector.current_symbol_node(assignment_node).get_heap_layout(var_name);
 
-            String field = var_name.substring(var_name.lastIndexOf(".")+1);
+        //     String field = var_name.substring(var_name.lastIndexOf(".")+1);
 
-            System.out.println( assignment_node.name());
-            System.out.println(heap_layout.var_offset);
+        //     System.out.println( assignment_node.name());
+        //     System.out.println(heap_layout.var_offset);
 
-            rbx.offset = (int)(long)heap_layout.var_offset.get(field); 
+        //     rbx.offset = (int)(long)heap_layout.var_offset.get(field); 
 
-            push( new Instruction( Opcode.MOVE, new Arguments( List.of( Operand.from_register( Register.RAX, AddressingMode.REGISER ), rbx ) ) ) );
-        } else {
+        //     push( new Instruction( Opcode.MOVE, new Arguments( List.of( Operand.from_register( Register.RAX, AddressingMode.REGISER ), rbx ) ) ) );
+        // } else {
             push( new Instruction( Opcode.STORE_VARIABLE, 
                                     new Arguments( List.of(new Operand( assignment_node.name(), AddressingMode.IMMEDIATE ), new Operand( Register.RAX, AddressingMode.REGISER )) ), 
                                     new Comment( "Store in variable " + assignment_node.name() ) ) );
 
-        }
+        // }
         
     }
 
@@ -644,7 +644,6 @@ public class AST_StackMachine extends Visitor {
                         push( _load_var( (LexIdent)exp.node, Operand.from_register( Register.RDI, AddressingMode.REGISER ) ) );
                     } else if ( exp.node instanceof NestedField ) {
                         push( _load_var( (NestedField)exp.node, Operand.from_register( Register.RDI, AddressingMode.REGISER ) ) );
-                        
                     } else if ( exp.node instanceof LexLiteral ) {
                         LexLiteral lit = (LexLiteral)exp.node;
                         if ( lit.literal_type == PrimitiveType.INT ) {
@@ -667,9 +666,15 @@ public class AST_StackMachine extends Visitor {
 
             }
 
-            push( new Instruction( Opcode.MOVE, new Arguments( List.of(string_operand, string_target )), new Comment( "The input text" ) ) );
-            push( new Instruction( Opcode.MOVE, new Arguments( List.of(Operand.from_int(str_node.stop_indicators.get(str_node.stop_indicators.size()-1) - prev ), Operand.from_register( Register.RSI, AddressingMode.REGISER )) ) ) );
-            push( new Instruction( Opcode.MOVE, new Arguments( List.of(Operand.from_int(prev ), Operand.from_register( Register.RDX, AddressingMode.REGISER )) ) ) );
+            push( new Instruction( Opcode.MOVE, new Arguments( List.of(
+                string_operand, 
+                string_target )), new Comment( "The input text" ) ) );
+            push( new Instruction( Opcode.MOVE, new Arguments( List.of(
+                Operand.from_int(str_node.stop_indicators.get(str_node.stop_indicators.size()-1) - prev ), 
+                Operand.from_register( Register.RSI, AddressingMode.REGISER )) ) ) );
+            push( new Instruction( Opcode.MOVE, new Arguments( List.of(
+                Operand.from_int(prev ), 
+                Operand.from_register( Register.RDX, AddressingMode.REGISER )) ) ) );
             push( new Instruction( Opcode.PRINT_STRING, Arguments.from_label( "%\n" ) ) ); 
 
         }
@@ -701,16 +706,16 @@ public class AST_StackMachine extends Visitor {
                                 new Arguments( List.of(var, target) ), 
                                 new Comment( "Load variable " + var_name ),
                                 target_is_parameter ) );
-            Operand inter = Operand.from_register( target.get_reg(), AddressingMode.DIRECT_OFFSET );
+            // Operand inter = Operand.from_register( target.get_reg(), AddressingMode.DIRECT_OFFSET );
             
-            String field = var_name.substring(var_name.lastIndexOf(".")+1);
-            HeapLayout heap_layout = AST_SymbolCollector.current_symbol_node(id).get_heap_layout(var_name);
+            // String field = var_name.substring(var_name.lastIndexOf(".")+1);
+            // HeapLayout heap_layout = AST_SymbolCollector.current_symbol_node(id).get_heap_layout(var_name);
             
             
-            inter.offset = (int)(long)heap_layout.var_offset.get(field);
+            // inter.offset = (int)(long)heap_layout.var_offset.get(field);
             
 
-            li.add( new Instruction( Opcode.MOVE, new Arguments( List.of( inter, target ) ) ) );
+            // li.add( new Instruction( Opcode.MOVE, new Arguments( List.of( inter, target ) ) ) );
 
             return li;
         } else {
@@ -737,15 +742,15 @@ public class AST_StackMachine extends Visitor {
                                 new Arguments( List.of(var, target) ), 
                                 new Comment( "Load variable " + var_name ),
                                 target_is_parameter ) );
-            Operand inter = Operand.from_register( target.get_reg(), AddressingMode.DIRECT_OFFSET );
+            // Operand inter = Operand.from_register( target.get_reg(), AddressingMode.DIRECT_OFFSET );
             
-            String field = var_name.substring(var_name.lastIndexOf(".")+1);
-            HeapLayout heap_layout = AST_SymbolCollector.current_symbol_node(id).get_heap_layout(var_name);
+            // String field = var_name.substring(var_name.lastIndexOf(".")+1);
+            // HeapLayout heap_layout = AST_SymbolCollector.current_symbol_node(id).get_heap_layout(var_name);
             
             
-            inter.offset = (int)(long)heap_layout.var_offset.get(field);
+            // inter.offset = (int)(long)heap_layout.var_offset.get(field);
             
-            li.add( new Instruction( Opcode.MOVE, new Arguments( List.of( inter, target ) ) ) );
+            // li.add( new Instruction( Opcode.MOVE, new Arguments( List.of( inter, target ) ) ) );
 
             return li;
         } else {

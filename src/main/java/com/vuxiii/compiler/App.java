@@ -193,13 +193,14 @@ public final class App {
 
                 """;
         input = """
+                type Int: { var: int; };
                 type rec: {
                     f1: int;
-                    f2: int;
+                    f2: *int;
                     f3: int;
                 };
 
-                let b: *rec;
+                let b: rec;
 
                 b.f1 = 6;
                 b.f2 = 7;

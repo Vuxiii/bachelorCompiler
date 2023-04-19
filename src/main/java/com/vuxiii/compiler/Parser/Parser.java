@@ -589,6 +589,9 @@ public class Parser {
             } else if ( t.get(3) instanceof UserType ) {
                 UserType type = (UserType)t.get(3);
                 return new Declaration( Symbol.n_Field, id, type, DeclarationKind.HEAP );
+            } else if ( t.get(3) instanceof RecordType ) {
+                RecordType type = (RecordType)t.get(3);
+                return new Declaration( Symbol.n_Field, id, type, DeclarationKind.HEAP );  
             } else {
                 System.out.println( t.get(3));
                 AST_Printer printer = new AST_Printer();
@@ -597,7 +600,7 @@ public class Parser {
                 System.out.println(printer.get_ascii());
             }
             
-            System.out.println( "Something bad happend in parsin n_Field -> t_Identifier t_Colon n_User_Type" );
+            System.out.println( "Something bad happend in parsin n_Field -> t_Identifier t_Colon t_Times n_User_Type" );
             System.exit(-1);
             return null;
         });

@@ -1,13 +1,14 @@
 .section .data
 # [ String Buffers and Substitutes ]
-string2: .ascii "b.f3: %\n"
-string2subs: .ascii ""
-string1: .ascii "b.f2: %\n"
-string1subs: .ascii ""
 string0: .ascii "b.f1: %\n"
 string0subs: .ascii ""
+string1: .ascii "b.f2: %\n"
+string1subs: .ascii ""
+string2: .ascii "b.f3: %\n"
+string2subs: .ascii ""
 
 # [ Pointers to Record Layouts ]
+heap3: .space 8
 heap1: .space 8
 heap2: .space 8
 
@@ -19,12 +20,24 @@ main:
     movq %rsp, %rbp # Setup stackpointer
     subq $32, %rsp
     callq initialize_heap
-    movq $1, %rdi
+    movq $2, %rdi
     leaq -8(%rbp), %rsi
-    pushq $16
+    pushq $136
     leaq (%rsp), %rdx
     callq new_scope_header
     addq $1, %rsp
+
+# Number of Bitfields
+
+    movq $1, %rdi
+
+# Bitfields
+
+    pushq $2
+    leaq (%rsp), %rsi
+    callq new_layout
+    addq $1, %rsp
+    movq %rax, heap3
 
 # Number of Bitfields
 
@@ -44,43 +57,40 @@ main:
 
 # Bitfields
 
-    pushq $2
+    pushq $4
     leaq (%rsp), %rsi
     callq new_layout
     addq $1, %rsp
     movq %rax, heap2
     movq $1, %rdi
-    movq $heap2, %rsi
+    movq $heap3, %rsi
     callq new_ptr_size
     
-    # [[ Storing variable b ]] 
-    # [[ offset is -1 ]] 
-    movq %rax, -8(%rbp)
+    # [[ Storing variable b.f2 ]] 
+    # [[ offset is 2 ]] 
+    movq %rax, 16(%rbp)
     
     pushq $6
     popq %rax
     
-    # [[ Loading variable b ]] 
-    # [[ offset is -1 ]] 
-    movq -8(%rbp), %rbx
+    # [[ Storing variable b.f1 ]] 
+    # [[ offset is 1 ]] 
+    movq %rax, 8(%rbp)
     
-    movq %rax, 16(%rbx)
     pushq $7
     popq %rax
     
-    # [[ Loading variable b ]] 
-    # [[ offset is -1 ]] 
-    movq -8(%rbp), %rbx
+    # [[ Storing variable b.f2 ]] 
+    # [[ offset is 2 ]] 
+    movq %rax, 16(%rbp)
     
-    movq %rax, 24(%rbx)
     pushq $8
     popq %rax
     
-    # [[ Loading variable b ]] 
-    # [[ offset is -1 ]] 
-    movq -8(%rbp), %rbx
+    # [[ Storing variable b.f3 ]] 
+    # [[ offset is 3 ]] 
+    movq %rax, 24(%rbp)
     
-    movq %rax, 32(%rbx)
 
 # Setup Print
 
@@ -90,10 +100,9 @@ main:
     callq print_string
     
     # [[ Loading variable b.f1 ]] 
-    # [[ offset is 69 ]] 
-    movq 552(%rbp), %rdi
+    # [[ offset is 1 ]] 
+    movq 8(%rbp), %rdi
     
-    movq 16(%rdi), %rdi
     callq print_num
     movq $string0, %rdi
     movq $1, %rsi
@@ -111,10 +120,9 @@ main:
     callq print_string
     
     # [[ Loading variable b.f2 ]] 
-    # [[ offset is 69 ]] 
-    movq 552(%rbp), %rdi
+    # [[ offset is 2 ]] 
+    movq 16(%rbp), %rdi
     
-    movq 24(%rdi), %rdi
     callq print_num
     movq $string1, %rdi
     movq $1, %rsi
@@ -132,10 +140,9 @@ main:
     callq print_string
     
     # [[ Loading variable b.f3 ]] 
-    # [[ offset is 69 ]] 
-    movq 552(%rbp), %rdi
+    # [[ offset is 3 ]] 
+    movq 24(%rbp), %rdi
     
-    movq 32(%rdi), %rdi
     callq print_num
     movq $string2, %rdi
     movq $1, %rsi
