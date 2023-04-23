@@ -7,6 +7,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 
 import com.vuxiii.compiler.Error.Error;
 import com.vuxiii.compiler.Lexer.Tokens.PrimitiveType;
@@ -402,14 +403,23 @@ public class AST_StackMachine extends Visitor {
         String func_name = call.func_name.name;
         System.out.println( func_name );
         System.out.println( functions );
-        Assignment func = functions.get( func_name ).function;
+        // Assignment func = functions.get( func_name ).function;
 
-        push( new Instruction( Opcode.CALL, Arguments.from_label( func_name ), new Comment( "Calling function " + func_name ) ) );
+        push( new Instruction( Opcode.LOAD_VARIABLE, new Arguments( List.of( 
+            Operand.from_string( func_name ),
+            Operand.from_register( Register.RBX, AddressingMode.REGISER )
+        ))));
 
+        push( new Instruction( Opcode.CALL, new Arguments( List.of( 
+            Operand.from_register( Register.RBX, AddressingMode.FUNCTION_POINTER )
+        )), new Comment( "Calling function " + func_name ) ) );
+        // push( new Instruction( Opcode.CALL, Arguments.from_label( func_name ), new Comment( "Calling function " + func_name ) ) );
+
+        //TODO! Implement the return types.
         // Slå functionen op. Maybe it might be bigger in size.
-        if ( ((FunctionType)func.value).return_type.isPresent() ) {
-            push( new Instruction( Opcode.PUSH, Arguments.from_register( Register.RAX ) ) );
-        }
+        // if ( ((FunctionType)func.value).return_type.isPresent() ) {
+        //     push( new Instruction( Opcode.PUSH, Arguments.from_register( Register.RAX ) ) );
+        // }
 
 
     }
@@ -526,7 +536,7 @@ public class AST_StackMachine extends Visitor {
         ))) );
     }
 
-    @VisitorPattern( when = VisitOrder.EXIT_NODE )
+    @VisitorPattern( when = VisitOrder.EXIT_NODE, order = 1 )
     public void assign_value_to_var( Assignment assignment_node ) {
         if ( assignment_node.value instanceof FunctionType ) { function_depth--; return; }
         if ( function_depth != 0 ) return;
@@ -544,12 +554,39 @@ public class AST_StackMachine extends Visitor {
         }
 
         push( new Instruction( Opcode.STORE_VARIABLE, 
-                                new Arguments( List.of(new Operand( assignment_node.name(), AddressingMode.IMMEDIATE ), new Operand( Register.RAX, AddressingMode.REGISER )) ), 
+                                new Arguments( List.of(
+                                    new Operand( assignment_node.name(), AddressingMode.IMMEDIATE ), 
+                                    new Operand( Register.RAX, AddressingMode.REGISER )
+                                ) ), 
                                 new Comment( "Store in variable " + assignment_node.name() ) ) );
         
     }
 
-    @VisitorPattern( when = VisitOrder.ENTER_NODE )
+    @VisitorPattern( when = VisitOrder.ENTER_NODE, order = 2 )
+    public void assign_func_to_var( Assignment assignment_node ) {
+        if ( !(assignment_node.value instanceof FunctionType) ) return;
+        // if ( function_depth != 0 ) return;
+
+        FunctionType func = (FunctionType) assignment_node.value;
+
+        String name = assignment_node.id instanceof LexIdent ? ((LexIdent) assignment_node.id).name
+                                                             : ((NestedField)assignment_node.id).name();
+
+        push( new Instruction( Opcode.LEA, new Arguments( List.of( 
+            Operand.from_label( name ),
+            Operand.from_register(Register.RBX, AddressingMode.REGISER )
+        ))));
+
+        push( new Instruction( Opcode.STORE_VARIABLE, new Arguments( List.of( 
+            new Operand( name, AddressingMode.IMMEDIATE ),
+            Operand.from_register(Register.RBX, AddressingMode.REGISER )
+        )) ));
+
+        // System.exit(-1);
+
+    }
+
+    @VisitorPattern( when = VisitOrder.ENTER_NODE, order = 1 )
     public void increase_function_depth( Assignment function_def ) {
         if ( function_def.value instanceof FunctionType ) 
             function_depth++;

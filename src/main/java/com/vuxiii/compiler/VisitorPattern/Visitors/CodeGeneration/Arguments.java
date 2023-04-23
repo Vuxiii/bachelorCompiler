@@ -27,7 +27,7 @@ public class Arguments {
         Arguments arg = new Arguments();
         arg.operands = new ArrayList<>();
 
-        arg.operands.add( new Operand( label, AddressingMode.IMMEDIATE ) );
+        arg.operands.add( new Operand( label, AddressingMode.LABEL ) );
         arg.kind = ArgumentKind.LABEL;
         return arg;
     }

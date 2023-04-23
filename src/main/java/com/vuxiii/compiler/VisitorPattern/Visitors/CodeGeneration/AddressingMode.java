@@ -6,5 +6,5 @@ public enum AddressingMode {
     INDIRECT_MEMORY,
     IMMEDIATE,
     LABEL,
-    REGISER,
+    REGISER, FUNCTION_POINTER,
 }

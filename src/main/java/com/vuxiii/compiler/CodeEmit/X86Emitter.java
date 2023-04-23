@@ -306,8 +306,8 @@ public class X86Emitter {
                 } break;
 
                 case CALL: {
-                    // Handle argument passing.
-                    push_code( "callq " + instruction.args.get().operands.get(0).get_string() );
+                    String op = ope_string(instruction.args.get().operands.get(0));
+                    push_code( "callq " + op + " # " + instruction.args.get().operands.get(0).addressing_mode );
                 } break;
                 case MOVE: {
                     Operand ope_1 = instruction.args.get().operands.get(0);
@@ -395,6 +395,9 @@ public class X86Emitter {
     private String ope_string( Operand ope ) {
         String out = "";
         switch ( ope.addressing_mode ) {
+            case FUNCTION_POINTER: {
+                out += "*%" + getReg(ope.get_reg() );
+            } break;
             case DIRECT_MEMORY: {
                 System.out.println( ope );
                 System.out.println( "Need implement" );
@@ -412,6 +415,9 @@ public class X86Emitter {
             } break;
             case REGISER: {
                 out += "%" + getReg(ope.get_reg() );
+            } break;
+            case LABEL: {
+                out += ope.get_string();
             } break;
             case IMMEDIATE: {
                 out += "$";
@@ -436,10 +442,7 @@ public class X86Emitter {
                     } break;
                 }
             } break;
-            case LABEL: {
-                out += ope.get_string();
-            } break;
         }
         return out;
-    }
+        }
 }

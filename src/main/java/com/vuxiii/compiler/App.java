@@ -115,14 +115,18 @@ public final class App {
                 print("%\\n", a);
                 """;
         input = """
-                let fun: ();
+                let fun1: ();
+                let fun2: ();
                 let a: int;
                 a = 69;
-                fun = () {
+                fun1 = () {
                     print("a is %\\n", a);
                 };
 
-                fun();
+                fun2 = fun1;
+
+                fun2();
+                fun1();
                 """;
 
         System.out.println( input );
