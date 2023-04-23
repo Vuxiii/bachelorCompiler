@@ -1,5 +1,7 @@
 package com.vuxiii.compiler.Parser;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -57,18 +59,28 @@ public class Parser {
     private static Map<String, Type> stored_user_types = new HashMap<>();
 
     public static ASTNode getAST( List<ASTToken> tokens ) {
-        if ( g == null ) {
-            long bf = System.currentTimeMillis();
-            init();
-            long after = System.currentTimeMillis();
-            System.out.println( "Compiling the parser took: " + (after - bf) + " milliseconds");
-        }
+        ParseTable table;
+
+        if ( Files.exists( Path.of("Par.ser")) ) {
+            table = LRParser.load( "Par.ser" );
+        } else {
+            if ( g == null ) {
+                long bf = System.currentTimeMillis();
+                init();
+                long after = System.currentTimeMillis();
+                System.out.println( "Compiling the parser took: " + (after - bf) + " milliseconds");
+            }
+            
 
         
-        long bf = System.currentTimeMillis();
-        ParseTable table = LRParser.compile( g, Symbol.n_Start );
-        long after = System.currentTimeMillis();
-        System.out.println( "Parsing the input took: " + (after - bf) + " milliseconds");
+            long bf = System.currentTimeMillis();
+            table = LRParser.compile( g, Symbol.n_Start );
+            long after = System.currentTimeMillis();
+            System.out.println( "Parsing the input took: " + (after - bf) + " milliseconds");
+            LRParser.save( "Par.ser", table );
+        }
+        
+       
         
         // System.out.println( tokens );
 
@@ -87,13 +99,6 @@ public class Parser {
                 e.ast.accept( printer );
 
                 System.out.println( printer.get_ascii() );
-            } else {
-                AST_Printer printer = new AST_Printer();
-                
-                e.ast.accept( printer );
-
-                System.out.println( printer.get_ascii() );
-
             }
             System.exit(-1);
         }

@@ -1,11 +1,11 @@
 .section .data
 # [ String Buffers and Substitutes ]
-string2: .ascii "b.f3: %\n"
-string2subs: .ascii ""
 string0: .ascii "b.f1: %\n"
 string0subs: .ascii ""
 string1: .ascii "b.f2: %\n"
 string1subs: .ascii ""
+string2: .ascii "b.f3: %\n"
+string2subs: .ascii ""
 
 # [ Pointers to Record Layouts ]
 heap1: .space 8

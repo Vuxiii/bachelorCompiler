@@ -494,7 +494,6 @@ public class AST_StackMachine extends Visitor {
     public void heap_declaration( Declaration decl ) {
         if ( decl.kind != DeclarationKind.POINTER ) return;
         if ( decl.parent.get() instanceof Field ) return;
-        
 
         _register_var_heap("", decl);
     }

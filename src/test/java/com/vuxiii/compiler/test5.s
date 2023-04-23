@@ -1,12 +1,12 @@
 .section .data
 # [ String Buffers and Substitutes ]
-string2: .ascii "Else\n"
-string0: .ascii "If\n"
-string3: .ascii "If\n"
 string4: .ascii "Else if\n"
-string5: .ascii "Else\n"
+string0: .ascii "If\n"
 string1: .ascii "If\n"
+string2: .ascii "Else\n"
+string3: .ascii "If\n"
 string6: .ascii "Fix ending...\n"
+string5: .ascii "Else\n"
 
 # [ Pointers to Record Layouts ]
 
@@ -18,9 +18,9 @@ main:
     movq %rsp, %rbp # Setup stackpointer
     subq $0, %rsp
     callq initialize_heap
-    movq $1, %rdi
+    movq $0, %rdi
     leaq -8(%rbp), %rsi
-    pushq $2
+    pushq $0
     leaq (%rsp), %rdx
     callq new_scope_header
     addq $1, %rsp
@@ -36,7 +36,7 @@ main:
     movq $string0, %rdi
     movq $3, %rsi
     movq $0, %rdx
-    call print_string
+    callq print_string
 
 # End Print
 
@@ -57,7 +57,7 @@ IfEndOfBody1:
     movq $string1, %rdi
     movq $3, %rsi
     movq $0, %rdx
-    call print_string
+    callq print_string
 
 # End Print
 
@@ -69,7 +69,7 @@ IfEndOfBody2:
     movq $string2, %rdi
     movq $5, %rsi
     movq $0, %rdx
-    call print_string
+    callq print_string
 
 # End Print
 
@@ -91,7 +91,7 @@ EndOfIfBlocks1:
     movq $string3, %rdi
     movq $3, %rsi
     movq $0, %rdx
-    call print_string
+    callq print_string
 
 # End Print
 
@@ -109,7 +109,7 @@ IfEndOfBody3:
     movq $string4, %rdi
     movq $8, %rsi
     movq $0, %rdx
-    call print_string
+    callq print_string
 
 # End Print
 
@@ -121,7 +121,7 @@ IfEndOfBody4:
     movq $string5, %rdi
     movq $5, %rsi
     movq $0, %rdx
-    call print_string
+    callq print_string
 
 # End Print
 
@@ -135,7 +135,7 @@ EndOfIfBlocks2:
     movq $string6, %rdi
     movq $14, %rsi
     movq $0, %rdx
-    call print_string
+    callq print_string
 
 # End Print
 
