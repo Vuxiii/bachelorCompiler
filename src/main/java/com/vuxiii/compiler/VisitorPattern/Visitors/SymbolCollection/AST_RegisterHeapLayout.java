@@ -11,7 +11,7 @@ public class AST_RegisterHeapLayout extends VisitorBase {
 
     @VisitorPattern( when = VisitOrder.ENTER_NODE )
     public void register_var( Declaration decl ) {
-        if ( decl.kind != DeclarationKind.HEAP ) return;
+        if ( decl.kind != DeclarationKind.POINTER ) return;
 
         decl.heap_layout = new HeapLayout(decl);
 
@@ -24,7 +24,7 @@ public class AST_RegisterHeapLayout extends VisitorBase {
 
         if ( record.parent.get() instanceof Declaration ) {
             Declaration decl = (Declaration)record.parent.get();
-            if ( decl.kind == DeclarationKind.HEAP ) {
+            if ( decl.kind == DeclarationKind.POINTER ) {
                 
                 AST_SymbolCollector.current_symbol_node(decl).heap_layouts.put( decl.id.name, record.heap_layout );
             }

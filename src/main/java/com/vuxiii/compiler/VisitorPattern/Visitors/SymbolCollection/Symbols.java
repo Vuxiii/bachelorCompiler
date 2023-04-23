@@ -13,6 +13,7 @@ import com.vuxiii.compiler.Parser.Nodes.Declaration;
 import com.vuxiii.compiler.Parser.Nodes.DeclarationKind;
 import com.vuxiii.compiler.Parser.Nodes.Field;
 import com.vuxiii.compiler.Parser.Nodes.Types.RecordType;
+import com.vuxiii.compiler.Parser.Nodes.Types.StandardType;
 import com.vuxiii.compiler.Parser.Nodes.Types.Type;
 import com.vuxiii.compiler.VisitorPattern.Visitors.Debug.AST_Printer;
 
@@ -25,7 +26,7 @@ public class Symbols {
     private int current_parameter_offset = 2;
     
     public Map<String, OffsetLogic> variable_offsets = new HashMap<>();
-    private int current_variable_offset = 1;
+    private int current_variable_offset = 2;
 
     private Set<String> is_var_heap_allocated = new HashSet<>();
 
@@ -73,32 +74,58 @@ public class Symbols {
         local_vars.put( decl.id.name, decl.id );
         OffsetLogic off = new OffsetLogic();
         off.add( -current_variable_offset, false );
+        off.add( 0, false );
+        
         variable_offsets.put( decl.id.name, off );
 
         int fieldOffset = 2;
+
         for ( Field f : type.fields.fields ) {
             String name = decl.id.name + "." + f.field.id.name;
             local_vars.put( name, f.field.id );
-            if ( decl.kind != DeclarationKind.HEAP ) {
+            if ( decl.kind != DeclarationKind.POINTER ) {
+                // Check if the field is a pointer
                 OffsetLogic offlogic = new OffsetLogic();
-                offlogic.add( current_variable_offset++, false );
+                offlogic.add( -current_variable_offset, false );
+                current_variable_offset++;
+
+                if ( f.field.kind == DeclarationKind.POINTER ) {
+                    if ( f.field.type instanceof StandardType ) {
+                        offlogic.add( 2, true );
+                    } else if ( f.field.type instanceof RecordType ) {
+                        add_record_layout_on_heap((RecordType)f.field.type, offlogic);
+                    } else {
+                        System.out.println( "Unknown type in Symbols.java symbolcollection" );
+                        AST_Printer print = new AST_Printer();
+                        decl.accept( print );
+                        System.out.println( print.get_ascii() );
+                        System.exit(-1);
+                    }
+                    System.out.println( "ADDED " + name + ", on the stack. It is a pointer.");
+
+                } else {
+                    System.out.println( "ADDED " + name + ", on the stack. It is not a pointer.");
+                }
                 
                 variable_offsets.put( name, offlogic );
-                System.out.println( "ADDED " + name );
             } else {
-                identifier_is_heap_allocated( name );
                 OffsetLogic offlogic = new OffsetLogic();
                 offlogic.add( off.offsets.get(0), false );
                 offlogic.add( fieldOffset++, true );
-                variable_offsets.put( name, offlogic );
+                
+                if ( f.field.kind == DeclarationKind.POINTER ) {
+                    offlogic.add( 2, true );
+                } 
                 System.out.println( "It is on heap.... " + name );
+                variable_offsets.put( name, offlogic );
+                
             }
         }
         System.out.println( variable_offsets );
     }
 
-    public void identifier_is_heap_allocated( String identifier ) {
-        is_var_heap_allocated.add( identifier );
+    private void add_record_layout_on_heap( RecordType rec, OffsetLogic logic ) {
+
     }
 
     public void add_capture( LexIdent variable ) {
@@ -115,11 +142,6 @@ public class Symbols {
         return var;
     }
 
-    public boolean is_on_heap( String variable_name ) {
-        System.out.println( is_var_heap_allocated );
-        System.out.println( variable_name );
-        return is_var_heap_allocated.contains( variable_name );
-    }
 
     public LexIdent lookup_capture( String variable_name ) {
         if ( local_vars.containsKey( variable_name ) )
@@ -155,7 +177,7 @@ public class Symbols {
         System.out.println("============================");
         System.out.println( variable_offsets );
         System.out.println("============================");
-            return variable_offsets.get(variable);
+        return variable_offsets.get(variable);
     }
 
     public boolean can_access( String variable ) {

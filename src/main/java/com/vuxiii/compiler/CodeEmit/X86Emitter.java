@@ -234,7 +234,7 @@ public class X86Emitter {
                     OffsetLogic offsets = var_offsets.get( var );
 
                     push_code ( "" );
-                    push_code ("# [[ Storing variable " + var + " ]] " );
+                    push_code ("# [[ Storing variable " + var + " " + offsets.offsets  + " ]] " );
                     for ( int i = 0; i < offsets.size(); ++i ) {
                         push_code ("# [[ offset is " + offsets.offsets.get(i) + " ]] " );
                         if ( i == offsets.size()-1 && i == 0 ) 
@@ -244,11 +244,35 @@ public class X86Emitter {
                         else if ( i == 0 )
                             push_code( "movq " + (offsets.offsets.get(i)*8) + "(" + ope_string(rbp) + "), " + ope_string(rbx) );
                         else
-                           push_code( "movq " + (offsets.offsets.get(i)*8) + "(" + ope_string(rbx) + "), " + ope_string(rbx) );
+                            push_code( "movq " + (offsets.offsets.get(i)*8) + "(" + ope_string(rbx) + "), " + ope_string(rbx) );
                     }
                     
                     push_code ( "" );
 
+                } break;
+
+                case STORE_POINTER: {
+                    String var = instruction.args.get().operands.get(0).get_string();
+                    Operand src_1 = instruction.args.get().operands.get(1);
+                    System.out.println( var );
+                    System.out.println( var_offsets );
+                    OffsetLogic offsets = var_offsets.get( var );
+
+                    push_code ( "" );
+                    push_code ("# [[ Storing pointer " + var + " " + offsets.offsets + " ]] " );
+                    for ( int i = 0; i < offsets.size()-1; ++i ) {
+                        push_code ("# [[ offset is " + offsets.offsets.get(i) + " ]] " );
+                        if ( i == offsets.size()-2 && i == 0 ) 
+                            push_code( "movq " + ope_string(src_1) + ", " + (offsets.offsets.get(i)*8) + "(" + ope_string(rbp) + ")" );
+                        else if ( i == offsets.size()-2 )
+                            push_code( "movq " + ope_string(src_1) + ", " + (offsets.offsets.get(i)*8) + "(" + ope_string(rbx) + ")" );
+                        else if ( i == 0 )
+                            push_code( "movq " + (offsets.offsets.get(i)*8) + "(" + ope_string(rbp) + "), " + ope_string(rbx) );
+                        else
+                            push_code( "movq " + (offsets.offsets.get(i)*8) + "(" + ope_string(rbx) + "), " + ope_string(rbx) );
+                    }
+                    
+                    push_code ( "" );
                 } break;
                 
                 

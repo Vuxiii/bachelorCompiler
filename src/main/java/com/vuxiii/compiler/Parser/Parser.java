@@ -220,18 +220,18 @@ public class Parser {
                 
                 stored_user_types.putIfAbsent( id.matchInfo.str(), type );
                 
-                return new Declaration( Symbol.n_Declaration_Variable, id, type, DeclarationKind.HEAP );
+                return new Declaration( Symbol.n_Declaration_Variable, id, type, DeclarationKind.POINTER );
             } else if (t.get(4) instanceof StandardType ) { 
                 StandardType type = (StandardType)t.get(4); 
-                return new Declaration( Symbol.n_Declaration_Variable, id, type, DeclarationKind.HEAP );
+                return new Declaration( Symbol.n_Declaration_Variable, id, type, DeclarationKind.POINTER );
             } else if ( t.get(4) instanceof LexIdent ) {
                 LexIdent ident = (LexIdent)t.get(4);             
                 Type type = stored_user_types.get( ident.name );
                 
                 if ( type == null )
-                    return new Declaration( Symbol.n_Declaration_Variable, id, new UnknownType(Symbol.n_Declaration_Variable, ident ), DeclarationKind.HEAP );
+                    return new Declaration( Symbol.n_Declaration_Variable, id, new UnknownType(Symbol.n_Declaration_Variable, ident ), DeclarationKind.POINTER );
 
-                return new Declaration( Symbol.n_Declaration_Variable, id, type, DeclarationKind.HEAP );
+                return new Declaration( Symbol.n_Declaration_Variable, id, type, DeclarationKind.POINTER );
             } else if ( t.get(4) instanceof FunctionType ) {
                 FunctionType type = (FunctionType)t.get(4);    
                 stored_user_types.putIfAbsent( id.matchInfo.str(), type );
@@ -244,10 +244,10 @@ public class Parser {
                 return new Declaration( Symbol.n_Declaration_Variable, id, type, DeclarationKind.UNKNOWN );
             } else if ( t.get(4) instanceof UserType ) {
                 UserType type = (UserType)t.get(4);
-                return new Declaration( Symbol.n_Declaration_Variable, id, type, DeclarationKind.HEAP );
+                return new Declaration( Symbol.n_Declaration_Variable, id, type, DeclarationKind.POINTER );
             } else if ( t.get(4) instanceof RecordType ) {
                 RecordType type = (RecordType)t.get(4);
-                return new Declaration( Symbol.n_Declaration_Variable, id, type, DeclarationKind.HEAP );
+                return new Declaration( Symbol.n_Declaration_Variable, id, type, DeclarationKind.POINTER );
             }
             System.out.println("--[[ Parser Error ]]--\nSomething happend trying to parse a user type. It is not a UserType or an Identifier. So what is it?" );
             System.out.println( t.get(4) );
@@ -516,7 +516,7 @@ public class Parser {
             LexIdent id = (LexIdent)t.get(0);
             StandardType type = (StandardType)t.get(3);
             
-            return new Declaration( Symbol.n_Field, id, type, DeclarationKind.HEAP );
+            return new Declaration( Symbol.n_Field, id, type, DeclarationKind.POINTER );
         });
 
 
@@ -575,7 +575,7 @@ public class Parser {
 
                 stored_user_types.putIfAbsent( id.matchInfo.str(), type );
                 
-                return new Declaration( Symbol.n_Field, id, type, DeclarationKind.HEAP );
+                return new Declaration( Symbol.n_Field, id, type, DeclarationKind.POINTER );
                 
             } else if ( t.get(3) instanceof Field ) {
 
@@ -584,14 +584,14 @@ public class Parser {
                 
                 stored_user_types.putIfAbsent( id.matchInfo.str(), type );
                 
-                return new Declaration( Symbol.n_Field, id, type, DeclarationKind.HEAP );
+                return new Declaration( Symbol.n_Field, id, type, DeclarationKind.POINTER );
 
             } else if ( t.get(3) instanceof UserType ) {
                 UserType type = (UserType)t.get(3);
-                return new Declaration( Symbol.n_Field, id, type, DeclarationKind.HEAP );
+                return new Declaration( Symbol.n_Field, id, type, DeclarationKind.POINTER );
             } else if ( t.get(3) instanceof RecordType ) {
                 RecordType type = (RecordType)t.get(3);
-                return new Declaration( Symbol.n_Field, id, type, DeclarationKind.HEAP );  
+                return new Declaration( Symbol.n_Field, id, type, DeclarationKind.POINTER );  
             } else {
                 System.out.println( t.get(3));
                 AST_Printer printer = new AST_Printer();

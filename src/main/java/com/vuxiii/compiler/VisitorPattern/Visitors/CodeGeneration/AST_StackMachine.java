@@ -484,7 +484,7 @@ public class AST_StackMachine extends Visitor {
         String prefix = decl.id.name + ".";
         for ( Field field : record.fields.fields ) {
             Declaration d = field.field;
-            if ( d.kind == DeclarationKind.HEAP ) {
+            if ( d.kind == DeclarationKind.POINTER ) {
                 _register_var_heap( prefix, d);
             }
         }
@@ -492,7 +492,7 @@ public class AST_StackMachine extends Visitor {
 
     @VisitorPattern( when = VisitOrder.ENTER_NODE, order = 1 )
     public void heap_declaration( Declaration decl ) {
-        if ( decl.kind != DeclarationKind.HEAP ) return;
+        if ( decl.kind != DeclarationKind.POINTER ) return;
         if ( decl.parent.get() instanceof Field ) return;
         
 
@@ -501,7 +501,6 @@ public class AST_StackMachine extends Visitor {
 
     private void _register_var_heap( String prefix, Declaration var ) {
         LexIdent id = var.id;
-        AST_SymbolCollector.current_scope(var).identifier_is_heap_allocated(prefix + id.name);
 
         String layout_name = var.heap_layout.name;
         
@@ -522,7 +521,7 @@ public class AST_StackMachine extends Visitor {
 
         // Move it to the correct location.
 
-        push( new Instruction( Opcode.STORE_VARIABLE, new Arguments(List.of(
+        push( new Instruction( Opcode.STORE_POINTER, new Arguments(List.of(
             Operand.from_string( prefix + id.name ),
             Operand.from_register(Register.RAX, AddressingMode.REGISER )
         ))) );
@@ -545,34 +544,9 @@ public class AST_StackMachine extends Visitor {
                                 new Comment( "Fetching value" ) ) );
         }
 
-        // if ( AST_SymbolCollector.current_scope( assignment_node.id ).is_on_heap( assignment_node.name() ) ) {
-        //     String var_name = assignment_node.name();
-        //     Operand var = new Operand( var_name.substring(0, var_name.indexOf(".") ), AddressingMode.IMMEDIATE );
-        //     Symbols scope = AST_SymbolCollector.current_scope(assignment_node);
-        //     boolean target_is_parameter = scope.get_parameters().contains( var_name );
-
-        //     push( new Instruction( Opcode.LOAD_VARIABLE, 
-        //                         new Arguments( List.of(var, Operand.from_register(Register.RBX, AddressingMode.REGISER)) ), 
-        //                         new Comment( "Load variable " + var_name.substring(0, var_name.indexOf(".") )),
-        //                         target_is_parameter ) );
-            
-        //     Operand rbx = Operand.from_register( Register.RBX, AddressingMode.DIRECT_OFFSET );
-        //     HeapLayout heap_layout = AST_SymbolCollector.current_symbol_node(assignment_node).get_heap_layout(var_name);
-
-        //     String field = var_name.substring(var_name.lastIndexOf(".")+1);
-
-        //     System.out.println( assignment_node.name());
-        //     System.out.println(heap_layout.var_offset);
-
-        //     rbx.offset = (int)(long)heap_layout.var_offset.get(field); 
-
-        //     push( new Instruction( Opcode.MOVE, new Arguments( List.of( Operand.from_register( Register.RAX, AddressingMode.REGISER ), rbx ) ) ) );
-        // } else {
-            push( new Instruction( Opcode.STORE_VARIABLE, 
-                                    new Arguments( List.of(new Operand( assignment_node.name(), AddressingMode.IMMEDIATE ), new Operand( Register.RAX, AddressingMode.REGISER )) ), 
-                                    new Comment( "Store in variable " + assignment_node.name() ) ) );
-
-        // }
+        push( new Instruction( Opcode.STORE_VARIABLE, 
+                                new Arguments( List.of(new Operand( assignment_node.name(), AddressingMode.IMMEDIATE ), new Operand( Register.RAX, AddressingMode.REGISER )) ), 
+                                new Comment( "Store in variable " + assignment_node.name() ) ) );
         
     }
 
@@ -700,30 +674,10 @@ public class AST_StackMachine extends Visitor {
         Symbols scope = AST_SymbolCollector.current_scope(id);
         boolean target_is_parameter = scope.get_parameters().contains( var_name );
 
-        if ( scope.is_on_heap( var_name ) ) {
-            List<Instruction> li = new ArrayList<>();
-            li.add( new Instruction( Opcode.LOAD_VARIABLE, 
-                                new Arguments( List.of(var, target) ), 
-                                new Comment( "Load variable " + var_name ),
-                                target_is_parameter ) );
-            // Operand inter = Operand.from_register( target.get_reg(), AddressingMode.DIRECT_OFFSET );
-            
-            // String field = var_name.substring(var_name.lastIndexOf(".")+1);
-            // HeapLayout heap_layout = AST_SymbolCollector.current_symbol_node(id).get_heap_layout(var_name);
-            
-            
-            // inter.offset = (int)(long)heap_layout.var_offset.get(field);
-            
-
-            // li.add( new Instruction( Opcode.MOVE, new Arguments( List.of( inter, target ) ) ) );
-
-            return li;
-        } else {
-            return List.of(new Instruction( Opcode.LOAD_VARIABLE, 
-                                new Arguments( List.of(var, target) ), 
-                                new Comment( "Load variable " + var_name ),
-                                target_is_parameter ) );
-        }
+        return List.of(new Instruction( Opcode.LOAD_VARIABLE, 
+                            new Arguments( List.of(var, target) ), 
+                            new Comment( "Load variable " + var_name ),
+                            target_is_parameter ) );
     }
 
     /**
@@ -736,29 +690,10 @@ public class AST_StackMachine extends Visitor {
         Symbols scope = AST_SymbolCollector.current_scope(id);
         boolean target_is_parameter = scope.get_parameters().contains( var_name );
 
-        if ( scope.is_on_heap( var_name ) ) {
-            List<Instruction> li = new ArrayList<>();
-            li.add( new Instruction( Opcode.LOAD_VARIABLE, 
-                                new Arguments( List.of(var, target) ), 
-                                new Comment( "Load variable " + var_name ),
-                                target_is_parameter ) );
-            // Operand inter = Operand.from_register( target.get_reg(), AddressingMode.DIRECT_OFFSET );
-            
-            // String field = var_name.substring(var_name.lastIndexOf(".")+1);
-            // HeapLayout heap_layout = AST_SymbolCollector.current_symbol_node(id).get_heap_layout(var_name);
-            
-            
-            // inter.offset = (int)(long)heap_layout.var_offset.get(field);
-            
-            // li.add( new Instruction( Opcode.MOVE, new Arguments( List.of( inter, target ) ) ) );
-
-            return li;
-        } else {
-            return List.of(new Instruction( Opcode.LOAD_VARIABLE, 
-                                new Arguments( List.of(var, target) ), 
-                                new Comment( "Load variable " + var_name ),
-                                target_is_parameter ) );
-        }
+        return List.of(new Instruction( Opcode.LOAD_VARIABLE, 
+                            new Arguments( List.of(var, target) ), 
+                            new Comment( "Load variable " + var_name ),
+                            target_is_parameter ) );
     }
 
 }

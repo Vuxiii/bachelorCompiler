@@ -193,7 +193,6 @@ public final class App {
 
                 """;
         input = """
-                type Int: { var: int; };
                 type rec: {
                     f1: int;
                     f2: *int;
@@ -209,7 +208,6 @@ public final class App {
                 print( "b.f1: %\\n", b.f1 );
                 print( "b.f2: %\\n", b.f2 );
                 print( "b.f3: %\\n", b.f3 );
-
                 """;
         // let a: *int;
         // a = 3;
