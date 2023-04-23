@@ -1,0 +1,27 @@
+[200~.section .text
+fun:
+    pushq %rbp
+    movq %rsp, %rbp # Setup stackpointer
+    
+# Setup Print
+
+    movq , %rdi
+    movq , %rsi
+    movq /bin/zsh, %rdx
+    callq print_string
+
+    movq (%rbp), %rdi
+    movq -8(%rdi), %rdi
+    callq print_num
+    movq , %rdi
+    movq , %rsi
+    movq , %rdx
+    callq print_string
+
+
+# End Print
+
+    movq %rbp, %rsp # Restore stackpointer
+    popq %rbp
+    retq
+

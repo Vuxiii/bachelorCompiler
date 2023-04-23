@@ -95,6 +95,35 @@ public final class App {
                 print( "b.f2: %\\n", b.f2 );
                 print( "b.f3: %\\n", b.f3 );
                 """;
+        input = """ 
+                let fun: () -> void;
+                let a: int;
+                a = 0;
+                fun = () -> void {
+                    print("%\\n", a);
+                    let inner: () -> void;
+                    inner = () -> void {
+                        let a: int;
+                        a = 1;
+                        print("%\\n", a);
+                    };
+                    print("%\\n", a);
+                    a = 2;
+                };
+
+                fun();
+                print("%\\n", a);
+                """;
+        input = """
+                let fun: ();
+                let a: int;
+                a = 69;
+                fun = () {
+                    print("a is %\\n", a);
+                };
+
+                fun();
+                """;
 
         System.out.println( input );
 

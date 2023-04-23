@@ -76,7 +76,7 @@ public class AST_SymbolCollector extends VisitorBase {
         if ( !(func_assignment.value instanceof FunctionType) ) return;
         if ( !(func_assignment.id instanceof LexIdent) ) return;
         SymbolNode parent_scope = current_symbol_node(func_assignment);
-        Symbols new_scope = new Symbols( );
+        Symbols new_scope = new Symbols();
 
         new_scope.add_variable( (LexIdent)func_assignment.id, false ); // Name of function
         System.out.println( "Adding " + func_assignment.id + " to scope " + new_scope);
@@ -90,6 +90,8 @@ public class AST_SymbolCollector extends VisitorBase {
         functions.add( func_assignment );
 
         scope_map.put( "function " + func_assignment.name(), new_scope );
+
+        new_scope.register_static_scope( parent_scope.scope );
     }
 
     @VisitorPattern( when = VisitOrder.ENTER_NODE, order = 1 )

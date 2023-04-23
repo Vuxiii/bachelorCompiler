@@ -187,4 +187,28 @@ public class Symbols {
     public String toString() {
         return "Params" + parameters.keySet().toString() + " | Vars: " + local_vars.keySet().toString() ;
     }
+
+    public void register_static_scope( Symbols parent ) {
+
+        // Add for static_scope
+        for ( String name : parent.get_variables() ) {
+            System.out.println( name );
+            System.out.println( parent.variable_offsets.get(name) );
+
+            OffsetLogic parent_logic = parent.variable_offsets.get(name);
+            
+            OffsetLogic logic = new OffsetLogic();
+
+            logic.add( 0, false );
+
+            for ( int i = 0; i < parent_logic.size(); ++i ) {
+                Integer offset = parent_logic.offsets.get( i );
+                logic.add( offset, parent_logic.onHeap.get( i ) );
+            }
+
+            variable_offsets.put( name, logic );
+        }
+        
+        System.out.println( variable_offsets );
+    }
 }

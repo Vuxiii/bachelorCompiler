@@ -208,6 +208,8 @@ public class X86Emitter {
                     Operand var = instruction.args.get().operands.get(0);
                     Operand target = instruction.args.get().operands.get(1);
                     
+                    System.out.println( "Trying to load " + var.get_string() );
+
                     OffsetLogic offsets = var_offsets.get( var.get_string() );
 
                     push_code ( "" );

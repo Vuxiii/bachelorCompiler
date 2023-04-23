@@ -131,8 +131,8 @@ public class AST_StackMachine extends Visitor {
         }
 
         // Make room for our main function's variables!
-
-        int total_variables_in_main = ((SymbolNode)root.node).scope.get_variables().size();
+        // 1 is for the stackpointer layout
+        int total_variables_in_main = 1 + ((SymbolNode)root.node).scope.get_variables().size();
         int total_offset = total_variables_in_main*8;
 
         Operand left = new Operand( total_offset, AddressingMode.IMMEDIATE );
