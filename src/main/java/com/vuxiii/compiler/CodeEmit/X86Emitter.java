@@ -134,8 +134,10 @@ public class X86Emitter {
 
         for ( String function : functions.keySet() ) {
             FunctionBlock fb = functions.get(function);
-            
-            _run( fb.instructions, scopes.get( "function " + function ) );
+            System.out.println( function );
+            System.out.println( scopes );
+            if ( scopes.containsKey( "function " + function ) )
+                _run( fb.instructions, scopes.get( "function " + function ) );
             
         }
 
@@ -301,6 +303,8 @@ public class X86Emitter {
                 } break;
 
                 case RETURN: {
+                    push_code( "movq %rbp, %rsp" );
+                    push_code( "popq %rbp" );
                     push_code( "retq" );
                     push_code( "" );
                 } break;

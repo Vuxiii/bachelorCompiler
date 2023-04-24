@@ -23,7 +23,7 @@ public class AST_Shrinker_Argument_Collector extends VisitorBase {
 
     public Map<Argument, ArgumentList> mapper = new HashMap<>();
 
-    @VisitorPattern( when = VisitOrder.ENTER_NODE )
+    @VisitorPattern( when = VisitOrder.ENTER_NODE, order = 1 )
     public void collect( Argument arg ) {
         if ( visited.contains( arg ) ) return;
         if ( arg.next.isEmpty() ) return;

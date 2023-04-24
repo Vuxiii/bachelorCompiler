@@ -2,11 +2,13 @@
 # [ String Buffers and Substitutes ]
 string0: .ascii "a is %\n"
 string0subs: .ascii ""
+string1: .ascii "The %th fib number is: %\n"
+string1subs: .ascii ""
 
 # [ Pointers to Record Layouts ]
 
 .section .text
-fun1:
+fib:
     pushq %rbp
     movq %rsp, %rbp # Setup stackpointer
     subq $8, %rsp
@@ -18,11 +20,8 @@ fun1:
     addq $1, %rsp
     
     # [[ Loading variable a ]] 
-    # [[ offset is 0 ]] 
-    movq 0(%rbp), %rax
-    
-    # [[ offset is -4 ]] 
-    movq -32(%rax), %rax
+    # [[ offset is 2 ]] 
+    movq 16(%rbp), %rax
     
     pushq %rax
 
@@ -34,11 +33,8 @@ fun1:
     callq print_string
     
     # [[ Loading variable a ]] 
-    # [[ offset is 0 ]] 
-    movq 0(%rbp), %rdi
-    
-    # [[ offset is -4 ]] 
-    movq -32(%rdi), %rdi
+    # [[ offset is 2 ]] 
+    movq 16(%rbp), %rdi
     
     callq print_num
     movq $string0, %rdi
@@ -48,8 +44,81 @@ fun1:
 
 # End Print
 
+    pushq $1
+    popq %rcx
+    
+    # [[ Loading variable a ]] 
+    # [[ offset is 2 ]] 
+    movq 16(%rbp), %rbx
+    
+    cmpq %rbx, %rcx
+    jne IfEndOfBody1
     callq release_scope_header # LABEL
+    pushq $1
+    popq %rax
+    movq %rbp, %rsp
+    popq %rbp
+    retq
+    
+    jmp EndOfIfBlocks1
+IfEndOfBody1:
+    pushq $2
+    popq %rcx
+    
+    # [[ Loading variable a ]] 
+    # [[ offset is 2 ]] 
+    movq 16(%rbp), %rbx
+    
+    cmpq %rbx, %rcx
+    jne IfEndOfBody2
+    callq release_scope_header # LABEL
+    pushq $1
+    popq %rax
+    movq %rbp, %rsp
+    popq %rbp
+    retq
+    
+IfEndOfBody2:
+    jmp EndOfIfBlocks1
+EndOfIfBlocks1:
+    callq release_scope_header # LABEL
+    pushq $1
+    popq %rcx
+    
+    # [[ Loading variable a ]] 
+    # [[ offset is 2 ]] 
+    movq 16(%rbp), %rbx
+    
+    subq %rcx, %rbx
+    movq %rbx, %rax
+    pushq %rax
+    callq fib # LABEL
+    pushq %rax
+    pushq $2
+    popq %rcx
+    
+    # [[ Loading variable a ]] 
+    # [[ offset is 2 ]] 
+    movq 16(%rbp), %rbx
+    
+    subq %rcx, %rbx
+    movq %rbx, %rax
+    pushq %rax
+    callq fib # LABEL
+    pushq %rax
+    popq %rcx
+    popq %rbx
+    addq %rcx, %rbx
+    movq %rbx, %rax
+    pushq %rax
+    popq %rax
+    movq %rbp, %rsp
+    popq %rbp
+    retq
+    
     movq %rbp, %rsp # Restore stackpointer
+    popq %rbp
+    movq %rbp, %rsp
     popq %rbp
     retq
     
@@ -58,7 +127,7 @@ fun1:
 main:
     pushq %rbp
     movq %rsp, %rbp # Setup stackpointer
-    subq $32, %rsp
+    subq $24, %rsp
     callq initialize_heap # LABEL
     movq $0, %rdi
     leaq -8(%rbp), %rsi
@@ -66,41 +135,59 @@ main:
     leaq (%rsp), %rdx
     callq new_scope_header # LABEL
     addq $1, %rsp
-    pushq $69
-    popq %rax
+    leaq fib, %rbx
     
-    # [[ Storing variable a [-4] ]] 
-    # [[ offset is -4 ]] 
-    movq %rax, -32(%rbp)
-    
-    leaq fun1, %rbx
-    
-    # [[ Storing variable fun1 [-2] ]] 
+    # [[ Storing variable fib [-2] ]] 
     # [[ offset is -2 ]] 
     movq %rbx, -16(%rbp)
     
+    pushq $4
+    popq %rax
     
-    # [[ Loading variable fun1 ]] 
-    # [[ offset is -2 ]] 
-    movq -16(%rbp), %rax
-    
-    
-    # [[ Storing variable fun2 [-3] ]] 
+    # [[ Storing variable n [-3] ]] 
     # [[ offset is -3 ]] 
     movq %rax, -24(%rbp)
     
     
-    # [[ Loading variable fun2 ]] 
+    # [[ Loading variable n ]] 
     # [[ offset is -3 ]] 
-    movq -24(%rbp), %rbx
+    movq -24(%rbp), %rax
     
-    callq *%rbx # FUNCTION_POINTER
+    pushq %rax
     
-    # [[ Loading variable fun1 ]] 
-    # [[ offset is -2 ]] 
-    movq -16(%rbp), %rbx
+    # [[ Loading variable n ]] 
+    # [[ offset is -3 ]] 
+    movq -24(%rbp), %rax
     
-    callq *%rbx # FUNCTION_POINTER
+    pushq %rax
+    callq fib # LABEL
+    pushq %rax
+
+# Setup Print
+
+    movq $string1, %rdi
+    movq $4, %rsi
+    movq $0, %rdx
+    callq print_string
+    
+    # [[ Loading variable n ]] 
+    # [[ offset is -3 ]] 
+    movq -24(%rbp), %rdi
+    
+    callq print_num
+    movq $string1, %rdi
+    movq $18, %rsi
+    movq $5, %rdx
+    callq print_string
+    popq %rdi
+    callq print_num
+    movq $string1, %rdi
+    movq $1, %rsi
+    movq $24, %rdx
+    callq print_string
+
+# End Print
+
     movq %rbp, %rsp # Restore stackpointer
     popq %rbp
     

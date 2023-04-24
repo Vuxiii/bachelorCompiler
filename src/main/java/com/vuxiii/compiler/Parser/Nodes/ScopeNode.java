@@ -13,7 +13,7 @@ public class ScopeNode extends ASTNode {
     public Optional<Capture> capture;
 
     @VisitNumber( number = 2 ) 
-    public Statement body;
+    public ASTNode body;
     
     public ScopeNode( Term term, Statement body ) {
         super( term ); 

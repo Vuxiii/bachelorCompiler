@@ -20,7 +20,7 @@ public class AST_Shrinker_Statement extends VisitorBase {
         this.mapper = mapper;
     }
 
-    @VisitorPattern( when = VisitOrder.AFTER_CHILD )
+    @VisitorPattern( when = VisitOrder.AFTER_CHILD, order = 1 )
     public void set_new_child_statement( ASTNode node ) {
         if ( !mapper.containsKey( prev ) ) return;
 
@@ -28,7 +28,7 @@ public class AST_Shrinker_Statement extends VisitorBase {
 
     }
 
-    @VisitorPattern( when = VisitOrder.EXIT_NODE )
+    @VisitorPattern( when = VisitOrder.EXIT_NODE, order = 1 )
     public void reset( Statement stmt ) {
         prev = stmt;
     }

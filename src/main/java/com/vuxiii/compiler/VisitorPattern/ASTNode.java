@@ -213,11 +213,11 @@ public abstract class ASTNode implements ASTToken {
         Comparator<Method> comparator = Comparator.comparing(method -> method.getAnnotation( VisitorPattern.class ).order(), Comparator.naturalOrder() );
         
         // Probably allocate once, and after each new visitor just clear them...
-        TreeSet<Method> enterMethodQueue = new TreeSet<>( comparator );
-        TreeSet<Method> exitMethodQueue = new TreeSet<>( comparator );
+        TreeSet<Method> enterMethodQueue  = new TreeSet<>( comparator );
+        TreeSet<Method> exitMethodQueue   = new TreeSet<>( comparator );
         TreeSet<Method> beforeMethodQueue = new TreeSet<>( comparator );
-        TreeSet<Method> afterMethodQueue = new TreeSet<>( comparator );
-
+        TreeSet<Method> afterMethodQueue  = new TreeSet<>( comparator );
+        
         // Collect all the methods from the visitor that are marked with the Visitor Pattern
         
         Method[] methods = visitor.getClass().getMethods();

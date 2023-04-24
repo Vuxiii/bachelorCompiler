@@ -30,7 +30,7 @@ public class AST_RegisterStackFrames extends VisitorBase {
 
     Set<Declaration> ignore_list = new HashSet<>();
 
-    @VisitorPattern( when = VisitOrder.ENTER_NODE )
+    @VisitorPattern( when = VisitOrder.ENTER_NODE, order = 1 )
     public void register_root( Root root ) {
         StackFrame frame = new StackFrame();
 
@@ -39,7 +39,7 @@ public class AST_RegisterStackFrames extends VisitorBase {
 
     }
 
-    @VisitorPattern( when = VisitOrder.ENTER_NODE )
+    @VisitorPattern( when = VisitOrder.ENTER_NODE, order = 1 )
     public void register_var( Declaration decl ) {
         if ( decl.kind != DeclarationKind.VARIABLE && decl.kind != DeclarationKind.FIELD && decl.kind != DeclarationKind.POINTER ) return;
         if ( ignore_list.contains( decl ) ) return;
@@ -53,7 +53,7 @@ public class AST_RegisterStackFrames extends VisitorBase {
         AST_SymbolCollector.current_symbol_node(decl).stack_frame.register_variable(decl);
     }
 
-    @VisitorPattern( when = VisitOrder.ENTER_NODE )
+    @VisitorPattern( when = VisitOrder.ENTER_NODE, order = 1 )
     public void register_function( Assignment func_assignment ) {
         // if ( func_assignment.)
     }

@@ -24,5 +24,5 @@ public @interface  VisitorPattern {
      * share the same VisitOrder directive.
      * @return The number in the queue when this method will be called.
      */
-    int order() default 1;
+    int order();
 }
