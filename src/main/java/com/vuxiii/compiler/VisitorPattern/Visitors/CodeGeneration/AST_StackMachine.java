@@ -669,6 +669,7 @@ public class AST_StackMachine extends Visitor {
 
                     offset += sub_len + 1;
                 } else /*if ( exp.node instanceof LexLiteral && ((LexLiteral)exp.node).literal_type.equals( PrimitiveType.INT ) ) */ {
+                    /* This should just pop in reverse order into rdi. The values have already been calculated and are located on the stack - IN REVERSE ORDER!
                     if ( exp.node instanceof LexIdent ) {
                         push( _load_var( (LexIdent)exp.node, Operand.from_register( Register.RDI, AddressingMode.REGISER ) ) );
                     } else if ( exp.node instanceof NestedField ) {
@@ -690,8 +691,15 @@ public class AST_StackMachine extends Visitor {
                         exp.accept( p );
                         System.out.println( p.get_ascii() );
                         push( new Instruction( Opcode.POP, Arguments.from_register( Register.RDI ) ) ); 
-                    }
+                    } */
 
+                    Operand arg = Operand.from_register( Register.RSP, AddressingMode.DIRECT_OFFSET );
+                    arg.offset = args.size() - i - 1;
+
+                    push( new Instruction( Opcode.MOVE, new Arguments( List.of(
+                        arg,
+                        Operand.from_register( Register.RDI, AddressingMode.REGISER )
+                    ))));
 
                     push( new Instruction( Opcode.PRINT_NUM, Arguments.from_label( "%\n" ) ) ); 
 
