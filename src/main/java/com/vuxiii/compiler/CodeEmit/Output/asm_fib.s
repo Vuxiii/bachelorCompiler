@@ -2,10 +2,10 @@
 # [ String Buffers and Substitutes ]
 string1: .ascii "fib(%) = %\n"
 string1subs: .ascii ""
-string2: .ascii "The %th fib number is: %\n"
-string2subs: .ascii ""
 string0: .ascii "fib(%) = %\n"
 string0subs: .ascii ""
+string2: .ascii "The %th fib number is: %\n"
+string2subs: .ascii ""
 
 # [ Pointers to Record Layouts ]
 
@@ -13,13 +13,8 @@ string0subs: .ascii ""
 fib:
     pushq %rbp
     movq %rsp, %rbp # Setup stackpointer
-    subq $24, %rsp
-    movq $0, %rdi
-    leaq -8(%rbp), %rsi
-    pushq $0
-    leaq (%rsp), %rdx
-    callq new_scope_header # LABEL
-    addq $1, %rsp
+    subq $32, %rsp
+
     pushq $1
     popq %rcx
     
@@ -29,7 +24,6 @@ fib:
     
     cmpq %rbx, %rcx
     jne IfEndOfBody1
-    callq release_scope_header # LABEL
     pushq $1
     popq %rax
     movq %rbp, %rsp
@@ -47,7 +41,6 @@ IfEndOfBody1:
     
     cmpq %rbx, %rcx
     jne IfEndOfBody2
-    callq release_scope_header # LABEL
     pushq $1
     popq %rax
     movq %rbp, %rsp
@@ -104,11 +97,6 @@ EndOfIfBlocks1:
     movq %rbx, %rax
     pushq %rax
     
-    # [[ Loading variable fib1 ]] 
-    # [[ offset is -3 ]] 
-    movq -24(%rbp), %rax
-    
-    pushq %rax
 
 # Setup Print
 
@@ -116,13 +104,17 @@ EndOfIfBlocks1:
     movq $4, %rsi
     movq $0, %rdx
     callq print_string
-    movq 8(%rsp), %rdi
+    popq %rdi
     callq print_num
     movq $string0, %rdi
     movq $4, %rsi
     movq $5, %rdx
     callq print_string
-    movq (%rsp), %rdi
+    
+    # [[ Loading variable fib1 ]] 
+    # [[ offset is -3 ]] 
+    movq -24(%rbp), %rdi
+    
     callq print_num
     movq $string0, %rdi
     movq $1, %rsi
@@ -142,25 +134,23 @@ EndOfIfBlocks1:
     movq %rbx, %rax
     pushq %rax
     
-    # [[ Loading variable fib2 ]] 
-    # [[ offset is -4 ]] 
-    movq -32(%rbp), %rax
-    
-    pushq %rax
-
 # Setup Print
 
     movq $string1, %rdi
     movq $4, %rsi
     movq $0, %rdx
     callq print_string
-    movq 8(%rsp), %rdi
+    popq %rdi
     callq print_num
     movq $string1, %rdi
     movq $4, %rsi
     movq $5, %rdx
     callq print_string
-    movq (%rsp), %rdi
+    
+    # [[ Loading variable fib2 ]] 
+    # [[ offset is -4 ]] 
+    movq -32(%rbp), %rdi
+    
     callq print_num
     movq $string1, %rdi
     movq $1, %rsi
@@ -169,8 +159,6 @@ EndOfIfBlocks1:
 
 # End Print
 
-    callq release_scope_header # LABEL
-    
     # [[ Loading variable fib2 ]] 
     # [[ offset is -4 ]] 
     movq -32(%rbp), %rcx
@@ -184,12 +172,6 @@ EndOfIfBlocks1:
     movq %rbx, %rax
     pushq %rax
     popq %rax
-    movq %rbp, %rsp
-    popq %rbp
-    retq
-    
-    movq %rbp, %rsp # Restore stackpointer
-    popq %rbp
     movq %rbp, %rsp
     popq %rbp
     retq
@@ -226,12 +208,6 @@ main:
     movq -24(%rbp), %rax
     
     pushq %rax
-    
-    # [[ Loading variable n ]] 
-    # [[ offset is -3 ]] 
-    movq -24(%rbp), %rax
-    
-    pushq %rax
     callq fib # LABEL
     pushq %rax
 
@@ -241,13 +217,17 @@ main:
     movq $4, %rsi
     movq $0, %rdx
     callq print_string
-    movq 8(%rsp), %rdi
+    
+    # [[ Loading variable n ]] 
+    # [[ offset is -3 ]] 
+    movq -24(%rbp), %rdi
+    
     callq print_num
     movq $string2, %rdi
     movq $18, %rsi
     movq $5, %rdx
     callq print_string
-    movq (%rsp), %rdi
+    popq %rdi
     callq print_num
     movq $string2, %rdi
     movq $1, %rsi

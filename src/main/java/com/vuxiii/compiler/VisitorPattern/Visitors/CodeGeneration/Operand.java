@@ -19,11 +19,11 @@ public class Operand {
     }
 
     public static Operand from_string( String str ) {
-        return new Operand( str, AddressingMode.IMMEDIATE);
+        return new Operand( str, AddressingMode.IMMEDIATE );
     }
 
     public static Operand from_label( String str ) {
-        return new Operand( str, AddressingMode.LABEL);
+        return new Operand( str, AddressingMode.LABEL );
     }
 
     public static Operand from_int( int num_int ) {

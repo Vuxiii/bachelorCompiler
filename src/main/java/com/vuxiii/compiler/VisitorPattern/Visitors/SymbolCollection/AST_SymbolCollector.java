@@ -39,7 +39,7 @@ public class AST_SymbolCollector extends VisitorBase {
     Set<ASTNode> ignore_decl = new HashSet<>();
 
 
-    @VisitorPattern( when = VisitOrder.ENTER_NODE )
+    @VisitorPattern( when = VisitOrder.ENTER_NODE, order = 1 )
     public void init_root_scope( Root rootie ) {
         Symbols new_scope = new Symbols( );
         SymbolNode node = new SymbolNode( Symbol.n_Scope, rootie.node, "root", new_scope, Optional.empty() );
@@ -71,7 +71,7 @@ public class AST_SymbolCollector extends VisitorBase {
         func_decl.parent = Optional.of( node ); 
     }
 
-    @VisitorPattern( when = VisitOrder.ENTER_NODE )
+    @VisitorPattern( when = VisitOrder.ENTER_NODE, order = 1 )
     public void init_function_scopes( Assignment func_assignment ) {
         if ( !(func_assignment.value instanceof FunctionType) ) return;
         if ( !(func_assignment.id instanceof LexIdent) ) return;
@@ -120,7 +120,7 @@ public class AST_SymbolCollector extends VisitorBase {
         current_scope( decl ).add_parameter( decl.id, decl.kind == DeclarationKind.POINTER );
     }
 
-    @VisitorPattern( when = VisitOrder.ENTER_NODE )
+    @VisitorPattern( when = VisitOrder.ENTER_NODE, order = 1 )
     public void check_use_before_decl( LexIdent ident ) {
         if ( ident.parent.get() instanceof Declaration ) return;
         SymbolNode current_node = current_symbol_node(ident);

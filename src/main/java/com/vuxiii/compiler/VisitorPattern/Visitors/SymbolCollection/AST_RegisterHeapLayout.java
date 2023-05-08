@@ -9,7 +9,7 @@ import com.vuxiii.compiler.VisitorPattern.Annotations.VisitorPattern;
 
 public class AST_RegisterHeapLayout extends VisitorBase {
 
-    @VisitorPattern( when = VisitOrder.ENTER_NODE )
+    @VisitorPattern( when = VisitOrder.ENTER_NODE, order = 1 )
     public void register_var( Declaration decl ) {
         if ( decl.kind != DeclarationKind.POINTER ) return;
 
@@ -17,7 +17,7 @@ public class AST_RegisterHeapLayout extends VisitorBase {
 
     }
 
-    @VisitorPattern( when = VisitOrder.ENTER_NODE )
+    @VisitorPattern( when = VisitOrder.ENTER_NODE, order = 1 )
     public void register_record( RecordType record ) {
         
         record.heap_layout = new HeapLayout(record);    

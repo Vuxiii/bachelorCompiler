@@ -19,7 +19,7 @@ public class AST_Shrinker_If_Collector extends VisitorBase {
     
     public Map<IfElseNode, IfList> mapper = new HashMap<>();
 
-    @VisitorPattern( when = VisitOrder.ENTER_NODE )
+    @VisitorPattern( when = VisitOrder.ENTER_NODE, order = 1 )
     public void collect_if_else( IfElseNode if_elses ) {
         IfList s = new IfList(Symbol.n_StatementList);
         

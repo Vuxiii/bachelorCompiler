@@ -16,7 +16,7 @@ public class AST_Shrinker extends VisitorBase {
     
     private ASTNode current = null;
 
-    @VisitorPattern( when = VisitOrder.EXIT_NODE )
+    @VisitorPattern( when = VisitOrder.EXIT_NODE, order = 1 )
     public void call_other_shrinkers( Root root ) {
         AST_Shrinker_Statement_Collector scollector = new AST_Shrinker_Statement_Collector();
         root.accept(scollector);

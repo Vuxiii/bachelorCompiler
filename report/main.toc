@@ -1,0 +1,7 @@
+\contentsline {paragraph}{English}{i}{}%
+\contentsline {paragraph}{Danish}{i}{}%
+\contentsline {chapter}{\numberline {1}Introduction}{1}{}%
+\contentsline {chapter}{\numberline {2}Tokenization}{3}{}%
+\contentsline {chapter}{\numberline {3}Parsing}{5}{}%
+\contentsline {chapter}{\numberline {4}Compilation}{6}{}%
+\contentsline {chapter}{\numberline {5}Concluding Remarks}{7}{}%

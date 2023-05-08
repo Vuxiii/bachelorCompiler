@@ -21,7 +21,7 @@ public class AST_Shrinker_Statement_Collector extends VisitorBase {
 
     public Map<Statement, StatementList> mapper = new HashMap<>();
 
-    @VisitorPattern( when = VisitOrder.ENTER_NODE )
+    @VisitorPattern( when = VisitOrder.ENTER_NODE, order = 1 )
     public void collect( Statement stmt ) {
         if ( visited.contains( stmt ) ) return;
         if ( stmt.next.isEmpty() ) return;

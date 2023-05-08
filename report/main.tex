@@ -1,0 +1,377 @@
+\documentclass[a4paper,12pt]{report}
+
+% Packages
+\usepackage[utf8]{inputenc}
+\usepackage{titling}
+\usepackage{fancyhdr}
+\usepackage{graphicx}
+\usepackage{parskip}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{xspace}
+
+% Algorithms
+%\usepackage{algorithm}
+%\usepackage[noend]{algorithmic}
+%\usepackage{listings}
+
+% Tabular
+%\usepackage{multirow}
+%\usepackage{rotating}
+
+% Figures
+%\usepackage{epic,eepic}
+
+% Consider periods after theorems and "Proof" and consider not forcing Roman.
+% Theorems
+\newtheorem{xdefinition}{Definition}
+\newtheorem{xobservation}{Observation}
+\newtheorem{xtheorem}{Theorem}
+\newtheorem{xlemma}{Lemma}
+\newtheorem{xproposition}{Proposition}
+\newtheorem{xcorollary}{Corollary}
+\newenvironment{definition}{\begin{xdefinition}\rm}%
+{\hspace*{\fill}\raisebox{-1pt}{\boldmath$\Box$}\end{xdefinition}}
+\newenvironment{observation}{\begin{xobservation}\rm}%
+{\hspace*{\fill}\raisebox{-1pt}{\boldmath$\Box$}\end{xobservation}}
+\newenvironment{theorem}{\begin{xtheorem}\rm}{\end{xtheorem}}
+\newenvironment{lemma}{\begin{xlemma}\rm}{\end{xlemma}}
+\newenvironment{proposition}{\begin{xproposition}\rm}{\end{xproposition}}
+\newenvironment{corollary}{\begin{xcorollary}\rm}{\end{xcorollary}}
+\newenvironment{proof}{\begin{trivlist}\item[]{\bf Proof }}%
+{\hspace*{\fill}\raisebox{-1pt}{\boldmath$\Box$}\end{trivlist}}
+
+% Example commands
+\newcommand{\OPT}{\ensuremath{\operatorname{\textsc{Opt}}}\xspace}
+\newcommand{\MIN}[1]{\min\left\{#1\right\}}
+\newcommand{\CEIL}[1]{\left\lceil#1\right\rceil}
+\newcommand{\FLOOR}[1]{\left\lfloor#1\right\rfloor}
+\newcommand{\SIZE}[1]{|#1|}
+\newcommand{\SET}[1]{\left\{#1\right\}}
+\newcommand{\SETOF}[2]{\SET{#1 \mid #2}}
+\newcommand{\BIGSET}[1]{\left\{#1\right\}}
+\newcommand{\BIGSETOF}[2]{\BIGSET{#1 \mid #2}}
+\newcommand{\NAT}{\ensuremath{\mathbb{N}}}
+\newcommand{\HRule}{\rule{\linewidth}{0.5mm}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+		
+\begin{titlepage}
+
+\center % Center everything on the page
+
+\textsc{\LARGE Department of Mathematics}\\[0.3cm]
+
+\textsc{\LARGE and  Computer Science}\\[1.5cm]
+
+\textsc{\Large University of Southern Denmark}\\[0.5cm]
+
+\textsc{\large Bachelor Thesis in Computer Science }\\[0.5cm]
+% \textsc{\large Master Thesis in Computer Science }\\[0.5cm]
+
+\HRule\\[0.4cm]
+
+{\huge\bfseries A Compiler for the Juhl language}\\[0.4cm]
+
+\HRule\\[1.5cm]
+
+\begin{minipage}{0.47\textwidth}
+        \begin{flushleft}
+                \large
+                \textit{Author}\\
+                William Juhl \\ 
+                wijuh20@student.sdu.dk
+        \end{flushleft}
+\end{minipage}
+%~ % Uncomment from this line if there are two students
+%\begin{minipage}{0.47\textwidth}
+%        \begin{flushleft}
+%                \large
+%                \textit{Author}\\
+%                Your name \\ 
+%                youremail@student.sdu.dk
+%        \end{flushleft}
+%\end{minipage}
+
+\vfill
+
+\begin{minipage}{0.45\textwidth}
+        \begin{flushleft}
+                \large
+                \textit{Supervisor}\\
+                Kim Skak Larsen\\
+                Professor
+        \end{flushleft}
+\end{minipage}
+%~ % Uncomment from this line if there are two supervisors
+%\begin{minipage}{0.45\textwidth}
+%        \begin{flushleft}
+%                \large
+%                \textit{Supervisor}\\
+%                Excellent Additional Help\\
+%                Title
+%        \end{flushleft}
+%\end{minipage}
+
+\vfill\vfill
+
+{\large\today} % At the very end, insert date for turning in, but leave it like this during the advising
+
+\vfill\vfill
+\includegraphics[width=0.4\textwidth]{SDU_BLACK_RGB.png}\\[1cm]
+
+\vfill
+
+\end{titlepage}
+
+\pagenumbering{roman} 
+
+\begin{abstract}
+\paragraph{English}
+your abstract in English
+
+\paragraph{Danish}
+your abstract in Danish
+\end{abstract}
+
+\newpage
+\section*{Acknowledgments}
+Thank you, Mom \& Dad!
+
+\newpage
+\tableofcontents
+
+\newpage
+\pagenumbering{arabic} 
+\setcounter{page}{1}
+
+\chapter{Introduction}
+The goal of this project is to develop a compiler for a simple language without the use of external libraries or tools. The compiler emits X86-64 assembly with the AT\&T syntax. This means that to run the compiled assembly program the use of an assembler and linker is needed. 
+
+One might wonder why the use of third party tools such as Bison or Flex were not used, and the answer to that is simple: \textit{Where would the fun be in that?} Thus, for this project we will develop our own tools. 
+
+Let us first go through the different phases of the compiler pipeline and discover what needs to be developed:
+\begin{itemize}
+  \item The first step of our compiler is to divide the source code into tokens This step is called tokenization. Here we define which keywords are reserved for the language and which variable names are legal and which are not. Flex is a tool that solves this goal, so we will try to make one similar to that.
+  \item The second step is where we will need a parser. Here we take the list of tokens created from the privious step, and combine them into a parsetree. The output of this step is an abstract syntax tree. A tool for this phase is called Bison.
+  \item In the third step we take the raw abstract syntax tree and massages it by removing any unnessecary artifacts from the parser. This results in a clean AST which is easier to work with.
+  \item Lastly we go through our generated tree to produce the assembly language.
+\end{itemize}
+
+After all of these steps, which are simplified for introductory purposes, we finally have our compiler.
+
+\chapter{Tokenization}
+The goal of the first step of our compiler, the tokenizer, is to convert the source code into a list of tonkens. Ideally we want it to be simple to add new keywords to our language to ease maintenance later down the road. For each recognized string we want to make a token which stores some metadata about where in the file the token was found and what kind of token it is. The metadata will be used for notifying the user of any potential user errors.
+
+One way to solve this problem is to split the input after each space and then having a bunch of checks that determine what kind of token we are dealing with. This, however, can be expensive computational wise: for a single token we will in the worst case have to check each reserved keyword, and if none of these match, determine if it is a string, number or a variable name. With this approach some maintenance also follows. By complicating this step a whole bunch, we can do better. 
+
+Flex uses regex to describe which strings match selected tokens, and returns a list of tokens based on what it matches. Let's create this tool.
+
+\section*{DFA}
+We first need to know some theory of deterministic finite automata. As the name implies we are dealing with a machine that is both deterministic and finite, meaning that it always know what to do, and that it is not infinite. A DFA is a collection of states, that for each state has arcs that links it to other states. The deterministic part of the name, comes from the fact that for each state it has as many arcs as the alfabet. The alfabet is a collection of characters or symbols that the state machine knows about. To make the machine finite we need to mark some of the states to be accepting, meaning that when it reaches such a state it is allowed to stop or continue. 
+
+
+
+
+\section*{NFA}
+
+\section*{NFA to DFA}
+
+\section*{Regex to NFA}
+
+\chapter{Parsing}
+
+
+
+
+\chapter{Compilation}
+
+
+\chapter{Concluding Remarks}
+Veni, vidi, vici!
+
+
+\bibliography{refs}
+\bibliographystyle{plain}
+
+\appendix
+
+\newpage
+
+\chapter*{Appendix: Lists of Stuff}
+\label{appendix}
+
+This is under development!
+
+These issues are to some extent my personal opinions!
+
+The topics are to a large extent guided by the type of mistakes Danish
+students would make.
+
+There are of course numerous issues that I do not discuss, some of
+which are hard for Danes, such a subjunctive forms, rules (other
+than the obvious) for the use of singular vs.\ plural forms, etc.
+
+\section*{Matters of Style}
+
+\subsection*{Miscellaneous}
+\begin{itemize}
+\item
+Id est: use punctuation as
+``\ldots,\textvisiblespace{}i.e.,\textvisiblespace''.
+The construction should be followed by more than just one word,
+usually a whole or partial sentence.
+The construction should never start a sentence.
+To be very strict, it should also not start the inside
+of a parenthesis (use ``that is'' followed by a comma instead).
+The same rules apply to ``e.g.''
+If you insist on \emph{not} using a comma, make sure to use a backslash
+to prevent \LaTeX{} from making an end-of-sentence space.
+\item
+Do not concatenate words or hyphenate them just because you would in Danish.
+It is called ``type checker'', ``data structure'', ``garbage collector'', etc.
+\item
+Do not start a sentence with ``Else''; use ``Otherwise''.
+\item
+Do not start a sentence with ``But''; use ``However'', ``On the contrary'',
+or something else appropriate.
+\item
+When capitalizing a headline, capitalize both words in a hyphenated
+construction.
+\item
+Capitalize named entities such as ``Figure~42''.
+\item
+Unless one is comparing numbers, small numbers in text should be
+spelled out.
+\item
+  There are (almost) always better (more precise) words than
+  big, do, put, and things.
+\item
+In formal writing, do not use contractions such as ``don't''.
+\item
+  In formal writing, ``like'', in comparisons, should most often be ``such as''.
+\item
+  Do not use ``OK''.
+\item
+``Look at'' is informal and should often be replaced by ``Consider''.
+\item
+  Use ``essentially'' very sparingly. Never use it if something is
+  actually exactly as described. Otherwise, it is often possible
+  to explain or hint at the difference with few words instead of
+  using ``essentially''.
+\item
+  I see many word order errors such as
+  ``the decisions resulted always in more work'' instead of
+  ``the decisions always resulted in more work''.
+\item
+  ``It'' cannot be the subject of something such as ``it is forbidden to smoke
+  here''. 
+\item
+  Do not use ``less'' for countable items, i.e., ``Adam had less apples than Eve'' is incorrect and should be ``Adam had fewer apples than Eve''.
+\end{itemize}
+
+\subsection*{Commas}
+\begin{itemize}
+\item
+Place a comma before ``then'' or instead of a ``then'' that has been left out
+in an ``if-then'' construction. Also after the first part of ``since'' constructions and similar (where ``then'' is of course out of the question).
+\item
+  Use commas around ``however'' and similar constructions.
+\item
+  In lists, use comma after the penultimate item in the list, e.g., before ``and''. Also use a comma before ``etc''.
+\item
+  There are exceptions, but normally there should not be a comma before ``that''.
+\item
+  Use a comma after an introductory clause or word, just before a main clause.
+  Main clauses joint by most conjunctions (``and'', ``but'', etc.)
+  should also be separated by commas.
+\end{itemize}
+
+\section*{\LaTeX{}}
+\begin{itemize}
+\item
+Use commands for most constructions and variable names other than
+one letter math variables; see examples in this file.
+\item
+Remember backslash after abbreviation periods as
+``vs.$\backslash$\textvisiblespace''.
+\item
+Never typeset names in math mode, i.e.,
+``{\$}left{\$}'' is strictly forbidden. Use
+``{\$}$\backslash{}$mathit\{left\}{\$}'', or just
+``$\backslash{}$textit\{left\}'' if you do not need math mode.
+This is how ugly is looks if you use math mode: $left$.
+And this is when it is done correctly: \textit{left}.
+\item
+Use $\sim$ (space forbidding line break) between names of numbered
+entities, e.g., write ``Figure$\sim$42'' to avoid that ``42'' can
+appear at the start of a line. (Of course, you would never write ``42'',
+but instead refer to a label.)
+\item
+Use one hyphen to hyphenate words and two hyphens to create the little line
+between two numbers of an interval. A dash should be either two hyphens
+surrounded by space or three hyphens and no space. It is a style issue
+and a paper should only contain one type.
+\item
+Sometimes a style is enforced on you, but if you can decide
+yourself, I find it much easier to read a text where paragraphs are
+separated by vertical space than when a new paragraph is just indicated
+by indentation. It is of course a style matter that should be defined
+in the preamble.
+\item
+Use \verb"\cdots" for missing parts of a sequence when there are no commas;
+if there are commas, as in $1, 2, \ldots, n$, use \verb"\ldots" to show
+the continuation.
+\end{itemize}
+
+\section*{Writing Advice for TCS}
+\begin{itemize}
+\item
+Think carefully about the naming of objects. When more than one object
+of the same type is used, it is often a good idea to use letters close
+to each other in the alphabet. That establishes a sort of typed language
+that helps the reader.
+However, skip letters with very established meaning, e.g., it is
+often not good to use $f$ for something that is not a function.
+Primes can also be used to stay in the same name space.
+Also using first letters of the names of entities, equivalent Greek
+letters, etc.\ can be helpful.
+And do not give a name to a concept or introduce notation for it
+unless you need it later.
+\item
+Sentences explaining progress in proof can be helpful: Where are we, and what
+are we doing now?
+\item
+Do not say ``It is easy to see that \ldots''. If it is true, you
+can almost always in the same space say ``Since this and that, \ldots''.
+\item
+Insert data unreduced into formulas and then use arithmetic,
+so it is easy to see where things come from, i.e., do not combine
+insertion and reduction steps.
+\item
+  Be careful with pronouns and be sure that it is clear what they refer to.
+  Very often it is better to write the term ``it'' is referring to instead of writing ``it''.
+\item
+  Things that are the same should be written the same, so that one can more clearly see differences. Technical writing is different from writing literature! Also use a fixed word for any action, i.e., do not use put, place, write, etc. for
+  the action.
+\end{itemize}
+
+\section*{Slides for the Presentation}
+\begin{itemize}
+\item
+  Use the slides primarily for figures, graphs, and keywords. It is seldom a
+  good idea to include many full sentences
+  (except maybe a theorem statement) and
+  almost never a good idea with full paragraphs of text.
+\item
+  Think about how you \emph{supplement} your written work,
+  rather than just showing excerpts.
+  For instance, if you show the workings of an algorithm, you can have the
+  algorithm on one side and the result it is working on on the other side,
+  and you can highlight lines of the algorithm as the results change
+  incrementally.
+\end{itemize}
+
+\end{document}
