@@ -31,7 +31,7 @@ public class HeapLayout {
 
         for ( Field field : record.fields.fields ) {
             current_offset++;
-            if ( field.field.kind == DeclarationKind.HEAP ) {
+            if ( field.field.kind == DeclarationKind.POINTER ) {
                 pointer_offsets.add( current_offset );
             }
             var_offset.put( field.field.id.name, current_offset+1 );

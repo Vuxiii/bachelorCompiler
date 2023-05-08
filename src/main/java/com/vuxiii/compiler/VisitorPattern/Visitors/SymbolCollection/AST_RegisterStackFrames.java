@@ -41,10 +41,10 @@ public class AST_RegisterStackFrames extends VisitorBase {
 
     @VisitorPattern( when = VisitOrder.ENTER_NODE )
     public void register_var( Declaration decl ) {
-        if ( decl.kind != DeclarationKind.VARIABLE && decl.kind != DeclarationKind.FIELD && decl.kind != DeclarationKind.HEAP ) return;
+        if ( decl.kind != DeclarationKind.VARIABLE && decl.kind != DeclarationKind.FIELD && decl.kind != DeclarationKind.POINTER ) return;
         if ( ignore_list.contains( decl ) ) return;
         
-        if ( decl.kind == DeclarationKind.HEAP && decl.type instanceof RecordType ) {
+        if ( decl.kind == DeclarationKind.POINTER && decl.type instanceof RecordType ) {
             RecordType record = (RecordType)decl.type;
             for ( Field field : record.fields.fields ) {
                 ignore_list.add( field.field );

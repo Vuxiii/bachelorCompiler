@@ -18,6 +18,7 @@ import com.vuxiii.compiler.VisitorPattern.Visitors.CodeGeneration.Operand;
 import com.vuxiii.compiler.VisitorPattern.Visitors.CodeGeneration.Register;
 import com.vuxiii.compiler.VisitorPattern.Visitors.CodeGeneration.StringCollection.StringNode;
 import com.vuxiii.compiler.VisitorPattern.Visitors.SymbolCollection.HeapLayout;
+import com.vuxiii.compiler.VisitorPattern.Visitors.SymbolCollection.OffsetLogic;
 import com.vuxiii.compiler.VisitorPattern.Visitors.SymbolCollection.Symbols;
 
 /**
@@ -32,7 +33,7 @@ public class X86Emitter {
     private Map<String, Symbols> scopes;
     Map<String, FunctionBlock> functions;
 
-    Map<String, Integer> var_offsets;
+    Map<String, OffsetLogic> var_offsets;
 
     Map<Print, StringNode> string_buffers;
 
@@ -156,13 +157,16 @@ public class X86Emitter {
         
         System.out.println( current_scope.get_variables() );
         System.out.println( current_scope.variable_offsets );
-        for ( String var : current_scope.get_variables() ) {
-            var_offsets.put( var, -current_scope.get_variable_offset(var) );
-        }
+        
+        var_offsets = current_scope.variable_offsets;
 
-        for ( String var : current_scope.get_parameters() ) {
-            var_offsets.put( var, current_scope.get_parameter_offset(var) );
-        }
+        // for ( String var : current_scope.get_variables() ) {
+        //     var_offsets.put( var, -current_scope.get_variable_offset(var).offsets.get(0) );
+        // }
+
+        // for ( String var : current_scope.get_parameters() ) {
+        //     var_offsets.put( var, current_scope.get_parameter_offset(var) );
+        // }
 
         System.out.println();
 
@@ -204,13 +208,23 @@ public class X86Emitter {
                     Operand var = instruction.args.get().operands.get(0);
                     Operand target = instruction.args.get().operands.get(1);
                     
-                    int offset = var_offsets.get( var.get_string() );
+                    System.out.println( "Trying to load " + var.get_string() );
+
+                    OffsetLogic offsets = var_offsets.get( var.get_string() );
 
                     push_code ( "" );
                     push_code ("# [[ Loading variable " + var + " ]] " );
-                    push_code ("# [[ offset is " + offset + " ]] " );
-                    push_code( "movq " + (offset*8) + "(%rbp), " + ope_string(target) ); // What offset is the variable stored at
-                    push_code ( "" );
+                    for ( int i = 0; i < offsets.size(); ++i ) {
+                        push_code("# [[ offset is " + offsets.offsets.get(i) + " ]] " );
+                        if ( i == 0 )
+                            push_code( "movq " + (offsets.offsets.get(i)*8) + "(%rbp), " + ope_string(target) ); // What offset is the variable stored at
+                        else
+                            push_code( "movq " + (offsets.offsets.get(i)*8) + "(" + ope_string(target) + "), " + ope_string(target) ); // What offset is the variable stored at
+
+                        push_code( "" );
+                    }
+
+                    
                     
                 } break;
 
@@ -219,14 +233,48 @@ public class X86Emitter {
                     Operand src_1 = instruction.args.get().operands.get(1);
                     System.out.println( var );
                     System.out.println( var_offsets );
-                    int offset = var_offsets.get( var );
+                    OffsetLogic offsets = var_offsets.get( var );
 
                     push_code ( "" );
-                    push_code ("# [[ Storing variable " + var + " ]] " );
-                    push_code ("# [[ offset is " + offset + " ]] " );
-                    push_code( "movq " + ope_string(src_1) + ", " + (offset*8) + "(" + ope_string(rbp) + ")" );
+                    push_code ("# [[ Storing variable " + var + " " + offsets.offsets  + " ]] " );
+                    for ( int i = 0; i < offsets.size(); ++i ) {
+                        push_code ("# [[ offset is " + offsets.offsets.get(i) + " ]] " );
+                        if ( i == offsets.size()-1 && i == 0 ) 
+                            push_code( "movq " + ope_string(src_1) + ", " + (offsets.offsets.get(i)*8) + "(" + ope_string(rbp) + ")" );
+                        else if ( i == offsets.size()-1 )
+                            push_code( "movq " + ope_string(src_1) + ", " + (offsets.offsets.get(i)*8) + "(" + ope_string(rbx) + ")" );
+                        else if ( i == 0 )
+                            push_code( "movq " + (offsets.offsets.get(i)*8) + "(" + ope_string(rbp) + "), " + ope_string(rbx) );
+                        else
+                            push_code( "movq " + (offsets.offsets.get(i)*8) + "(" + ope_string(rbx) + "), " + ope_string(rbx) );
+                    }
+                    
                     push_code ( "" );
 
+                } break;
+
+                case STORE_POINTER: {
+                    String var = instruction.args.get().operands.get(0).get_string();
+                    Operand src_1 = instruction.args.get().operands.get(1);
+                    System.out.println( var );
+                    System.out.println( var_offsets );
+                    OffsetLogic offsets = var_offsets.get( var );
+
+                    push_code ( "" );
+                    push_code ("# [[ Storing pointer " + var + " " + offsets.offsets + " ]] " );
+                    for ( int i = 0; i < offsets.size()-1; ++i ) {
+                        push_code ("# [[ offset is " + offsets.offsets.get(i) + " ]] " );
+                        if ( i == offsets.size()-2 && i == 0 ) 
+                            push_code( "movq " + ope_string(src_1) + ", " + (offsets.offsets.get(i)*8) + "(" + ope_string(rbp) + ")" );
+                        else if ( i == offsets.size()-2 )
+                            push_code( "movq " + ope_string(src_1) + ", " + (offsets.offsets.get(i)*8) + "(" + ope_string(rbx) + ")" );
+                        else if ( i == 0 )
+                            push_code( "movq " + (offsets.offsets.get(i)*8) + "(" + ope_string(rbp) + "), " + ope_string(rbx) );
+                        else
+                            push_code( "movq " + (offsets.offsets.get(i)*8) + "(" + ope_string(rbx) + "), " + ope_string(rbx) );
+                    }
+                    
+                    push_code ( "" );
                 } break;
                 
                 

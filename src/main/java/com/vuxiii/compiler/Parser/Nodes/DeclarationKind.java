@@ -1,7 +1,7 @@
 package com.vuxiii.compiler.Parser.Nodes;
 
 public enum DeclarationKind {
-    HEAP,
+    POINTER,
     VARIABLE,
     PARAMETER,
     FUNCTION,

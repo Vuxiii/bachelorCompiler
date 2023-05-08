@@ -2,6 +2,7 @@ package com.vuxiii.compiler.Parser.Nodes;
 
 import com.vuxiii.LR.Records.Term;
 import com.vuxiii.compiler.Lexer.Tokens.Leaf.LexIdent;
+import com.vuxiii.compiler.Parser.Nodes.Types.RecordType;
 import com.vuxiii.compiler.Parser.Nodes.Types.Type;
 import com.vuxiii.compiler.VisitorPattern.ASTNode;
 import com.vuxiii.compiler.VisitorPattern.Annotations.VisitNumber;
@@ -50,6 +51,14 @@ public class Declaration extends ASTNode {
 
     public String get_parameter_form() {
         return id.name + ": " + type.simple_type_name();
+    }
+
+    public int size() {
+        if ( type instanceof RecordType ) {
+            return ((RecordType)type).fields.fields.size(); // call each fields size method
+        } else {
+            return 1; // std type
+        }
     }
     
 }

@@ -1,14 +1,14 @@
 .section .data
 # [ String Buffers and Substitutes ]
-string2: .ascii "Field c is: %\n"
-string2subs: .ascii ""
-string1: .ascii "Field b is: %\n"
-string1subs: .ascii ""
-string0: .ascii "Field a is: %\n"
-string0subs: .ascii ""
+string24: .ascii "Field b is: %\n"
+string24subs: .ascii ""
+string23: .ascii "Field a is: %\n"
+string23subs: .ascii ""
+string25: .ascii "Field c is: %\n"
+string25subs: .ascii ""
 
 # [ Pointers to Record Layouts ]
-nested: .space 8
+heap1: .space 8
 
 .section .text
 .section .text
@@ -16,92 +16,104 @@ nested: .space 8
 main:
     pushq %rbp
     movq %rsp, %rbp # Setup stackpointer
-    subq $24, %rsp
+    subq $32, %rsp
     callq initialize_heap
-    movq $1, %rdi
+    movq $0, %rdi
     leaq -8(%rbp), %rsi
-    pushq $2
+    pushq $0
     leaq (%rsp), %rdx
     callq new_scope_header
     addq $1, %rsp
+
+# Number of Bitfields
+
+    movq $1, %rdi
+
+# Bitfields
+
+    pushq $0
+    leaq (%rsp), %rsi
+    callq new_layout
+    addq $1, %rsp
+    movq %rax, heap1
     pushq $42
     popq %rax
     
-    # [[ Storing variable rec.a ]] 
-    # [[ offset is -1 ]] 
-    movq %rax, -8(%rbp)
+    # [[ Storing variable rec.a [-2] ]] 
+    # [[ offset is -2 ]] 
+    movq %rax, -16(%rbp)
     
     pushq $69
     popq %rax
     
-    # [[ Storing variable rec.b ]] 
-    # [[ offset is -2 ]] 
-    movq %rax, -16(%rbp)
+    # [[ Storing variable rec.b [-3] ]] 
+    # [[ offset is -3 ]] 
+    movq %rax, -24(%rbp)
     
     pushq $512
     popq %rax
     
-    # [[ Storing variable rec.c ]] 
-    # [[ offset is -3 ]] 
-    movq %rax, -24(%rbp)
+    # [[ Storing variable rec.c [-4] ]] 
+    # [[ offset is -4 ]] 
+    movq %rax, -32(%rbp)
     
 
 # Setup Print
 
-    movq $string0, %rdi
+    movq $string23, %rdi
     movq $12, %rsi
     movq $0, %rdx
-    call print_string
+    callq print_string
     
     # [[ Loading variable rec.a ]] 
-    # [[ offset is -1 ]] 
-    movq -8(%rbp), %rdi
-    
-    call print_num
-    movq $string0, %rdi
-    movq $1, %rsi
-    movq $13, %rdx
-    call print_string
-
-# End Print
-
-
-# Setup Print
-
-    movq $string1, %rdi
-    movq $12, %rsi
-    movq $0, %rdx
-    call print_string
-    
-    # [[ Loading variable rec.b ]] 
     # [[ offset is -2 ]] 
     movq -16(%rbp), %rdi
     
-    call print_num
-    movq $string1, %rdi
+    callq print_num
+    movq $string23, %rdi
     movq $1, %rsi
     movq $13, %rdx
-    call print_string
+    callq print_string
 
 # End Print
 
 
 # Setup Print
 
-    movq $string2, %rdi
+    movq $string24, %rdi
     movq $12, %rsi
     movq $0, %rdx
-    call print_string
+    callq print_string
     
-    # [[ Loading variable rec.c ]] 
+    # [[ Loading variable rec.b ]] 
     # [[ offset is -3 ]] 
     movq -24(%rbp), %rdi
     
-    call print_num
-    movq $string2, %rdi
+    callq print_num
+    movq $string24, %rdi
     movq $1, %rsi
     movq $13, %rdx
-    call print_string
+    callq print_string
+
+# End Print
+
+
+# Setup Print
+
+    movq $string25, %rdi
+    movq $12, %rsi
+    movq $0, %rdx
+    callq print_string
+    
+    # [[ Loading variable rec.c ]] 
+    # [[ offset is -4 ]] 
+    movq -32(%rbp), %rdi
+    
+    callq print_num
+    movq $string25, %rdi
+    movq $1, %rsi
+    movq $13, %rdx
+    callq print_string
 
 # End Print
 

@@ -60,7 +60,7 @@ public class AST_SymbolCollector extends VisitorBase {
 
         SymbolNode parent_scope = current_symbol_node(func_decl);
 
-        parent_scope.scope.add_variable( func_decl.id, func_decl.kind == DeclarationKind.HEAP );
+        parent_scope.scope.add_variable( func_decl.id, func_decl.kind == DeclarationKind.POINTER );
 
 
         Symbols new_scope = new Symbols(  );
@@ -76,7 +76,7 @@ public class AST_SymbolCollector extends VisitorBase {
         if ( !(func_assignment.value instanceof FunctionType) ) return;
         if ( !(func_assignment.id instanceof LexIdent) ) return;
         SymbolNode parent_scope = current_symbol_node(func_assignment);
-        Symbols new_scope = new Symbols( );
+        Symbols new_scope = new Symbols();
 
         new_scope.add_variable( (LexIdent)func_assignment.id, false ); // Name of function
         System.out.println( "Adding " + func_assignment.id + " to scope " + new_scope);
@@ -90,11 +90,13 @@ public class AST_SymbolCollector extends VisitorBase {
         functions.add( func_assignment );
 
         scope_map.put( "function " + func_assignment.name(), new_scope );
+
+        new_scope.register_static_scope( parent_scope.scope );
     }
 
     @VisitorPattern( when = VisitOrder.ENTER_NODE, order = 1 )
     public void collect_var( Declaration decl ) {
-        if ( decl.kind != DeclarationKind.VARIABLE && decl.kind != DeclarationKind.HEAP ) return;
+        if ( decl.kind != DeclarationKind.VARIABLE && decl.kind != DeclarationKind.POINTER ) return;
         if ( decl.parent.get() instanceof Field ) return;
         // if ( ignore_decl.contains(decl) ) return;
 
@@ -103,7 +105,7 @@ public class AST_SymbolCollector extends VisitorBase {
         if ( decl.type instanceof RecordType ) {
             scope.add_fields(decl);
         } else {
-            scope.add_variable( decl.id, decl.kind == DeclarationKind.HEAP );
+            scope.add_variable( decl.id, decl.kind == DeclarationKind.POINTER );
         }
         
         // if ( decl.kind == DeclarationKind.HEAP ) {
@@ -115,7 +117,7 @@ public class AST_SymbolCollector extends VisitorBase {
     @VisitorPattern( when = VisitOrder.ENTER_NODE, order = 2 )
     public void collect_param( Declaration decl ) {
         if ( decl.kind != DeclarationKind.PARAMETER ) return;
-        current_scope( decl ).add_parameter( decl.id, decl.kind == DeclarationKind.HEAP );
+        current_scope( decl ).add_parameter( decl.id, decl.kind == DeclarationKind.POINTER );
     }
 
     @VisitorPattern( when = VisitOrder.ENTER_NODE )

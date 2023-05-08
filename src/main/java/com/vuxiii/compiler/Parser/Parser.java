@@ -1,5 +1,7 @@
 package com.vuxiii.compiler.Parser;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -57,18 +59,28 @@ public class Parser {
     private static Map<String, Type> stored_user_types = new HashMap<>();
 
     public static ASTNode getAST( List<ASTToken> tokens ) {
-        if ( g == null ) {
-            long bf = System.currentTimeMillis();
-            init();
-            long after = System.currentTimeMillis();
-            System.out.println( "Compiling the parser took: " + (after - bf) + " milliseconds");
-        }
+        ParseTable table;
+
+        if ( Files.exists( Path.of("Par.ser")) ) {
+            table = LRParser.load( "Par.ser" );
+        } else {
+            if ( g == null ) {
+                long bf = System.currentTimeMillis();
+                init();
+                long after = System.currentTimeMillis();
+                System.out.println( "Compiling the parser took: " + (after - bf) + " milliseconds");
+            }
+            
 
         
-        long bf = System.currentTimeMillis();
-        ParseTable table = LRParser.compile( g, Symbol.n_Start );
-        long after = System.currentTimeMillis();
-        System.out.println( "Parsing the input took: " + (after - bf) + " milliseconds");
+            long bf = System.currentTimeMillis();
+            table = LRParser.compile( g, Symbol.n_Start );
+            long after = System.currentTimeMillis();
+            System.out.println( "Parsing the input took: " + (after - bf) + " milliseconds");
+            LRParser.save( "Par.ser", table );
+        }
+        
+       
         
         // System.out.println( tokens );
 
@@ -87,13 +99,6 @@ public class Parser {
                 e.ast.accept( printer );
 
                 System.out.println( printer.get_ascii() );
-            } else {
-                AST_Printer printer = new AST_Printer();
-                
-                e.ast.accept( printer );
-
-                System.out.println( printer.get_ascii() );
-
             }
             System.exit(-1);
         }
@@ -220,18 +225,18 @@ public class Parser {
                 
                 stored_user_types.putIfAbsent( id.matchInfo.str(), type );
                 
-                return new Declaration( Symbol.n_Declaration_Variable, id, type, DeclarationKind.HEAP );
+                return new Declaration( Symbol.n_Declaration_Variable, id, type, DeclarationKind.POINTER );
             } else if (t.get(4) instanceof StandardType ) { 
                 StandardType type = (StandardType)t.get(4); 
-                return new Declaration( Symbol.n_Declaration_Variable, id, type, DeclarationKind.HEAP );
+                return new Declaration( Symbol.n_Declaration_Variable, id, type, DeclarationKind.POINTER );
             } else if ( t.get(4) instanceof LexIdent ) {
                 LexIdent ident = (LexIdent)t.get(4);             
                 Type type = stored_user_types.get( ident.name );
                 
                 if ( type == null )
-                    return new Declaration( Symbol.n_Declaration_Variable, id, new UnknownType(Symbol.n_Declaration_Variable, ident ), DeclarationKind.HEAP );
+                    return new Declaration( Symbol.n_Declaration_Variable, id, new UnknownType(Symbol.n_Declaration_Variable, ident ), DeclarationKind.POINTER );
 
-                return new Declaration( Symbol.n_Declaration_Variable, id, type, DeclarationKind.HEAP );
+                return new Declaration( Symbol.n_Declaration_Variable, id, type, DeclarationKind.POINTER );
             } else if ( t.get(4) instanceof FunctionType ) {
                 FunctionType type = (FunctionType)t.get(4);    
                 stored_user_types.putIfAbsent( id.matchInfo.str(), type );
@@ -244,10 +249,10 @@ public class Parser {
                 return new Declaration( Symbol.n_Declaration_Variable, id, type, DeclarationKind.UNKNOWN );
             } else if ( t.get(4) instanceof UserType ) {
                 UserType type = (UserType)t.get(4);
-                return new Declaration( Symbol.n_Declaration_Variable, id, type, DeclarationKind.HEAP );
+                return new Declaration( Symbol.n_Declaration_Variable, id, type, DeclarationKind.POINTER );
             } else if ( t.get(4) instanceof RecordType ) {
                 RecordType type = (RecordType)t.get(4);
-                return new Declaration( Symbol.n_Declaration_Variable, id, type, DeclarationKind.HEAP );
+                return new Declaration( Symbol.n_Declaration_Variable, id, type, DeclarationKind.POINTER );
             }
             System.out.println("--[[ Parser Error ]]--\nSomething happend trying to parse a user type. It is not a UserType or an Identifier. So what is it?" );
             System.out.println( t.get(4) );
@@ -516,7 +521,7 @@ public class Parser {
             LexIdent id = (LexIdent)t.get(0);
             StandardType type = (StandardType)t.get(3);
             
-            return new Declaration( Symbol.n_Field, id, type, DeclarationKind.HEAP );
+            return new Declaration( Symbol.n_Field, id, type, DeclarationKind.POINTER );
         });
 
 
@@ -575,7 +580,7 @@ public class Parser {
 
                 stored_user_types.putIfAbsent( id.matchInfo.str(), type );
                 
-                return new Declaration( Symbol.n_Field, id, type, DeclarationKind.HEAP );
+                return new Declaration( Symbol.n_Field, id, type, DeclarationKind.POINTER );
                 
             } else if ( t.get(3) instanceof Field ) {
 
@@ -584,11 +589,14 @@ public class Parser {
                 
                 stored_user_types.putIfAbsent( id.matchInfo.str(), type );
                 
-                return new Declaration( Symbol.n_Field, id, type, DeclarationKind.HEAP );
+                return new Declaration( Symbol.n_Field, id, type, DeclarationKind.POINTER );
 
             } else if ( t.get(3) instanceof UserType ) {
                 UserType type = (UserType)t.get(3);
-                return new Declaration( Symbol.n_Field, id, type, DeclarationKind.HEAP );
+                return new Declaration( Symbol.n_Field, id, type, DeclarationKind.POINTER );
+            } else if ( t.get(3) instanceof RecordType ) {
+                RecordType type = (RecordType)t.get(3);
+                return new Declaration( Symbol.n_Field, id, type, DeclarationKind.POINTER );  
             } else {
                 System.out.println( t.get(3));
                 AST_Printer printer = new AST_Printer();
@@ -597,7 +605,7 @@ public class Parser {
                 System.out.println(printer.get_ascii());
             }
             
-            System.out.println( "Something bad happend in parsin n_Field -> t_Identifier t_Colon n_User_Type" );
+            System.out.println( "Something bad happend in parsin n_Field -> t_Identifier t_Colon t_Times n_User_Type" );
             System.exit(-1);
             return null;
         });

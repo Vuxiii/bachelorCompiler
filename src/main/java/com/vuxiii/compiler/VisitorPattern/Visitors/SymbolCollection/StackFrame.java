@@ -20,7 +20,7 @@ public class StackFrame {
     public void register_variable( Declaration decl ) {
         current_offset++;
 
-        if ( decl.kind != DeclarationKind.HEAP ) return;
+        if ( decl.kind != DeclarationKind.POINTER ) return;
 
         pointer_offsets.add( current_offset );
     }

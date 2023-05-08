@@ -15,7 +15,7 @@ public class LexLet extends ASTNode {
         this.matchInfo = matchInfo;
         super.setup_ASTNodeQueue();
     }
-    
+
     public String toString() {
         return "ASTTokenLet";
     }

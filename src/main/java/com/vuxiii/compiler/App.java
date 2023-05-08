@@ -44,126 +44,12 @@ public final class App {
         Settings.showParsingSteps = false;
         Settings.showGrammar = false;
         Settings.showParsingTable = false;
-        String input = """   
-            a = (3 + 1);
-            {
-                c = 43;
-                print( c - 1 );
-            }
-            [..]{
-                b = 3;
-                print(b);
-            }
-            [ a ] {
-                print(a);
-            }
-            [ a, b ] {
-                print(a);
-            }
-            print(a);
-            """;
-        input = """
-            let a: int;
-            a = 3;
-            [ a ] {
-
-                print( a + 2 );
-                let n: int;
-
-                [a, n ] {
-                    let c: int;
-                    print( a + n );
-
-                    [..]{
-                        print( a * n + c );
-                    }
-                }
-            }
-            print( a );
-            """;
-        input = """
-            type string: int;
-            type my_func: ( name: string, age: int );
-            let a: my_func;
-
-            a = ( name: string, age: int ) {
-                print( age );
-            };
-
-        """;
-        input = """
-        type nested: {
-            nested_field: int;
-        };
-
-        type my_rec: {
-            field1: int;
-            field2: int;
-            nested_records: nested;
-        };
-
-        let rec: my_rec;
-
-        my_rec.field1 = 42;
-        """;
-        input = """
-                type nested: {
-                    a: int;
-                    b: int;
-                    c: *int;
-                };
-
-                let rec: nested;
-
-                rec.a = 42;
-                rec.b = 69;
-                rec.c = 512;
-
-
-                print( "Field a is: %\\n", rec.a );
-                print( "Field b is: %\\n", rec.b );
-                print( "Field c is: %\\n", rec.c );
-                """;
-
-        input = """
-                type a: { f: *int; };
-                let b: a;
-                b = 42;
-                print("%\\n", b);
-                """;
-        input = """
-                let p1: *int;
-                p1 = 2;
-                print( "p1 is %\\n", p1 );
-                let va: int;
-                let p2: *int;
-                p2 = p1 * 3;
-                print( "p2 is %\\n", p2 );
-                let fun: () -> void;
-                fun = () -> void {
-                    let p42: *int;
-                    p42 = 42;
-                    print( "P42 %\\n", p42 );
-                };
-                fun();
-                """;
-        input = """
-                let a: *int;
-                let b: int;
-                let c: *int;
-                let d: int;
-
-                a = 1;
-                b = 2;
-                c = 3;
-                d = 4;
-
-                print( "a: %\\n", a );
-                print( "b: %\\n", b );
-                print( "c: %\\n", c );
-                print( "d: %\\n", d );
-
-                """;
+        String input =  """   
+                        type a: { f: *int; };
+                        let b: a;
+                        b = 42;
+                        print("%\\n", b);
+                        """;
         input = """
                 type rec: {
                     f1: int;
@@ -195,11 +81,11 @@ public final class App {
         input = """
                 type rec: {
                     f1: int;
-                    f2: int;
+                    f2: *int;
                     f3: int;
                 };
 
-                let b: *rec;
+                let b: rec;
 
                 b.f1 = 6;
                 b.f2 = 7;
@@ -208,18 +94,36 @@ public final class App {
                 print( "b.f1: %\\n", b.f1 );
                 print( "b.f2: %\\n", b.f2 );
                 print( "b.f3: %\\n", b.f3 );
-
                 """;
-        // let a: *int;
-        // a = 3;
+        input = """ 
+                let fun: () -> void;
+                let a: int;
+                a = 0;
+                fun = () -> void {
+                    print("%\\n", a);
+                    let inner: () -> void;
+                    inner = () -> void {
+                        let a: int;
+                        a = 1;
+                        print("%\\n", a);
+                    };
+                    print("%\\n", a);
+                    a = 2;
+                };
 
-        // print( "a has the value: %\\n", a );
-        
-        // a = 42 - a;
+                fun();
+                print("%\\n", a);
+                """;
+        input = """
+                let fun: ();
+                let a: int;
+                a = 69;
+                fun = () {
+                    print("a is %\\n", a);
+                };
 
-        // print( "a has the value: %\\n", a );
-
-        // """;
+                fun();
+                """;
 
         System.out.println( input );
 
@@ -267,17 +171,6 @@ public final class App {
     
         System.out.println( ast );
 
-
-        // ConstantPropagation cp = new ConstantPropagation();
-        // do {
-        //     cp.run_again = false;
-        //     ast.accept( cp );
-        // } while ( cp.run_again );
-
-        // printer = new AST_Printer();
-        // ast.accept( printer );
-        // System.out.println( printer.get_ascii() );
-        
         line_break();
         System.out.println( "TYPE_FIXER BEFORE" );
         line_break();
@@ -299,7 +192,6 @@ public final class App {
 
         // [[ Symbol Collecting ]]
 
-
         line_break();
         System.out.println( "Symbol collector" );
         line_break();
@@ -317,12 +209,6 @@ public final class App {
         ast.accept( printer );
         System.out.println( printer.get_ascii() );
 
-        // System.out.println( "Layouts:" );
-        // for ( Layout l : Layout.get_all_layouts() ) {
-        //     System.out.println( l );
-        // }
-
-
         line_break();
         System.out.println( "String collector" );
         line_break();
@@ -330,8 +216,6 @@ public final class App {
         StringCollector str_collector = new StringCollector();
         ast.accept( str_collector );
         
-        
-
         // [[ Type Checking ]]
 
         // Skip for now. We only have one type.
@@ -339,9 +223,6 @@ public final class App {
         // [[ Code Generation ]]
 
         // [[ Create Functions ]]
-
-
-
         
         AST_StackMachine generator = new AST_StackMachine();
         ast.accept(generator);
@@ -417,7 +298,6 @@ public final class App {
         Settings.showGrammar = false;
         Settings.showParsingTable = false;
 
-
         List<ASTToken> tokens = Lexer.lex( input );
 
         ASTNode ast = Parser.getAST( tokens );
@@ -433,6 +313,12 @@ public final class App {
         
         AST_SymbolCollector v2 = new AST_SymbolCollector();
         ast.accept(v2);
+
+        AST_RegisterStackFrames frames = new AST_RegisterStackFrames();
+        ast.accept( frames );
+
+        AST_RegisterHeapLayout heaps = new AST_RegisterHeapLayout();
+        ast.accept( heaps );
 
         StringCollector str_collector = new StringCollector();
         ast.accept( str_collector );
