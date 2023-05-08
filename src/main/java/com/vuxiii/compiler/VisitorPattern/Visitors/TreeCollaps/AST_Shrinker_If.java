@@ -22,14 +22,14 @@ public class AST_Shrinker_If extends VisitorBase {
         this.mapper = mapper;
     }
 
-    @VisitorPattern( when = VisitOrder.AFTER_CHILD )
+    @VisitorPattern( when = VisitOrder.AFTER_CHILD, order = 1 )
     public void set_new_child_if( ASTNode node ) {
         if ( !mapper.containsKey( prev ) ) return;
 
         node.replace_child_with( prev, mapper.get(prev) );
     }
 
-    @VisitorPattern( when = VisitOrder.EXIT_NODE )
+    @VisitorPattern( when = VisitOrder.EXIT_NODE, order = 1 )
     public void reset( IfElseNode stmt ) {
         prev = stmt;
     }

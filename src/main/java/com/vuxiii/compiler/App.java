@@ -115,16 +115,59 @@ public final class App {
                 print("%\\n", a);
                 """;
         input = """
-                let fun: ();
+                let fun1: () -> int;
+                let fun2: () -> int;
                 let a: int;
                 a = 69;
-                fun = () {
+                fun1 = () -> int {
                     print("a is %\\n", a);
+                    return 3;
                 };
 
-                fun();
+                fun2 = fun1;
+
+                print("%\\n", fun2());
+                fun1();
                 """;
 
+        input = """
+                let fib: (a: int) -> int;
+
+                fib = (a: int) -> int {
+                    if ( a == 1 ) {
+                        return 1;
+                    } else if ( a == 2 ) {
+                        return 1;
+                    }
+                    let fib1: int;
+                    let fib2: int;
+                    fib1 = fib(a-1);
+                    fib2 = fib(a-2);
+                    print("fib(%) = %\\n", a-1, fib1);
+                    print("fib(%) = %\\n", a-2, fib2);
+                    return fib1 + fib2; 
+                };
+                let n: int;
+                n = 7;
+
+                print( "The %th fib number is: %\\n", n, fib(n) );
+                """;
+        
+        // input = """
+        //         let counter: (a: int) -> int;
+
+        //         counter = (a: int) -> int {
+        //             print( "a is %\\n", a );
+        //             if ( a == 0 ) {
+        //                 return 1;
+        //             }
+        //             return counter(a-1);
+        //         };
+        //         let n: int;
+        //         n = 3;
+
+        //         print( "The %th fib number is: %\\n", n, counter(n) );
+        //         """;
         System.out.println( input );
 
         // [[ Tokenizer ]]

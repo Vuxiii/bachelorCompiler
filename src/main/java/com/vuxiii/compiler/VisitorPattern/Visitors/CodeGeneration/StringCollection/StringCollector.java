@@ -16,7 +16,7 @@ import com.vuxiii.compiler.VisitorPattern.Annotations.VisitorPattern;
 public class StringCollector extends Visitor {
     public Map<Print, StringNode> strings;
 
-    @VisitorPattern( when = VisitOrder.ENTER_NODE )
+    @VisitorPattern( when = VisitOrder.ENTER_NODE, order = 1 )
     public void init_root( Root root ) {
         this.strings = root.strings;
     }
