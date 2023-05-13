@@ -181,9 +181,14 @@ We first need to know some theory of deterministic finite automata. As the name 
 
 \section*{Regex to NFA}
 
+Which will be covered in the next section.
+
 \chapter{Parsing}
 
+The next major step in the compilation process is processing the tokens received from the previous step and combine them into an abstract syntax tree (AST). This AST contains the semantics of the program, and by traversing the tree we will be able to emit the target language. 
 
+The main two ways of writing a parser is by either utilizing a parser generator or by writing the parser by hand. This can be done by using a recursive decent technique. 
+There is a third way, which involves using both a parser generator and extending it by hand. This can provide much finergrained error messages to the user, as the compiler author is able to analyze the current state of the compiler at the point of failure, and figure out what went wrong by backtracking the call stack or by looking at the upcomming nodes.
 
 
 \chapter{Compilation}
