@@ -10,6 +10,10 @@
 \usepackage{amssymb}
 \usepackage{xspace}
 
+\usepackage{tikz}
+\usetikzlibrary{automata,positioning}
+\usepackage{subfiles}
+
 % Algorithms
 %\usepackage{algorithm}
 %\usepackage[noend]{algorithmic}
@@ -53,6 +57,9 @@
 \newcommand{\BIGSETOF}[2]{\BIGSET{#1 \mid #2}}
 \newcommand{\NAT}{\ensuremath{\mathbb{N}}}
 \newcommand{\HRule}{\rule{\linewidth}{0.5mm}}
+
+\newcommand{\term}[1]{\text{t\textunderscore #1}}
+\newcommand{\nont}[1]{\text{n\textunderscore #1}}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -148,51 +155,14 @@ Thank you, Mom \& Dad!
 \setcounter{page}{1}
 
 \chapter{Introduction}
-The goal of this project is to develop a compiler for a simple language without the use of external libraries or tools. The compiler emits X86-64 assembly with the AT\&T syntax. This means that to run the compiled assembly program the use of an assembler and linker is needed. 
-
-One might wonder why the use of third party tools such as Bison or Flex were not used, and the answer to that is simple: \textit{Where would the fun be in that?} Thus, for this project we will develop our own tools. 
-
-Let us first go through the different phases of the compiler pipeline and discover what needs to be developed:
-\begin{itemize}
-  \item The first step of our compiler is to divide the source code into tokens This step is called tokenization. Here we define which keywords are reserved for the language and which variable names are legal and which are not. Flex is a tool that solves this goal, so we will try to make one similar to that.
-  \item The second step is where we will need a parser. Here we take the list of tokens created from the privious step, and combine them into a parsetree. The output of this step is an abstract syntax tree. A tool for this phase is called Bison.
-  \item In the third step we take the raw abstract syntax tree and massages it by removing any unnessecary artifacts from the parser. This results in a clean AST which is easier to work with.
-  \item Lastly we go through our generated tree to produce the assembly language.
-\end{itemize}
-
-After all of these steps, which are simplified for introductory purposes, we finally have our compiler.
-
+\subfile{sections/introduction.tex}
 \chapter{Tokenization}
-The goal of the first step of our compiler, the tokenizer, is to convert the source code into a list of tonkens. Ideally we want it to be simple to add new keywords to our language to ease maintenance later down the road. For each recognized string we want to make a token which stores some metadata about where in the file the token was found and what kind of token it is. The metadata will be used for notifying the user of any potential user errors.
-
-One way to solve this problem is to split the input after each space and then having a bunch of checks that determine what kind of token we are dealing with. This, however, can be expensive computational wise: for a single token we will in the worst case have to check each reserved keyword, and if none of these match, determine if it is a string, number or a variable name. With this approach some maintenance also follows. By complicating this step a whole bunch, we can do better. 
-
-Flex uses regex to describe which strings match selected tokens, and returns a list of tokens based on what it matches. Let's create this tool.
-
-\section*{DFA}
-We first need to know some theory of deterministic finite automata. As the name implies we are dealing with a machine that is both deterministic and finite, meaning that it always know what to do, and that it is not infinite. A DFA is a collection of states, that for each state has arcs that links it to other states. The deterministic part of the name, comes from the fact that for each state it has as many arcs as the alfabet. The alfabet is a collection of characters or symbols that the state machine knows about. To make the machine finite we need to mark some of the states to be accepting, meaning that when it reaches such a state it is allowed to stop or continue. 
-
-
-
-
-\section*{NFA}
-
-\section*{NFA to DFA}
-
-\section*{Regex to NFA}
-
-Which will be covered in the next section.
-
+\subfile{sections/tokenization.tex}
 \chapter{Parsing}
-
-The next major step in the compilation process is processing the tokens received from the previous step and combine them into an abstract syntax tree (AST). This AST contains the semantics of the program, and by traversing the tree we will be able to emit the target language. 
-
-The main two ways of writing a parser is by either utilizing a parser generator or by writing the parser by hand. This can be done by using a recursive decent technique. 
-There is a third way, which involves using both a parser generator and extending it by hand. This can provide much finergrained error messages to the user, as the compiler author is able to analyze the current state of the compiler at the point of failure, and figure out what went wrong by backtracking the call stack or by looking at the upcomming nodes.
-
+\subfile{sections/parsing.tex}
 
 \chapter{Compilation}
-
+We have finally reached the backend of the compiler. This is where the actual heavy lifting of a compiler happens. Here we define the semantics of our language. 
 
 \chapter{Concluding Remarks}
 Veni, vidi, vici!

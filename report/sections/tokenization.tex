@@ -1,0 +1,61 @@
+The goal of the first step of our compiler, the tokenizer, is to convert the source code into a list of tonkens. Ideally we want it to be simple to add new keywords to our language to ease maintenance later down the road. For each recognized string we want to make a token which stores some metadata about where in the file the token was found and what kind of token it is. The metadata will be used for notifying the user of any potential user errors.
+
+One way to solve this problem is to split the input after each space and then having a bunch of checks that determine what kind of token we are dealing with. This, however, can be expensive computational wise: for a single token we will in the worst case have to check each reserved keyword, and if none of these match, determine if it is a string, number or a variable name. With this approach some maintenance also follows. By complicating this step a whole bunch, we can do better. 
+
+Flex uses regex to describe which strings match selected tokens, and returns a list of tokens based on what it matches. Let's create this tool.
+
+\section*{DFA}
+We first need to know some theory of deterministic finite automata. As the name implies we are dealing with a machine that is both deterministic and finite, meaning that it always knows what to do, and that it is not infinite. A DFA is a collection of states, that for each state has arcs that links it to other states. The deterministic part of the name, comes from the fact that for each state it has as many arcs as the alfabet. The alfabet is a collection of characters or symbols that the state machine knows about. To make the machine finite we need to mark some of the states to be accepting, meaning that when it reaches such a state it is allowed to stop or continue if more symbols follow. An example of a DFA is shown below.
+
+\begin{center}
+\begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto] 
+    \node[state,initial] (q_0)   {$q_0$}; 
+    \node[state] (q_1) [above right=of q_0] {$q_1$}; 
+    \node[state] (q_2) [below right=of q_0] {$q_2$}; 
+    \node[state,accepting](q_3) [below right=of q_1] {$q_3$};
+    \path[->] 
+    (q_0) edge  node {0} (q_1)
+          edge  node [swap] {1} (q_2)
+    (q_1) edge  node  {1} (q_3)
+          edge [loop above] node {0} ()
+    (q_2) edge  node [swap] {0} (q_3) 
+          edge [loop below] node {1} ();
+\end{tikzpicture}
+\end{center}
+
+The above DFA accepts any input where it either starts with any number og 0's (atleast one) and ends with a 1, or starts with any number of 1's (atleast one) and ends with a 0. The alfabet for the above DFA is $\{0, 1\}$.
+
+\section*{NFA}
+
+The difference between a non deterministic finite automata (NFA) and a DFA is that NFAs allow the use of $\epsilon$, which indicates that in the current state, we can progress through the arc marked with an $\epsilon$ which essentially simulates our machine being in multiple states at any given point in time. Furthermore a state can have zero outgoing arcs or even multiple of the same symbol. Hence the non deterministic part of the name. This allows us to both be lazy while diagramming a machine and build much more expressive machines. An example can be seen below:
+
+
+\begin{center}
+    \begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto] 
+        \node[state,initial] (q_0)   {$q_0$}; 
+        \node[state] (q_1) [above right=of q_0] {$q_1$}; 
+        \node[state] (q_2) [below right=of q_0] {$q_2$}; 
+        \node[state,accepting](q_3) [below right=of q_1] {$q_3$};
+        \path[->] 
+        (q_0) edge  node {$\epsilon$} (q_1)
+              edge  node [swap] {$\epsilon$} (q_2)
+              edge node {2} (q_3)
+        (q_1) edge  node  {1} (q_3)
+        (q_2) edge  node [swap] {0} (q_3) 
+              edge [loop below] node {1} ();
+    \end{tikzpicture}
+\end{center}
+
+Notice the state $q_1$. It doesn't have any outgoing arcs with a $0$. And the start state $q_0$ contains two epsilon arcs going to $q_1$ and $q_2$. This essentially means that from state $q_0$ the machine can choose to progress through any of its epsilon reachable states or the state itself. The above machine accepts the following inputs:
+\[\{0, 1, 2, 10, 110, 1110, \dots\}\]
+
+\section*{NFA to DFA}
+
+In this section I will show that any NFA can be converted to an equivalent DFA through a multiplum of steps.
+
+\section*{Regex to NFA}
+Which will be covered in the next section.
+
+\section*{Constructing Tokens}
+
+

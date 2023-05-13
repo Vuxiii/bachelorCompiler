@@ -1,0 +1,16 @@
+The goal of this project is to develop a compiler for a simple language without the use of external libraries or tools. The compiler emits X86-64 assembly with the AT\&T syntax. This means that to run the compiled assembly program the use of an assembler and linker is needed. The language is accompanied with a garbage collector which is written in $C$. 
+
+One might wonder why the use of third party tools such as Bison or Flex were not used, and the answer to that is simple: \textit{Where would the fun be in that?} Thus, for this project we will develop our own tools. 
+
+Let us first go through the different phases of the compiler pipeline and discover what needs to be developed:
+A compiler is divided up into two main phases. The front end, and the back end of the compiler. The front end defines the syntax of our programming language. Things such as reserved keywords, what are legal variable names and in what order keywords and symbols should appear. 
+\begin{itemize}
+    \item The first step of our compiler is to divide the source code into tokens This step is called tokenization. Here we define which keywords are reserved for the language and which variable names are legal and which are not. Flex is a tool that solves this goal, so we will try to make one similar to that.
+    \item The second step is where we will need a parser. Here we take the list of tokens created from the privious step, and combine them into a parsetree. The output of this step is an abstract syntax tree. A tool for this phase is called Bison.
+\end{itemize}  
+
+The backend of the compiler defines the semantics of the language. What happens when the user makes a function call, should it spawn a new thread and make that thread execute the function while the main thread continues execution, or should something happen anytime the value $42$ is computed. The backend allows us to essentially define what should happen at any time in runtime:
+\begin{itemize}
+  \item In the third step we take the raw abstract syntax tree and massages it by removing any unnessecary artifacts from the parser. This results in a clean AST which is easier to work with.
+  \item Lastly we go through our generated tree to produce the assembly language.
+\end{itemize}

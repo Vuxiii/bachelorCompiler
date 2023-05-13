@@ -1,0 +1,98 @@
+The next major step in the compilation process is processing the tokens received from the previous step and combine them into an abstract syntax tree (AST). This AST contains the semantics of the program, and by traversing the tree we will be able to emit the target language. 
+
+The main two ways of writing a parser is by either utilizing a parser generator or by writing the parser by hand. This can be done by using a recursive decent technique. Depending on the situation the latter technique can have its merrits. It will provide a much finer grained control over what is possible to parse. The error messages can also be super precise. Essentially, writing a parser by hand the compiler author is able to parse any imaginable language. However, maintaining such a beast can quickly become a nightmare as the language grows and new syntax needs to be added. 
+
+Which brings us to parser generators. Tools such as \textit{yacc} or \textit{Bison} generate parsers capable of parsing LR (1) and LALR (1) languages by taking as input a Context Free Grammar (CFG). By utilizing a parser generator we will gain greater flexibility maintaining the compiler and further expanding the acceptable language by modifying the CFG, which is the main advantage of going with this approach. However, the parse table generated for my language takes an enourmus 51 megabytes. 
+
+There is a third way, which involves using both a parser generator and extending it by hand. This can provide much finergrained error messages to the user, as the compiler author is able to analyze the current state of the compiler at the point of failure, and figure out what went wrong by backtracking the call stack or by looking at the upcomming nodes.
+
+For this project I will be using a parser generator. However, I will not be using an already available parser generator. I will be making my own, which I have called \textit{Parsley}. Parsley is capable of generating LR (1) parsers which fits the purpose of this project. The parser generator will solve two problems for us. Firstly, it will be used to generate a parser capable of accepting regular languages for the tokenizer. Secondly, it will generate a parser for the parsing step, which will, as stated earlier, combine the tokens from the tokenizer into an AST.
+
+In order to create \textit{Parsley}, we first need to understand some of the underlying theory \textit{Parsley} is built upon. 
+
+\section*{Context Free Grammar}
+
+Cotext Free Grammars are a formal way of describing a language. 
+CFG consists of \textit{terminals} and \textit{non terminals}. Every grammar contains a start symbol, which is usually denoted \textit{S}. The start symbol is a non terminal, which means that it must contain at least one reduction rule. A reduction is what happens when a list of symbols match the given rule, and is able to be reduced into a non terminal. The symbols in the reducion rule can be non terminals or terminals. The notation for such a rule can be seen below.
+
+
+\begin{equation*}
+  \begin{split}
+      S &\rightarrow aBBa \\
+      B &\rightarrow b
+  \end{split}
+\end{equation*}
+
+In the above example there are two reduction rules. One of which reduces into \textit{S} and one into \textit{B}. The arrow indicates that the left hand side of the arrow can be described as what lies on the right hand side of the arrow. Traditionally small letters indicate terminals and capital letters indicate a non terminal. From the above CFG, we see that the non terminal \textit{B} can only be expanded into a \textit{b}, or if we look at it in reverse, the terminal \textit{b} can be reduced into the non terminal \textit{B}. Thus the CFG can accept the language $\{abba\}$.
+
+If we take a step back and look at CFGs with the context of compilers, the terminals are the tokens provided from the tokenizer, and the non terminals are the building blocks that combine the terminals into a meaningful tree representation. A rule for accepting an assignment statement could look like the following:
+
+\begin{equation*}
+  \begin{split}
+      \text{\nont{ASSIGNMENT}} &\rightarrow \text{\term{id}   \term{eq}   \nont{EXPRESSION}} \\
+  \end{split}
+\end{equation*}
+
+Here we can see that in order to make a node symbolizing an assignment we need three symbols. Two of the symbols are terminals, indicated by the \textit{t}, and a non terminal, indicated by \textit{n}, called \textit{EXPRESSION}. This non terminal can be anything that the language designer sees fit as an expression. Let us say that in this context free language an expression is a literal number. We would then have the following language:
+
+\begin{equation*}
+  \begin{split}
+      S &\rightarrow \nont{ASSIGNMENT} \\
+      \nont{ASSIGNMENT} &\rightarrow \text{\term{id}   \term{eq}   \nont{EXPRESSION}} \\
+      \nont{EXPRESSION} &\rightarrow \term{literal} \\
+  \end{split}
+\end{equation*}
+
+Then imagine the parser receiving the following stream of tokens:
+\[[\term{id}, \term{eq}, \term{literal}]\]
+The parser would scan the tokens from left to right one by one, and check against any potential matching rules. It is first when we reach the literal that the parser finds a match from literal to expression. The parser will then replace the terminal with the corresponding non terminal. We will then have the following: 
+\[[\term{id}, \term{eq}, \nont{EXPRESSION}]\]
+Now the the second rule matches the input, and we can reduce the input to the following:
+\[[\nont{ASSIGNMENT}] \rightarrow [S]\]
+
+We now have an idea of what we want to build. We want to build a machine that takes some CFG and converts this into another machine that accepts the language of the given CFG. This machine is the actual parser that will be used for the parsing step of the compiler.
+
+We will now dive into the theory necessary constructing such a machine. To build the parsetable we need to understand three concepts: NULL, FIRST and FOLLOW.
+
+\section*{NULL}
+
+The name NULL comes from the fact that some non terminals are nullable. Nullable symbols are non terminals that have some rules where the entire right side of the production rule can be replaced with nothing, which indicated with an $\epsilon$. Imagine the following rules:
+
+\begin{equation*}
+  \begin{split}
+      S &\rightarrow ABC \\
+      A &\rightarrow AC \hspace*{3px}|\hspace*{3px}B\\
+      B &\rightarrow b \hspace*{3px}|\hspace*{3px}\epsilon \\
+      C &\rightarrow c
+  \end{split}
+\end{equation*}
+
+Looking at the third reduction rule we recognize that the non terminal \textit{B} can either be achieved by reading a \textit{b} from the input or nothing at all. This means that the non terminal \textit{B} is nullable, because it can be replaced with nothing. By transitivity this means that \textit{A} is also nullable, because \textit{A} has a reduction rule consisting of entirely nullable symbols. Thus for the above CFG we have the nullable set:
+\[\{A, B\}\]
+
+\section*{FIRST}
+
+The first set is the collection of terminals that can appear as the first symbol in the reduction rule for each non terminal. Thus, the first set for the above CFG will have four collections of terminals, one for each non terminal: S, A, B and C. However, we must remember that some of the non terminals are nullable. This means that FIRST(A) contains both \textit{b} and \textit{c}. This is due to the fact that \textit{A} itself is nullable, and thus the first reduction rule for \textit{A} can be rewritten as follows:
+
+
+\begin{equation*}
+  \begin{split}
+      A &\rightarrow C
+  \end{split}
+\end{equation*}
+
+From what we know now, we can compute the first set for each non terminal:
+\begin{itemize}
+  \item FIRST(S) = {FIRST(A)} = {b, c}
+  \item FIRST(A) = {FIRST(B), FIRST(C)} = {b, c}
+  \item FIRST(B) = {b}
+  \item FIRST(C) = {c}
+\end{itemize}
+
+\section*{FOLLOW}
+
+The follow set is the collection of symbols that may appear after a non terminal. Just like the first set it contains four collection of terminals.
+
+\section*{Parsley}
+
+Whenever a reduction happens, ie. from the above when a \textit{b} is reduced into a \textit{B} we should remove the \textit{b} from the input and replace it with \textit{B}. Thus, for each rule that describes the language for the programming language, we need to tell the parser generator what should happen when the specific reduction happens.  
