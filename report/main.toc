@@ -4,4 +4,5 @@
 \contentsline {chapter}{\numberline {2}Tokenization}{3}{}%
 \contentsline {chapter}{\numberline {3}Parsing}{6}{}%
 \contentsline {chapter}{\numberline {4}Compilation}{11}{}%
-\contentsline {chapter}{\numberline {5}Concluding Remarks}{12}{}%
+\contentsline {chapter}{\numberline {5}Runtime}{13}{}%
+\contentsline {chapter}{\numberline {6}Concluding Remarks}{15}{}%

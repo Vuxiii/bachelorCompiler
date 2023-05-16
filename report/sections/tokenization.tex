@@ -47,11 +47,11 @@ The difference between a non deterministic finite automata (NFA) and a DFA is th
 \end{center}
 
 Notice the state $q_1$. It doesn't have any outgoing arcs with a $0$. And the start state $q_0$ contains two epsilon arcs going to $q_1$ and $q_2$. This essentially means that from state $q_0$ the machine can choose to progress through any of its epsilon reachable states or the state itself. The above machine accepts the following inputs:
-\[\{0, 1, 2, 10, 110, 1110, \dots\}\]
+\[\SET{0, 1, 2, 10, 110, 1110, \dots}\]
 
 \section*{NFA to DFA}
 
-In this section I will show that any NFA can be converted to an equivalent DFA through a multiplum of steps.
+In this section I will show that any NFA can be converted to an equivalent DFA through a series of steps.
 
 \section*{Regex to NFA}
 Which will be covered in the next section.

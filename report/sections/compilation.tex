@@ -1,0 +1,28 @@
+Let us dive into the backend of the compiler. Here we define the semantics of our language. At this stage we have the AST from the parser which we will traverse multiple times in order to collect various components and information about the source code, which determine what should happen at runtime. This stage can be divided into multiple phases just like the frontend. For this compiler the phases are as follows: 
+\begin{enumerate}
+    \item Symbol Collection
+    \item Register The Stack's Layout
+    \item Register The Structs' Layout
+    \item String Collection
+    \item Intermediate Code Generation
+    \item Code Emit
+\end{enumerate}
+
+
+use to generate IR (intermediate representation). IR is a construct designed to make it easier to manipulate and handle the code during construction. For this project the IR is a set of instructions and 
+
+\section*{Symbol Collection}
+The goal of the symbol collector is to collect the symbols defined in the source code and map them accordingly. Symbols are variables, struct definitions and functions. 
+
+\subsection*{Garbage Collector}
+Arguably a garbage collector is not a part of the compiler, however, the metadata that the garbage collector needs will be collected in the compiler.
+
+
+For the garbage collector to function we need to register all the pointers located on the stack. Additionally we need to go through all user defined structs and identify which have pointers and in what offset they have from the start of the memory block.
+\subsubsection*{Stack Layout}
+We will now discuss how to collect the pointers located on the stack. Let us first imagine that no functions has been defined, thus the runtime only has one stack frame. We can then traverse the AST and locate any pointer declarations to the heap and struct declarations that contain pointers to the heap. Since the symbol collector already is mapping offsets for each local variable, we can use this offset counter to mark pointers on the stack. 
+For each function declared the compiler would also have to create a stack frame for that function. Each time a function is called the runtime generates a new stack frame and stores it for the garbage collector to access. Whenever a function terminates the runtime has to remove that stack frame from it's own stack of frames to ensure that the garbage collector does not touch the stack above the stack pointer.
+
+\subsubsection*{Struct Layout}
+\section*{Intermediate Representation}
+\section*{Code Emit}

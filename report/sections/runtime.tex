@@ -1,0 +1,18 @@
+\section*{Garbage Collector} 
+The goal of the garbage collector is to reclaim any unused heap allocations. There are multiple ways of doing this such as reference counting which is used in languages like C++ and Rust by using socalled Smart Pointers. However, reference counting has some limitations. Reference counting works by having the runtime count how many variables holds a reference to a piece of memory, and when this number reaches zero, the runtime will collect the unused memory and mark it as usable for reconsumption. Imagine one developing a Tree Datastructure where each node has references to their children and their parents. In this scheme the datastructure would never be reclaimed because the reference count for any of the nodes in the tree never reaches zero. 
+
+For this compiler I have chosen to implement a Mark and Compact Garbage Collector. This algorithm works by dividing the heap memory into two blocks. One of which is used for allocating into, and the other is used to compact the marked memory blocks into. This algorithm does not find the unused memory blocks, rather, it finds the used memory blocks and compacts them. This accomplished two things: 
+\begin{enumerate}
+    \item Cache locality. The used memory blocks lie contiguous next to each other. This is important for performance and avoiding cache misses.
+    \item Unused memory is located in a single division of the splitted heap and can be marked as available for allocation. 
+\end{enumerate}
+The algorithm can be divided into two steps. The first step is collecting all the memory blocks which are still being used. The next step is to move the used memory blocks to the other heap split.
+To find the memory blocks the algorithm traverses the stack and registers all the pointers. For each pointer on the stack it follows the pointer to the heap and finds all the pointers in that memory block. This continues until all the pointers have been traversed. Each of the visited memory blocks are marked. The next step is to move the marked memory to the other heap split, which can be done in two different approaches, either a DFS or a BFS. 
+
+\begin{itemize}
+    \item With a DFS approach, cache locality will be dependent on the order of the pointers in the memory blocks. The pointers placed first in the source code would be moved first.
+    \item With a BFA approach, cache locality for arrays of structs with pointers and other data would be packed closer to each other. However other datastrucures such as trees would be spread further apart.
+\end{itemize}
+Therefore I have chosen to move the memory blocks with using a DFS approach. 
+
+\section*{Stack Frames}
