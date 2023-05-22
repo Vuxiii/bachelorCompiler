@@ -11,18 +11,53 @@ Let us dive into the backend of the compiler. Here we define the semantics of ou
 
 use to generate IR (intermediate representation). IR is a construct designed to make it easier to manipulate and handle the code during construction. For this project the IR is a set of instructions and 
 
-\section*{Symbol Collection}
-The goal of the symbol collector is to collect the symbols defined in the source code and map them accordingly. Symbols are variables, struct definitions and functions. 
+\section{Symbol Collection}
+The goal of the symbol collector is to collect the symbols defined in the source code and map them accordingly. Symbols are variables, struct definitions and functions. Variables are usually placed on the stack unless it has been heap allocated. We can therefore traverse the AST and collect all declarations one by one. The variables will then be placed in order on the stack after the base pointer. Functions will be placed outside the main entry point in the assembly, such that these are callable later on. Struct definitions are essentially just a bunch of variables packed together and placed contiguously on the stack. 
 
-\subsection*{Garbage Collector}
+This phase is also where the compiler checks for scoping rules. I have chosen to implement static scoping, and this means that during an inorder traversal of the AST if at any point a variable is referenced, which have yet to be declared, we have encountered a scoping error. The variable has been referenced before being declared. Where the variables are placed on the stack is also important in order to read the stored value. How many stack frames is the variable located from the current frame. Imagine the following example:
+
+\begin{lstlisting}[language=Python,title=Static Scoping]
+let fun1: ();
+let var1: int;
+var1 = 42;
+
+fun1 = () {
+    let var2: int;
+    var2 = var1 + 4;
+    print("Variable 2 is: %\n", var2);
+};
+\end{lstlisting}
+
+In the above example at line 7 there currently is two stack frames. One for the outer scope, and one for the scope of the function \textit{fun1}. In order to read the value of \textit{var1} we first need to go to the outer frame, and then find the correct offset for that specific variable on the stack.
+
+\subsection{Garbage Collector}
 Arguably a garbage collector is not a part of the compiler, however, the metadata that the garbage collector needs will be collected in the compiler.
 
 
-For the garbage collector to function we need to register all the pointers located on the stack. Additionally we need to go through all user defined structs and identify which have pointers and in what offset they have from the start of the memory block.
-\subsubsection*{Stack Layout}
-We will now discuss how to collect the pointers located on the stack. Let us first imagine that no functions has been defined, thus the runtime only has one stack frame. We can then traverse the AST and locate any pointer declarations to the heap and struct declarations that contain pointers to the heap. Since the symbol collector already is mapping offsets for each local variable, we can use this offset counter to mark pointers on the stack. 
-For each function declared the compiler would also have to create a stack frame for that function. Each time a function is called the runtime generates a new stack frame and stores it for the garbage collector to access. Whenever a function terminates the runtime has to remove that stack frame from it's own stack of frames to ensure that the garbage collector does not touch the stack above the stack pointer.
+For the garbage collector to function we need to register all the pointers located on the stack. Additionally we need to go through all user defined structs and identify which have pointers and what offset these pointers have from the start of the memory block. 
 
-\subsubsection*{Struct Layout}
-\section*{Intermediate Representation}
-\section*{Code Emit}
+Let us call this for a \textit{Layout}. A layout is a series of bitfields indicating with a one if that specific offset is a pointer, or a zero if it can be ignored. For this we can use 64 bit bitfields, where the first bit indicates if there is another bitfield after this. This is necessary for large structs or stack frames, where there are more than 63 pointers or variables. Imagine the following struct definition:
+
+\begin{lstlisting}[language=C,keywords={Thing, int},title=Type Definition]
+type Thing: {
+    let a: *int;
+    let b: int;
+    let c: int;
+    let d: *int;
+};
+\end{lstlisting}
+
+In the above example the first bit will be set to zero, because there are less than 64 fields the struct. The second and the fifth bits are set to one and the rest zero. 
+
+\subsection{Stack Layout}
+We will now discuss how to collect the pointers located on the stack. For each possible stack frame we have to generate a layout which keeps track of where a pointer is located in respect to the currently active stack frame. This means that we traverse the main scope to identify its the layout, and for each function do the same. For each traversal of the AST we locate any pointer declarations to the heap. Since the symbol collector already is mapping offsets for each local variable, we can use this offset counter to mark pointers on the stack. 
+
+\subsection{Struct Layout}
+
+Just like generating layouts for each unique stack frame we generate layouts for each unique struct. Whenever we find a struct declaration we register any pointers it may contain, and depending on whether this specific struct has been allocated on the stack or on the heap, the pointer offsets will be negative or positive respectivly. 
+
+\section{Intermediate Representation}
+
+\section{Constructing the Language Semantics}
+
+\section{Code Emit}

@@ -1,8 +1,30 @@
 \contentsline {paragraph}{English}{i}{}%
 \contentsline {paragraph}{Danish}{i}{}%
 \contentsline {chapter}{\numberline {1}Introduction}{1}{}%
-\contentsline {chapter}{\numberline {2}Tokenization}{3}{}%
-\contentsline {chapter}{\numberline {3}Parsing}{6}{}%
-\contentsline {chapter}{\numberline {4}Compilation}{11}{}%
-\contentsline {chapter}{\numberline {5}Runtime}{13}{}%
-\contentsline {chapter}{\numberline {6}Concluding Remarks}{15}{}%
+\contentsline {chapter}{\numberline {2}Tokenization}{4}{}%
+\contentsline {section}{\numberline {2.1}DFA}{4}{}%
+\contentsline {section}{\numberline {2.2}NFA}{5}{}%
+\contentsline {section}{\numberline {2.3}NFA to DFA}{6}{}%
+\contentsline {section}{\numberline {2.4}Regex to NFA}{6}{}%
+\contentsline {subsection}{\numberline {2.4.1}Concatenation}{7}{}%
+\contentsline {subsection}{\numberline {2.4.2}Union}{8}{}%
+\contentsline {subsection}{\numberline {2.4.3}Star}{8}{}%
+\contentsline {chapter}{\numberline {3}Parsing}{10}{}%
+\contentsline {section}{\numberline {3.1}Context Free Grammar}{11}{}%
+\contentsline {section}{\numberline {3.2}NULL Set}{13}{}%
+\contentsline {section}{\numberline {3.3}FIRST Set}{13}{}%
+\contentsline {section}{\numberline {3.4}FOLLOW Set}{14}{}%
+\contentsline {section}{\numberline {3.5}Parsley}{14}{}%
+\contentsline {subsection}{\numberline {3.5.1}Constructing a parser for Tokenization}{14}{}%
+\contentsline {subsection}{\numberline {3.5.2}Constructing the Parser for the language}{14}{}%
+\contentsline {chapter}{\numberline {4}Compilation}{15}{}%
+\contentsline {section}{\numberline {4.1}Symbol Collection}{15}{}%
+\contentsline {subsection}{\numberline {4.1.1}Garbage Collector}{16}{}%
+\contentsline {subsection}{\numberline {4.1.2}Stack Layout}{17}{}%
+\contentsline {subsection}{\numberline {4.1.3}Struct Layout}{17}{}%
+\contentsline {section}{\numberline {4.2}Intermediate Representation}{17}{}%
+\contentsline {section}{\numberline {4.3}Constructing the Language Semantics}{17}{}%
+\contentsline {section}{\numberline {4.4}Code Emit}{17}{}%
+\contentsline {chapter}{\numberline {5}Runtime Machine}{18}{}%
+\contentsline {chapter}{\numberline {6}Concluding Remarks}{21}{}%
+\contentsline {section}{\numberline {6.1}Further Improvements}{21}{}%

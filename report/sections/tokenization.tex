@@ -1,11 +1,11 @@
-The goal of the first step of our compiler, the tokenizer, is to convert the source code into a list of tonkens. Ideally we want it to be simple to add new keywords to our language to ease maintenance later down the road. For each recognized string we want to make a token which stores some metadata about where in the file the token was found and what kind of token it is. The metadata will be used for notifying the user of any potential user errors.
+The goal of the first step of our compiler, the tokenizer, is to convert the source code into a list of tonkens. Ideally we want it to be simple to add new keywords to our language to ease maintenance later down the road. For each recognized string we want to construct a token which stores some metadata about where in the file the token was found and what kind of token it is. The metadata will be used for notifying the user of any potential syntax errors.
 
-One way to solve this problem is to split the input after each space and then having a bunch of checks that determine what kind of token we are dealing with. This, however, can be expensive computational wise: for a single token we will in the worst case have to check each reserved keyword, and if none of these match, determine if it is a string, number or a variable name. With this approach some maintenance also follows. By complicating this step a whole bunch, we can do better. 
+One way to solve this problem is to split the input after each space and then having a bunch of checks that determine what kind of token we are dealing with. This, however, can be expensive computational wise: for a single token we will in the worst case have to check each reserved keyword, and if none of these match, determine if it is a string, number or a variable name. With this approach some maintenance also follows. We can do better. 
 
-Flex uses regex to describe which strings match selected tokens, and returns a list of tokens based on what it matches. Let's create this tool.
+Flex uses regex to describe which strings match selected tokens, and returns a list of tokens based on what it matches. Let us create a tool similar to this.
 
-\section*{DFA}
-We first need to know some theory of deterministic finite automata. As the name implies we are dealing with a machine that is both deterministic and finite, meaning that it always knows what to do, and that it is not infinite. A DFA is a collection of states, that for each state has arcs that links it to other states. The deterministic part of the name, comes from the fact that for each state it has as many arcs as the alfabet. The alfabet is a collection of characters or symbols that the state machine knows about. To make the machine finite we need to mark some of the states to be accepting, meaning that when it reaches such a state it is allowed to stop or continue if more symbols follow. An example of a DFA is shown below.
+\section{DFA}
+We first need to know some theory of deterministic finite automata. A DFA is a collection of states, that for each state has arcs that links it to other states. The deterministic part of the name, comes from the fact that for each state it has as many arcs as the alfabet resulting in the machine always knowing which arc it should traverse. The alfabet is a collection of characters or symbols that the state machine knows about. To make the machine finite we need to mark some of the states to be accepting, meaning that when it reaches such a state it is allowed to stop or continue if more symbols follow. An example of a DFA is shown below.
 
 \begin{center}
 \begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto] 
@@ -25,9 +25,9 @@ We first need to know some theory of deterministic finite automata. As the name 
 
 The above DFA accepts any input where it either starts with any number og 0's (atleast one) and ends with a 1, or starts with any number of 1's (atleast one) and ends with a 0. The alfabet for the above DFA is $\{0, 1\}$.
 
-\section*{NFA}
+\section{NFA}
 
-The difference between a non deterministic finite automata (NFA) and a DFA is that NFAs allow the use of $\epsilon$, which indicates that in the current state, we can progress through the arc marked with an $\epsilon$ which essentially simulates our machine being in multiple states at any given point in time. Furthermore a state can have zero outgoing arcs or even multiple of the same symbol. Hence the non deterministic part of the name. This allows us to both be lazy while diagramming a machine and build much more expressive machines. An example can be seen below:
+The difference between a non deterministic finite automata (NFA) and a DFA is that NFAs allow the use of $\epsilon$, which indicates that in the current state, we can progress through the arc marked with an $\epsilon$ which simulates our machine being in multiple states at any given point in time. Furthermore a state can have zero outgoing arcs or even multiple of the same symbol. Hence the non deterministic part of the name. This allows us to both be lazy while diagramming a machine and build much more expressive machines. An example can be seen below:
 
 
 \begin{center}
@@ -46,16 +46,227 @@ The difference between a non deterministic finite automata (NFA) and a DFA is th
     \end{tikzpicture}
 \end{center}
 
-Notice the state $q_1$. It doesn't have any outgoing arcs with a $0$. And the start state $q_0$ contains two epsilon arcs going to $q_1$ and $q_2$. This essentially means that from state $q_0$ the machine can choose to progress through any of its epsilon reachable states or the state itself. The above machine accepts the following inputs:
+Notice the state $q_1$. It doesn't have any outgoing arcs with a $0$. And the start state $q_0$ contains two epsilon arcs going to $q_1$ and $q_2$. This means that from state $q_0$ the machine can choose to progress through any of its epsilon reachable states or the state itself. The above machine accepts the following inputs:
 \[\SET{0, 1, 2, 10, 110, 1110, \dots}\]
 
-\section*{NFA to DFA}
+\section{NFA to DFA}
 
-In this section I will show that any NFA can be converted to an equivalent DFA through a series of steps.
+In this section I will show that any NFA can be converted to an equivalent DFA through a series of steps. 
 
-\section*{Regex to NFA}
-Which will be covered in the next section.
+It is important to remember that NFAs can be in multiple states at any given point. For this reason we will collaps some states into a single state symbolising the NFA being in multiple states at once.
 
-\section*{Constructing Tokens}
+Given a set of states we can compute the epsilon closure for that set  by:
+\begin{enumerate}
+      \item For each state in the set: traverse each epsilon arc and add the reached state to the set.
+      \item If the newly added state also contains epsilon edges go to (1)
+\end{enumerate}
 
 
+Initially we start with the epsilon closure of the start state. Add this state to a queue and do the following until the queue is empty. 
+
+Extract a state from the queue and check each of the outgoing arcs. This gives us the following two cases
+\begin{enumerate}
+      \item Each arc has a unique symbol
+      \item Some arcs has the same symbol
+\end{enumerate}
+
+The first case is the simplest one. From the current state add an arc to the epsilon closure of the reachable state. 
+
+For the second case we collaps the states reachable with the same symbol and add an arc with that symbol to the epsilon closure of the collapsed states. 
+
+Add the computed state to a queue to be processed and repeat.
+
+
+\section{Regex to NFA}
+
+Regex is a language that allows us to make patterns that match quite complex inputs. And luckily for us, DFAs are able to express regular languages. For our purpose we need the following features from regex: concatenation, union and the star operator. We will now show that DFAs are closed under these three operators. 
+
+\subsection{Concatenation}
+Concatenation is a way to specify that a symbol must be followed by another symbol. Concatenation is usually denoted by the symbol $\circ$ in between two other symbols. Let us imagine the following regex pattern: ``a$\circ$b$\circ$c''. This pattern will only match if we first see an \textit{a} followed by a \textit{b} and ending with a \textit{c}. The symbol $\circ$ is usually omitted because it is easier for humans to read the following ``abc'' and recognizing that the pattern only matches ``abc''.
+
+To show that NFAs are closed under concatenation let us imagine the above scenario of a machine matching the language ``abc''. We can split the input into three different NFAs each containing a start and a end state. From the two states an arc is connecting them with either ``a'', ``b'' or ``c''. Machine A can be concatenated to machine B by for each finish state in A add an epsilon arc to the start state of machine B. And lastly remove each accepting state in machine A. This will result in a machine AB. After this we can apply the same logic to machine AB and C, which results in machine ABC.
+\begin{figure}[htp!]
+      \makebox[\textwidth][c]{
+      \subfloat[Machine A]{
+      \begin{tikzpicture}[shorten >=1pt,node distance=1.6cm,on grid,auto] 
+            \node[state,initial] (q_0)   {$q_0$}; 
+            \node[state,accepting](q_1) [right=of q_0] {$q_1$};
+            \path[->] 
+            (q_0) edge  node {a} (q_1);
+      \end{tikzpicture}}
+      \subfloat[Machine B]{
+      \begin{tikzpicture}[shorten >=1pt,node distance=1.6cm,on grid,auto] 
+            \node[state,initial] (q_2)   {$q_2$}; 
+            \node[state,accepting](q_3) [right=of q_2] {$q_3$};
+            \path[->] 
+            (q_2) edge  node {b} (q_3);
+      \end{tikzpicture}}
+      \subfloat[Machine C]{
+      \begin{tikzpicture}[shorten >=1pt,node distance=1.6cm,on grid,auto] 
+            \node[state,initial] (q_4)   {$q_4$}; 
+            \node[state,accepting](q_5) [right=of q_4] {$q_5$};
+            \path[->] 
+            (q_4) edge  node {c} (q_5);
+      \end{tikzpicture}}}
+      \caption*{Initial setup for the three machines}
+\end{figure}
+
+\begin{figure}[htp!]
+      \makebox[\textwidth][c]{
+      \subfloat[Machine AB]{
+      \begin{tikzpicture}[shorten >=1pt,node distance=1.6cm,on grid,auto] 
+            \node[state,initial] (q_0)   {$q_0$}; 
+            \node[state] (q_1) [right=of q_0] {$q_1$};
+            \node[state] (q_2) [right=of q_1] {$q_2$};
+            \node[state,accepting](q_3) [right=of q_2] {$q_3$};
+            \path[->] 
+            (q_0) edge  node {a} (q_1)
+            (q_1) edge  node {$\epsilon$} (q_2)
+            (q_2) edge  node {b} (q_3);
+      \end{tikzpicture}}
+      }
+      \caption*{Construction of machine AB}
+\end{figure}
+
+\begin{figure}[htp!]
+      \makebox[\textwidth][c]{
+      \subfloat[Machine ABC]{
+      \begin{tikzpicture}[shorten >=1pt,node distance=1.6cm,on grid,auto] 
+            \node[state,initial] (q_0)   {$q_0$}; 
+            \node[state] (q_1) [right=of q_0] {$q_1$};
+            \node[state] (q_2) [right=of q_1] {$q_2$};
+            \node[state] (q_3) [right=of q_2] {$q_3$};
+            \node[state] (q_4) [right=of q_3] {$q_4$};
+            \node[state,accepting](q_5) [right=of q_4] {$q_5$};
+            \path[->] 
+            (q_0) edge  node {a} (q_1)
+            (q_1) edge  node {$\epsilon$} (q_2)
+            (q_2) edge  node {b} (q_3)
+            (q_3) edge  node {$\epsilon$} (q_4)
+            (q_4) edge  node {c} (q_5);
+      \end{tikzpicture}}
+      }
+      \caption*{Construction of machine ABC}
+\end{figure}
+
+\subsection{Union}
+The union operator allows us to match either the first pattern or the second pattern. The operator is usually defined with a ``\text{$|$}'' symbol. In many programming languages this symbol is used as an \textit{or} operator. Let us expand on the above example, let us imagine that we would like to match on patterns that either contain ``abc'' or ``def''. This would be denoted by the following regex string: ``(abc) $|$ (def)''. The two machines, \textit{left} and \textit{right}, can be combined by adding a new start state and adding epsilon arcs to the start states of \textit{left} and \textit{right}. To make it simpler to understand let us also add a new accepting state. For each accepting state in \textit{left} and \textit{right} add an epsilon arc to the new accepting state, and remove any accept states in \textit{left} and \textit{right}.
+
+\begin{figure}[htp!]
+      \makebox[\textwidth][c]{
+            \begin{tikzpicture}[shorten >=1pt,node distance=1.6cm,on grid,auto] 
+                  \node[state,initial] (q_0)   {$q_0$}; 
+                  \node[state] (q_1) [right=of q_0] {$q_1$};
+                  \node[state] (q_2) [right=of q_1] {$q_2$};
+                  \node[state] (q_3) [right=of q_2] {$q_3$};
+                  \node[state] (q_4) [right=of q_3] {$q_4$};
+                  \node[state,accepting](q_5) [right=of q_4] {$q_5$};
+                  \path[->] 
+                  (q_0) edge  node {a} (q_1)
+                  (q_1) edge  node {$\epsilon$} (q_2)
+                  (q_2) edge  node {b} (q_3)
+                  (q_3) edge  node {$\epsilon$} (q_4)
+                  (q_4) edge  node {c} (q_5);
+            \end{tikzpicture}}
+      \caption*{Machine left}
+\end{figure}
+
+\begin{figure}[htp!]
+      \makebox[\textwidth][c]{
+            \begin{tikzpicture}[shorten >=1pt,node distance=1.6cm,on grid,auto] 
+                  \node[state,initial] (q_6)   {$q_6$}; 
+                  \node[state] (q_7) [right=of q_6] {$q_7$};
+                  \node[state] (q_8) [right=of q_7] {$q_8$};
+                  \node[state] (q_9) [right=of q_8] {$q_9$};
+                  \node[state] (q_10) [right=of q_9] {$q_{10}$};
+                  \node[state,accepting](q_11) [right=of q_10] {$q_{11}$};
+                  \path[->] 
+                  (q_6) edge  node {d} (q_7)
+                  (q_7) edge  node {$\epsilon$} (q_8)
+                  (q_8) edge  node {e} (q_9)
+                  (q_9) edge  node {$\epsilon$} (q_10)
+                  (q_10) edge  node {f} (q_11);
+            \end{tikzpicture}}
+      \caption*{Machine right}
+\end{figure}
+
+\begin{figure}[htp!]
+      \makebox[\textwidth][c]{
+            \begin{tikzpicture}[shorten >=1pt,node distance=1.6cm,on grid,auto] 
+                  \node[state, initial] (q) {$q$};
+                  \node[state] (q_0) [above right=of q] {$q_0$}; 
+                  \node[state] (q_1) [right=of q_0]     {$q_1$};
+                  \node[state] (q_2) [right=of q_1]     {$q_2$};
+                  \node[state] (q_3) [right=of q_2]     {$q_3$};
+                  \node[state] (q_4) [right=of q_3]     {$q_4$};
+                  \node[state] (q_5) [right=of q_4]     {$q_5$};
+                  
+                  \node[state] (q_6)  [below right= of q]   {$q_6$}; 
+                  \node[state] (q_7)  [right=of q_6]        {$q_7$};
+                  \node[state] (q_8)  [right=of q_7]        {$q_8$};
+                  \node[state] (q_9)  [right=of q_8]        {$q_9$};
+                  \node[state] (q_10) [right=of q_9]        {$q_{10}$};
+                  \node[state](q_11) [right=of q_10]       {$q_{11}$};
+                  \node[state,accepting](q_12) [above right=of q_11] {$q_{12}$};
+                  \path[->] 
+                  (q)   edge node        {$\epsilon$} (q_0)
+                        edge node [swap] {$\epsilon$} (q_6)
+                  (q_0) edge  node       {a}          (q_1)
+                  (q_1) edge  node       {$\epsilon$} (q_2)
+                  (q_2) edge  node       {b}          (q_3)
+                  (q_3) edge  node       {$\epsilon$} (q_4)
+                  (q_4) edge  node       {c}          (q_5)
+                  (q_5) edge  node       {$\epsilon$} (q_12)
+                  (q_6) edge  node       {d}          (q_7)
+                  (q_7) edge  node       {$\epsilon$} (q_8)
+                  (q_8) edge  node       {e}          (q_9)
+                  (q_9) edge  node       {$\epsilon$} (q_10)
+                  (q_10) edge node       {f}          (q_11)
+                  (q_11) edge node [swap]{$\epsilon$} (q_12);
+            \end{tikzpicture}}
+      \caption*{Union of Machine left and Machine right}
+\end{figure}
+
+\subsection{Star}
+The star operator, usually denoted with this symbol ``$\ast$'', lets us match on a pattern recurring zero or multiple times. This can be accomplished by adding an epsilon edge (an edge goes both ways) from the start state to each accepting state in the machine. This allows the machine to accept on the empty input and also if the pattern repeats itself multiple times. If we take the above example the regex pattern would look like this ``((abc) $|$ (def))$\ast$'' 
+
+\begin{figure}[htp!]
+      \makebox[\textwidth][c]{
+            \begin{tikzpicture}[shorten >=1pt,node distance=1.6cm,on grid,auto] 
+                  \node[state, initial] (q) {$q$};
+                  \node[state] (q_0) [above right=of q] {$q_0$}; 
+                  \node[state] (q_1) [right=of q_0]     {$q_1$};
+                  \node[state] (q_2) [right=of q_1]     {$q_2$};
+                  \node[state] (q_3) [right=of q_2]     {$q_3$};
+                  \node[state] (q_4) [right=of q_3]     {$q_4$};
+                  \node[state] (q_5) [right=of q_4]     {$q_5$};
+                  
+                  \node[state] (q_6)  [below right= of q]   {$q_6$}; 
+                  \node[state] (q_7)  [right=of q_6]        {$q_7$};
+                  \node[state] (q_8)  [right=of q_7]        {$q_8$};
+                  \node[state] (q_9)  [right=of q_8]        {$q_9$};
+                  \node[state] (q_10) [right=of q_9]        {$q_{10}$};
+                  \node[state](q_11) [right=of q_10]       {$q_{11}$};
+                  \node[state,accepting](q_12) [above right=of q_11] {$q_{12}$};
+                  \path[->] 
+                  (q)   edge node        {$\epsilon$} (q_0)
+                        edge node [swap] {$\epsilon$} (q_6)
+                  (q_0) edge  node       {a}          (q_1)
+                  (q_1) edge  node       {$\epsilon$} (q_2)
+                  (q_2) edge  node       {b}          (q_3)
+                  (q_3) edge  node       {$\epsilon$} (q_4)
+                  (q_4) edge  node       {c}          (q_5)
+                  (q_5) edge  node       {$\epsilon$} (q_12)
+                  (q_6) edge  node       {d}          (q_7)
+                  (q_7) edge  node       {$\epsilon$} (q_8)
+                  (q_8) edge  node       {e}          (q_9)
+                  (q_9) edge  node       {$\epsilon$} (q_10)
+                  (q_10) edge node       {f}          (q_11)
+                  (q_11) edge node [swap]{$\epsilon$} (q_12);
+                  \path[<->]
+                  (q_12) edge node       {$\epsilon$} (q);
+            \end{tikzpicture}}
+      \caption*{Star operator on the previous Machine}
+\end{figure}
+
+Beyond being able to convert regex to NFAs, we also need to be able to parse the regex language. This can be done with a recursive descent method, however, in the next section we will be building a parser generator, that can do this for us. So let us postpone this for later.

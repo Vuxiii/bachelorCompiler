@@ -10,7 +10,7 @@ For this project I will be using a parser generator. However, I will not be usin
 
 In order to create \textit{Parsley}, we first need to understand some of the underlying theory \textit{Parsley} is built upon. 
 
-\section*{Context Free Grammar}
+\section{Context Free Grammar}
 
 Cotext Free Grammars are a formal way of describing a language. 
 CFG consists of \textit{terminals} and \textit{non terminals}. Every grammar contains a start symbol, which is usually denoted \textit{S}. The start symbol is a non terminal, which means that it must contain at least one reduction rule. A reduction is what happens when a list of symbols match the given rule, and is able to be reduced into a non terminal. The symbols in the reducion rule can be non terminals or terminals. The notation for such a rule can be seen below.
@@ -54,7 +54,7 @@ We now have an idea of what we want to build. We want to build a machine that ta
 
 We will now dive into the theory necessary constructing such a machine. To build the parsetable we need to understand three concepts: NULL, FIRST and FOLLOW.
 
-\section*{NULL}
+\section{NULL Set}
 
 The name NULL comes from the fact that some non terminals are nullable. Nullable symbols are non terminals that have some rules where the entire right side of the production rule can be replaced with nothing, which indicated with an $\epsilon$. Imagine the following rules:
 
@@ -70,7 +70,7 @@ The name NULL comes from the fact that some non terminals are nullable. Nullable
 Looking at the third reduction rule we recognize that the non terminal \textit{B} can either be achieved by reading a \textit{b} from the input or nothing at all. This means that the non terminal \textit{B} is nullable, because it can be replaced with nothing. By transitivity this means that \textit{A} is also nullable, because \textit{A} has a reduction rule consisting of entirely nullable symbols. Thus for the above CFG we have the nullable set:
 \[\{A, B\}\]
 
-\section*{FIRST}
+\section{FIRST Set}
 
 The first set is the collection of terminals that can appear as the first symbol in the reduction rule for each non terminal. Thus, the first set for the above CFG will have four collections of terminals, one for each non terminal: S, A, B and C. However, we must remember that some of the non terminals are nullable. This means that FIRST(A) contains both \textit{b} and \textit{c}. This is due to the fact that \textit{A} itself is nullable, and thus the first reduction rule for \textit{A} can be rewritten as follows:
 
@@ -89,10 +89,14 @@ From what we know now, we can compute the first set for each non terminal:
   \item FIRST(C) = {c}
 \end{itemize}
 
-\section*{FOLLOW}
+\section{FOLLOW Set}
 
 The follow set is the collection of symbols that may appear after a non terminal. Just like the first set it contains four collection of terminals.
 
-\section*{Parsley}
+\section{Parsley}
 
-Whenever a reduction happens, ie. from the above when a \textit{b} is reduced into a \textit{B} we should remove the \textit{b} from the input and replace it with \textit{B}. Thus, for each rule that describes the language for the programming language, we need to tell the parser generator what should happen when the specific reduction happens.  
+Whenever a reduction happens, i.e. from the above when a \textit{b} is reduced into a \textit{B} we should remove the \textit{b} from the input and replace it with \textit{B}. Thus, for each rule that describes the language for the programming language, we need to tell the parser generator what should happen when the specific reduction happens.  
+
+
+\subsection{Constructing a parser for Tokenization}
+\subsection{Constructing the Parser for the language}

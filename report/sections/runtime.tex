@@ -16,3 +16,23 @@ To find the memory blocks the algorithm traverses the stack and registers all th
 Therefore I have chosen to move the memory blocks with using a DFS approach. 
 
 \section*{Stack Frames}
+
+For each function declared the compiler would also have to create a stack frame for that function. Each time a function is called the runtime generates a new stack frame and stores it for the garbage collector to access. Whenever a function terminates the runtime has to remove that stack frame from it's own stack of frames to ensure that the garbage collector does not touch the stack above the stack pointer.
+
+\section*{Heap Blocks}
+For each allocation on the heap, there is some metadata. This metadata consists of a Layout pointer and a size field which indicates the size for the memory block. So for the type \textit{Thing} from the above example would look like this on the heap.
+
+\begin{lstlisting}[language=C,morekeywords={Thing, LayoutForThing}]
+type: LayoutForThing {
+    let bitfield: int;
+};
+
+type Thing: {
+    let layout: *LayoutForThing;
+    let size: int;
+    let a: *int;
+    let b:  int;
+    let c:  int;
+    let d: *int;
+};
+\end{lstlisting}
