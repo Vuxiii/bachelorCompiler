@@ -1,16 +1,18 @@
 # Fdb version 4
-["bibtex main"] 1684768079 "main.aux" "main.bbl" "main" 1684768081 0
+["bibtex main"] 1685377706 "main.aux" "main.bbl" "main" 1685378244 0
   "./refs.bib" 1683981890 795 e97433db781157b8372cdb134cf8ee89 ""
   "/usr/share/texmf-dist/bibtex/bst/base/plain.bst" 1680514707 20613 bd3fbfa9f64872b81ac57a0dd2ed855f ""
-  "main.aux" 1684768081 4282 363eb57c6ddd5c2823576437345f8fdc "pdflatex"
+  "main.aux" 1685378244 4399 44d9dc7efef610ed2eb916d222415e37 "pdflatex"
   (generated)
   "main.bbl"
   "main.blg"
   (rewritten before read)
-["pdflatex"] 1684768079 "/home/william/Desktop/sdu/6sem/bachelor/juhl/report/main.tex" "main.pdf" "main" 1684768081 0
-  "/home/william/Desktop/sdu/6sem/bachelor/juhl/report/main.tex" 1684762759 12503 681f983346ad1ea944c371f040e21a79 ""
+["pdflatex"] 1685378242 "/home/william/Desktop/sdu/6sem/bachelor/juhl/report/main.tex" "main.pdf" "main" 1685378244 0
+  "/home/william/Desktop/sdu/6sem/bachelor/juhl/report/main.tex" 1685377599 12503 681f983346ad1ea944c371f040e21a79 ""
   "/usr/share/texmf-dist/fonts/enc/dvips/cm-super/cm-super-ts1.enc" 1680514707 2900 1537cc8184ad1792082cd229ecc269f4 ""
   "/usr/share/texmf-dist/fonts/map/fontname/texfonts.map" 1680514707 3524 cb3e574dea2d1052e39280babc910dc8 ""
+  "/usr/share/texmf-dist/fonts/tfm/jknappen/ec/tcrm0600.tfm" 1680514707 1536 12e8c510d3e158fdd0e9a42e75118bd9 ""
+  "/usr/share/texmf-dist/fonts/tfm/jknappen/ec/tcrm0800.tfm" 1680514707 1536 05df9db6aeccc4eea94fec15c9024f79 ""
   "/usr/share/texmf-dist/fonts/tfm/jknappen/ec/tcrm1200.tfm" 1680514707 1536 74b7293ec3713bb7fdca8dd1bd1f469c ""
   "/usr/share/texmf-dist/fonts/tfm/public/amsfonts/cmextra/cmex7.tfm" 1680514707 1004 54797486969f23fa377b128694d548df ""
   "/usr/share/texmf-dist/fonts/tfm/public/amsfonts/cmextra/cmex8.tfm" 1680514707 988 bdf658c3bfc2d96d3c8b02cfc1c94c20 ""
@@ -159,14 +161,14 @@
   "/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map" 1683474737 334353 c825108cbc13fa4a18a274c473196142 ""
   "/var/lib/texmf/web2c/pdftex/pdflatex.fmt" 1683474707 8204070 552d275390f776d5d99ca6d3a93c8169 ""
   "SDU_BLACK_RGB.png" 1683981890 11056 9a50a367ae7a0ce279f75918f11fad2b ""
-  "main.aux" 1684768081 4282 363eb57c6ddd5c2823576437345f8fdc "pdflatex"
-  "main.bbl" 1684768079 49 0eba253fc001332e731e8aba3f23127b "bibtex main"
-  "main.tex" 1684762759 12503 681f983346ad1ea944c371f040e21a79 ""
-  "main.toc" 1684768081 1907 3d46167711b6780e4329f9a34275dee2 "pdflatex"
+  "main.aux" 1685378244 4399 44d9dc7efef610ed2eb916d222415e37 "pdflatex"
+  "main.bbl" 1685377706 49 0eba253fc001332e731e8aba3f23127b "bibtex main"
+  "main.tex" 1685377599 12503 681f983346ad1ea944c371f040e21a79 ""
+  "main.toc" 1685378244 1983 be77759493eaae3602b1cd117c2cec92 "pdflatex"
   "sections/abstract.tex" 1684606588 854 be49fdb4be84d6852765562777eb43c3 ""
   "sections/compilation.tex" 1684768077 4819 6960834902b88faec380329aeff20801 ""
   "sections/introduction.tex" 1684607684 3825 324657b44c578a92938d91584b5eebae ""
-  "sections/parsing.tex" 1684767734 8413 e5d9b67cb93e4092bbe24a8a43a750f3 ""
+  "sections/parsing.tex" 1685378242 13132 2e3b87d4e1913bb4793ab4cabd9cd0f1 ""
   "sections/runtime.tex" 1684328648 3622 b304e5889fe8f495fb84d23461b068c4 ""
   "sections/tokenization.tex" 1684767620 16946 f5af2c2535ff85f5cee1813ae3ce2159 ""
   (generated)

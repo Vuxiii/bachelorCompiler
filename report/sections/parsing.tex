@@ -68,7 +68,7 @@ The name NULL comes from the fact that some non terminals are nullable. Nullable
 \end{equation*}
 
 Looking at the third reduction rule we recognize that the non terminal \textit{B} can either be achieved by reading a \textit{b} from the input or nothing at all. This means that the non terminal \textit{B} is nullable, because it can be replaced with nothing. By transitivity this means that \textit{A} is also nullable, because \textit{A} has a reduction rule consisting of entirely nullable symbols. Thus for the above CFG we have the nullable set:
-\[\{A, B\}\]
+\[\SET{A, B}\]
 
 \section{FIRST Set}
 
@@ -83,18 +83,96 @@ The first set is the collection of terminals that can appear as the first symbol
 
 From what we know now, we can compute the first set for each non terminal:
 \begin{itemize}
-  \item FIRST(S) = {FIRST(A)} = {b, c}
-  \item FIRST(A) = {FIRST(B), FIRST(C)} = {b, c}
-  \item FIRST(B) = {b}
-  \item FIRST(C) = {c}
+  \item FIRST(S) = $\SET{FIRST(A)}$ = $\SET{b, c}$
+  \item FIRST(A) = $\SET{FIRST(B), FIRST(C)}$ = $\SET{b, c}$
+  \item FIRST(B) = $\SET{b}$
+  \item FIRST(C) = $\SET{c}$
 \end{itemize}
 
 \section{FOLLOW Set}
 
 The follow set is the collection of symbols that may appear after a non terminal. Just like the first set it contains four collection of terminals.
 
-\section{Parsley}
+\section{Constructing a Parse Table}
 
+Using the above three sets, we can construct a parse table which will be used to parse some input given a grammar. On success this will result in an AST. The parse table is conceptually a state machine, where each arc is a symbol as defined in the grammar. However, it is not a DFA because this state machine only contains arcs that comply with the language as defined by the grammar. The parse table is constructed by running through two phases until no new states can be added. The first phase computes the closure of the given state. The second phase branches from a given state to the next state with a symbol.
+
+The start state of this machine starts with the start symbol and it's production rule of the grammar. Using the following grammar:
+
+\begin{equation*}
+  \begin{split}
+      S &\rightarrow E\$\\
+      E &\rightarrow T + E\\
+      E &\rightarrow T\\
+      T &\rightarrow x\\
+  \end{split}
+\end{equation*}
+We will get the following:
+\begin{equation*}
+  \begin{split}
+      S &\rightarrow [\bullet E\text{\$}, \SET{?}] 
+  \end{split}
+\end{equation*}
+
+The dot indicates which symbol the parser expects to see next, if it were to reduce using that production rule. The dollar sign is an End Of Parse (EOP) symbol indicating that the parser has successfully read the entire input. The questionmark is the lookahead symbol which is the symbol the parser expects to see if this given production rule's reduction. Since nothing is supposed to come after the the start production it is marked with a questionmark indicating that nothing is expected after. 
+
+Let us now dive into the first phase. The goal of this phase is to include all the rules from the grammar that this state can produce. For each production in the state take the symbol just right of the dot and if it is a nonterminal add the production rules of that nonterminal. This will give us the following initial state:
+
+\begin{figure}[htp!]
+\begin{equation*}
+  \begin{split}
+      S &\rightarrow [\bullet E\$, \SET{?}]\\
+      E &\rightarrow [\bullet T+E, \SET{\$}] \\
+      E &\rightarrow [\bullet T, \SET{\$}] \\
+      T &\rightarrow [\bullet x, \SET{+,\$}] \\
+  \end{split}
+\end{equation*}
+\caption*{State 1}
+\end{figure}
+
+The lookahead symbol has for the added entries changed to a dollar symbol for the second and third entry and for the last entry it contains both the plus symbol and the dollar symbol. The algorithm assigns the lookahead for each new entry by computing the FOLLOW set from the entry from which it was added. However, from the parsers perspective everything to the left of the dot in the entry has already been parsed. Therefore, from the parser's perspective, everything up until the dot is NULLABLE. The last entry contains two lookahead symbols. This is due to the fact that the T symbol has been added from entries two and three. The lookahead from entry 2 is $\SET{+}$ and the lookahead from entry 3 is $\SET{\$}$. 
+
+Now that the closure phase has finished the second phase begins. For each entry in the state make an arc, traversable using the symbol just right of the dot, to a new state. From the old state copy each entry that contains that symbol to the right of the dot to the new state. From here advance each entry's dot by one to the right. The last step in the second phase is to goto the first phase with the new state. This will give us the following states:
+
+\begin{figure}[htp!]
+    \[
+      \begin{split}
+          S &\rightarrow [E\bullet \$, \{\text{?}\}]
+      \end{split}
+    \]
+    \caption*{State 2}
+\end{figure}
+\begin{figure}[htp!]
+    \[
+      \begin{split}
+          E &\rightarrow [T\bullet + E, \{\$\}]\\
+          E &\rightarrow [T\bullet, \{\$\}]
+      \end{split}
+    \]
+    \caption*{State 3}
+\end{figure}
+\begin{figure}[htp!]
+    \[
+      \begin{split}
+          T &\rightarrow [x\bullet, \{+,\$\}]
+      \end{split}
+    \]
+  \caption*{State 4}
+\end{figure}
+
+The above grammar produces a total of 6 states. From these 6 states we can produce the parse table. There are a total of four possible actions that the parser can do in any given state while parsing some input. 
+
+The parser uses a stack to keep track of it's current state
+
+\begin{enumerate}
+  \item \textbf{Accept}: When reaching this the parser is in an accepting state which terminates the parser and returns the AST.
+  \item \textbf{Shift}: This action shift the parser into a new state. 
+  \item \textbf{Reduce}: When reaching this action the parser pops $n$ states from the stack, where $n$ is the number of symbols on the right hand side of the rule, and pushes the left hand side of the rule to the stack.
+  \item \textbf{Goto}:
+\end{enumerate}
+
+
+\section{Parsley}
 Whenever a reduction happens, i.e. from the above when a \textit{b} is reduced into a \textit{B} we should remove the \textit{b} from the input and replace it with \textit{B}. Thus, for each rule that describes the language for the programming language, we need to tell the parser generator what should happen when the specific reduction happens.  
 
 
