@@ -11,11 +11,25 @@
 \usepackage{xspace}
 
 \usepackage{tikz}
-\usetikzlibrary{automata,positioning}
+\usetikzlibrary{automata,positioning,arrows, shapes.geometric}
 \usepackage{subfiles}
 \usepackage{listings}
 \usepackage{xcolor}
 \usepackage{subfig}
+\usepackage{float}
+\usepackage{booktabs}
+
+\tikzstyle{square} = [rectangle, rounded corners, 
+minimum width=3cm, 
+minimum height=1cm,
+text centered, 
+draw=black, 
+fill=red!30]
+\tikzstyle{parserstyle} = [rectangle, minimum width=3cm, minimum height=1cm, text centered, draw=black, fill=orange!30]
+
+\tikzstyle{bluebox} = [rectangle, minimum width=3cm, minimum height=1cm, text centered, draw=black, fill=blue!30]
+
+\tikzstyle{arrow} = [thick,->,>=stealth]
 
 \definecolor{codegreen}{rgb}{0,0.6,0}
 \definecolor{codegray}{rgb}{0.5,0.5,0.5}

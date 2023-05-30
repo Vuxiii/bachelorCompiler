@@ -99,14 +99,18 @@ Using the above three sets, we can construct a parse table which will be used to
 
 The start state of this machine starts with the start symbol and it's production rule of the grammar. Using the following grammar:
 
-\begin{equation*}
-  \begin{split}
-      S &\rightarrow E\$\\
-      E &\rightarrow T + E\\
-      E &\rightarrow T\\
-      T &\rightarrow x\\
-  \end{split}
-\end{equation*}
+\begin{figure}[H]
+  \begin{equation*}
+    \begin{split}
+        S &\rightarrow E\$\\
+        E &\rightarrow T + E\\
+        E &\rightarrow T\\
+        T &\rightarrow x\\
+    \end{split}
+  \end{equation*}
+  \caption{CFG}\label{cfgparser}
+\end{figure}
+
 We will get the following:
 \begin{equation*}
   \begin{split}
@@ -134,47 +138,98 @@ The lookahead symbol has for the added entries changed to a dollar symbol for th
 
 Now that the closure phase has finished the second phase begins. For each entry in the state make an arc, traversable using the symbol just right of the dot, to a new state. From the old state copy each entry that contains that symbol to the right of the dot to the new state. From here advance each entry's dot by one to the right. The last step in the second phase is to goto the first phase with the new state. This will give us the following states:
 
-\begin{figure}[htp!]
-    \[
-      \begin{split}
-          S &\rightarrow [E\bullet \$, \{\text{?}\}]
-      \end{split}
-    \]
-    \caption*{State 2}
-\end{figure}
-\begin{figure}[htp!]
-    \[
-      \begin{split}
-          E &\rightarrow [T\bullet + E, \{\$\}]\\
-          E &\rightarrow [T\bullet, \{\$\}]
-      \end{split}
-    \]
-    \caption*{State 3}
-\end{figure}
-\begin{figure}[htp!]
-    \[
-      \begin{split}
-          T &\rightarrow [x\bullet, \{+,\$\}]
-      \end{split}
-    \]
-  \caption*{State 4}
+\begin{figure}[H]
+\makebox[\textwidth][c]{
+  \subfloat[State 2]{
+    \begin{minipage}{0.3\linewidth}
+      \begin{equation*}
+        \begin{split}
+            S &\rightarrow [E\bullet \$, \{\text{?}\}]
+        \end{split}
+      \end{equation*}
+    \end{minipage}}
+
+  \subfloat[State 3]{
+    \begin{minipage}{0.3\linewidth}
+        \begin{equation*}
+          \begin{split}
+              E &\rightarrow [T\bullet + E, \{\$\}]\\
+              E &\rightarrow [T\bullet, \{\$\}]
+          \end{split}
+        \end{equation*}
+    \end{minipage}}
+
+  \subfloat[State 4]{
+    \begin{minipage}{0.3\linewidth}
+        \begin{equation*}
+          \begin{split}
+            T &\rightarrow [x\bullet, \{+,\$\}]
+          \end{split}
+        \end{equation*}
+    \end{minipage}}
+}
 \end{figure}
 
-The above grammar produces a total of 6 states. From these 6 states we can produce the parse table. There are a total of four possible actions that the parser can do in any given state while parsing some input. 
+The above grammar produces a total of six states, \textit{all are not shown}. From these six states we can produce the parse table. For each state there is an action that can take place depending on the current symbol from the input. 
 
-The parser uses a stack to keep track of it's current state
+The parser uses a stack to keep track of symbols it has already checked.
 
 \begin{enumerate}
   \item \textbf{Accept}: When reaching this the parser is in an accepting state which terminates the parser and returns the AST.
-  \item \textbf{Shift}: This action shift the parser into a new state. 
-  \item \textbf{Reduce}: When reaching this action the parser pops $n$ states from the stack, where $n$ is the number of symbols on the right hand side of the rule, and pushes the left hand side of the rule to the stack.
-  \item \textbf{Goto}:
+  \item \textbf{Shift($i$)}: This action eats a symbol from the input and moves it to the stack. Then it does a Goto($i$). 
+  \item \textbf{Goto($i$)}: This action changes the parser's state to state $i$.
+  \item \textbf{Reduce($k$)}: This action tells the parser that it should reduce using rule $k$. By doing this it pops $n$ states from the stack and push the left hand side of the rule to the stack, where $n$ is the number of symbols on the right hand side of the rule.
+  \item \textbf{Syntax Error}: The parser stumbled across an unexpected symbol. It expected one of the symbols with any of the above four actions in the current state.
 \end{enumerate}
 
+Now that we know what each action does, we can go through the rules for deciding which action to populate the parse table with. For each state look through each entry and decide which one of the four possible conditions are met:
+\begin{enumerate}
+  \item If the symbol to the right of the dot is a dollar, put an accept action.
+  \item If the symbol to the right of the dot is a terminal, put a shift action and let $i$ be the id of the state reachable by traversing using that symbol.
+  \item If the symbol to the right of the dot is a non terminal, put a hoto action and let $i$ be the id of the state reachable by traversing using that symbol.
+  \item If no symbols are to the right of the dot, add a reduce action for each symbol in the lookahead set with the $k$'th rule.
+\end{enumerate}
+
+By following the above directions, we can produce a parse table for the above given grammar:
+
+\begin{table}[H]
+  \centering
+  \begin{tabular}{|l|lll|ll|}
+  \hline
+  State/Symbol & x  & +  & \$ & E  & T  \\ \hline
+  1            & s4 &    &    & g2 & g3 \\
+  2            &    &    & a  &    &    \\
+  3            &    & s5 & r2 &    &    \\
+  4            & s4 &    &    & g6 & g3 \\
+  5            &    & r3 & r3 &    &    \\
+  6            &    &    & r1 &    &    \\ \hline
+  \end{tabular}
+  \caption*{Parse Table constructed from CFG~\ref{cfgparser}}
+\end{table}
+If at any point the parser sees a symbol that has an empty cell, it will produce a syntax error.
 
 \section{Parsley}
-Whenever a reduction happens, i.e. from the above when a \textit{b} is reduced into a \textit{B} we should remove the \textit{b} from the input and replace it with \textit{B}. Thus, for each rule that describes the language for the programming language, we need to tell the parser generator what should happen when the specific reduction happens.  
 
+Parsley is the finished parser generator capable of producing an LR(1) parser given any CFG. Using Parsley we can construct a parser for the tokenizer capable of parsing Regex. Using the parser from Parsley we provide that parser the syntax of the language we want and that will return a DFA capable of tokenizing the source code. With this the first step of the frontend is finished. The second step of the frontend is the parser for the actual languange syntax. Just like with constructing a parser capable of recognizing Regex, we provide Parsley with the CFG for the language and it returns a parser for the compiler. These steps of the compiler chain are only present while  developing the compiler. The diagram below shows how the frontend fits together
+\begin{figure}[H]
+\begin{tikzpicture}[node distance=4cm]
+  \node (parsley) [square] {Parsley};
+  \node (cfg) [bluebox, above of=parsley, yshift=-10mm] {Language Definitions};
+  \node (regexparser) [square, right of=parsley, xshift=10mm] {Regex Parser};
+  \node (syntax) [bluebox, above of=regexparser, yshift=-10mm] {Syntax Definitions};
+  \node (tokenizer) [parserstyle, right of=regexparser, xshift=10mm] {Tokenizer};
+  \node (sourcecode) [bluebox, above of=tokenizer, yshift=-10mm] {Source Code};
+  \node (parser) [parserstyle, below of=tokenizer, yshift=10mm] {Parser};
 
-\subsection{Constructing a parser for Tokenization}
-\subsection{Constructing the Parser for the language}
+  \draw [arrow] (parsley) -- node[anchor=south] {Parser} (regexparser);
+  \draw [arrow] (parsley) |- node[xshift=25mm, anchor=south west] {Parser} (parser);
+  \draw [arrow] (regexparser) -- node[anchor=south] {DFA}(tokenizer);
+  \draw [arrow] (cfg) -- node[anchor=west] {CFG} (parsley);
+  \draw [arrow] (syntax) -- node[anchor=west] {Regex} (regexparser);
+  \draw [arrow] (sourcecode) -- node[anchor=east] {Plain Text} (tokenizer);
+  \draw [arrow] (tokenizer) -- node[anchor=east] {List of Tokens} (parser);
+\end{tikzpicture}
+\caption{Illustration of the Frontend for the Compiler}
+\end{figure}
+
+In the above figure the first two blue boxes are modifiable by the compiler author. Language Definitions define the language's syntax. Syntax Definitions define the syntax for keywords, legal variable names, etc. The Source Code box is the source code the user wants to compile. The red boxes are intermediary programs that are used for constructing the compiler. The orange boxes are part of the compiler and are used in production.
