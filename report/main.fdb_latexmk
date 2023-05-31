@@ -1,13 +1,13 @@
 # Fdb version 4
-["bibtex main"] 1685469454 "main.aux" "main.bbl" "main" 1685469631 0
+["bibtex main"] 1685546291 "main.aux" "main.bbl" "main" 1685547300 0
   "./refs.bib" 1683981890 795 e97433db781157b8372cdb134cf8ee89 ""
   "/usr/share/texmf-dist/bibtex/bst/base/plain.bst" 1680514707 20613 bd3fbfa9f64872b81ac57a0dd2ed855f ""
-  "main.aux" 1685469630 4850 99b8b0b6224fbdaa8cbd2453331d7d20 "pdflatex"
+  "main.aux" 1685547300 4958 acc752a94b0b192bc35fc7d70dda5a0e "pdflatex"
   (generated)
   "main.bbl"
   "main.blg"
   (rewritten before read)
-["pdflatex"] 1685469628 "/home/william/Desktop/sdu/6sem/bachelor/juhl/report/main.tex" "main.pdf" "main" 1685469631 0
+["pdflatex"] 1685547298 "/home/william/Desktop/sdu/6sem/bachelor/juhl/report/main.tex" "main.pdf" "main" 1685547300 0
   "/home/william/Desktop/sdu/6sem/bachelor/juhl/report/main.tex" 1685465955 12980 288295ac42a58caea3b0af5f2f7ac9c9 ""
   "/usr/share/texmf-dist/fonts/enc/dvips/cm-super/cm-super-ts1.enc" 1680514707 2900 1537cc8184ad1792082cd229ecc269f4 ""
   "/usr/share/texmf-dist/fonts/map/fontname/texfonts.map" 1680514707 3524 cb3e574dea2d1052e39280babc910dc8 ""
@@ -167,12 +167,12 @@
   "/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map" 1683474737 334353 c825108cbc13fa4a18a274c473196142 ""
   "/var/lib/texmf/web2c/pdftex/pdflatex.fmt" 1683474707 8204070 552d275390f776d5d99ca6d3a93c8169 ""
   "SDU_BLACK_RGB.png" 1683981890 11056 9a50a367ae7a0ce279f75918f11fad2b ""
-  "main.aux" 1685469630 4850 99b8b0b6224fbdaa8cbd2453331d7d20 "pdflatex"
-  "main.bbl" 1685469455 49 0eba253fc001332e731e8aba3f23127b "bibtex main"
+  "main.aux" 1685547300 4958 acc752a94b0b192bc35fc7d70dda5a0e "pdflatex"
+  "main.bbl" 1685546291 49 0eba253fc001332e731e8aba3f23127b "bibtex main"
   "main.tex" 1685465955 12980 288295ac42a58caea3b0af5f2f7ac9c9 ""
-  "main.toc" 1685469630 1795 1a414c7fc12ab04400f8b1db66d7aa7e "pdflatex"
+  "main.toc" 1685547300 1862 05a14d67b6fa1c27bf6dd791faa158fe "pdflatex"
   "sections/abstract.tex" 1684606588 854 be49fdb4be84d6852765562777eb43c3 ""
-  "sections/compilation.tex" 1684768077 4819 6960834902b88faec380329aeff20801 ""
+  "sections/compilation.tex" 1685547297 8923 24bff5e9d8174d522384f6297a79ceb7 ""
   "sections/introduction.tex" 1684607684 3825 324657b44c578a92938d91584b5eebae ""
   "sections/parsing.tex" 1685469628 17206 66b8cfb6a91255310789f2409bcdac80 ""
   "sections/runtime.tex" 1684328648 3622 b304e5889fe8f495fb84d23461b068c4 ""

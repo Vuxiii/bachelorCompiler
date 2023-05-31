@@ -18,12 +18,13 @@
 \contentsline {section}{\numberline {3.6}Parsley}{17}{}%
 \contentsline {chapter}{\numberline {4}Compilation}{19}{}%
 \contentsline {section}{\numberline {4.1}Symbol Collection}{19}{}%
-\contentsline {subsection}{\numberline {4.1.1}Garbage Collector}{20}{}%
-\contentsline {subsection}{\numberline {4.1.2}Stack Layout}{21}{}%
-\contentsline {subsection}{\numberline {4.1.3}Struct Layout}{21}{}%
-\contentsline {section}{\numberline {4.2}Intermediate Representation}{21}{}%
-\contentsline {section}{\numberline {4.3}Constructing the Language Semantics}{21}{}%
-\contentsline {section}{\numberline {4.4}Code Emit}{21}{}%
-\contentsline {chapter}{\numberline {5}Runtime Machine}{22}{}%
-\contentsline {chapter}{\numberline {6}Concluding Remarks}{25}{}%
-\contentsline {section}{\numberline {6.1}Further Improvements}{25}{}%
+\contentsline {section}{\numberline {4.2}String Collection}{20}{}%
+\contentsline {subsection}{\numberline {4.2.1}Garbage Collector}{20}{}%
+\contentsline {subsection}{\numberline {4.2.2}Stack Layout}{21}{}%
+\contentsline {subsection}{\numberline {4.2.3}Struct Layout}{21}{}%
+\contentsline {section}{\numberline {4.3}Intermediate Representation}{21}{}%
+\contentsline {section}{\numberline {4.4}Constructing the Language Semantics}{22}{}%
+\contentsline {section}{\numberline {4.5}Code Emit}{23}{}%
+\contentsline {chapter}{\numberline {5}Runtime Machine}{24}{}%
+\contentsline {chapter}{\numberline {6}Concluding Remarks}{27}{}%
+\contentsline {section}{\numberline {6.1}Further Improvements}{27}{}%
