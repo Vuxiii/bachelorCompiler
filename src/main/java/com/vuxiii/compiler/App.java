@@ -18,10 +18,15 @@ import com.vuxiii.compiler.VisitorPattern.Visitors.SymbolCollection.AST_Register
 import com.vuxiii.compiler.VisitorPattern.Visitors.SymbolCollection.AST_SymbolCollector;
 import com.vuxiii.compiler.VisitorPattern.Visitors.TreeCollaps.AST_Shrinker;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
 
 import com.vuxiii.LR.Records.ASTToken;
 import com.vuxiii.LR.LRParser;
@@ -36,11 +41,31 @@ public final class App {
 
     public static String asm_location = "src/main/java/com/vuxiii/compiler/CodeEmit/Output/";
 
-    /**
-     * Says hello to the world.
-     * @param args The arguments of the program.
-     */
+    
     public static void main(String[] args) {
+        if ( args.length == 1 ) {
+            File f = new File(args[0]);
+            if(f.exists() && !f.isDirectory()) { 
+                String filename = args[0];
+                try {
+                    String input = Files.readString(Path.of(filename));
+                    String output = runWithInput(input);
+                    save_to_file("", filename + ".s", output );
+                } catch (IOException e) {
+                    System.out.println( "Failed to read input file!" );
+                    System.exit(-1);
+                }
+                
+            } else {
+                System.out.println( "Could not locate File `" + args[0] + "`!\n" );
+            }
+        } else {
+            System.out.println( "Help menu for Juhl Compiler");
+            System.out.println( " > Run with first argument the <filename>");
+        }
+    }
+
+    public static void main_dev(String[] args) {
         Settings.showParsingSteps = false;
         Settings.showGrammar = false;
         Settings.showParsingTable = false;

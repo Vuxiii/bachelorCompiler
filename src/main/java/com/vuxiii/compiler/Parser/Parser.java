@@ -68,7 +68,7 @@ public class Parser {
                 long bf = System.currentTimeMillis();
                 init();
                 long after = System.currentTimeMillis();
-                System.out.println( "Compiling the parser took: " + (after - bf) + " milliseconds");
+                // System.out.println( "Compiling the parser took: " + (after - bf) + " milliseconds");
             }
             
 
@@ -76,7 +76,7 @@ public class Parser {
             long bf = System.currentTimeMillis();
             table = LRParser.compile( g, Symbol.n_Start );
             long after = System.currentTimeMillis();
-            System.out.println( "Parsing the input took: " + (after - bf) + " milliseconds");
+            // System.out.println( "Parsing the input took: " + (after - bf) + " milliseconds");
             LRParser.save( "Par.ser", table );
         }
         
@@ -117,7 +117,7 @@ public class Parser {
         
         // n_StatementList -> n_Statement n_StatementList
         g.addRuleWithReduceFunction( Symbol.n_StatementList, List.of( Symbol.n_Statement, Symbol.n_StatementList ), t -> {
-            System.out.println( "IM IN LIST" );
+            // System.out.println( "IM IN LIST" );
             Statement stm1 = (Statement)t.get(0);
             Statement stm2 = (Statement)t.get(1);
             return new Statement( Symbol.n_StatementList, stm1.node, stm2, stm1.kind );
@@ -125,7 +125,7 @@ public class Parser {
 
         // n_StatementList -> n_Statement
         g.addRuleWithReduceFunction( Symbol.n_StatementList, List.of( Symbol.n_Statement ), t -> {
-            System.out.println( "IM IN SINGLE" );
+            // System.out.println( "IM IN SINGLE" );
             Statement stm1 = (Statement)t.get(0);
             return new Statement( Symbol.n_StatementList, stm1.node, stm1.kind );
         });
@@ -554,11 +554,11 @@ public class Parser {
                 UserType type = (UserType)t.get(2);
                 return new Declaration( Symbol.n_Field, id, type, DeclarationKind.FIELD );
             } else {
-                System.out.println( t.get(2));
-                AST_Printer printer = new AST_Printer();
-                Type typ = (Type)t.get(2);
-                typ.accept(printer);
-                System.out.println(printer.get_ascii());
+                // System.out.println( t.get(2));
+                // AST_Printer printer = new AST_Printer();
+                // Type typ = (Type)t.get(2);
+                // typ.accept(printer);
+                // System.out.println(printer.get_ascii());
             }
             
             System.out.println( "Something bad happend in parsin n_Field -> t_Identifier t_Colon n_User_Type" );
@@ -598,11 +598,11 @@ public class Parser {
                 RecordType type = (RecordType)t.get(3);
                 return new Declaration( Symbol.n_Field, id, type, DeclarationKind.POINTER );  
             } else {
-                System.out.println( t.get(3));
-                AST_Printer printer = new AST_Printer();
-                Type typ = (Type)t.get(3);
-                typ.accept(printer);
-                System.out.println(printer.get_ascii());
+                // System.out.println( t.get(3));
+                // AST_Printer printer = new AST_Printer();
+                // Type typ = (Type)t.get(3);
+                // typ.accept(printer);
+                // System.out.println(printer.get_ascii());
             }
             
             System.out.println( "Something bad happend in parsin n_Field -> t_Identifier t_Colon t_Times n_User_Type" );

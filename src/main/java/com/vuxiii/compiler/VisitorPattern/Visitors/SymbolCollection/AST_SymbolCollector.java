@@ -79,7 +79,7 @@ public class AST_SymbolCollector extends VisitorBase {
         Symbols new_scope = new Symbols();
 
         new_scope.add_variable( (LexIdent)func_assignment.id, false ); // Name of function
-        System.out.println( "Adding " + func_assignment.id + " to scope " + new_scope);
+        // System.out.println( "Adding " + func_assignment.id + " to scope " + new_scope);
 
         SymbolNode node = new SymbolNode( Symbol.n_Scope, func_assignment, "function " + func_assignment.name(), new_scope, Optional.of(parent_scope) );
         node.parent = Optional.of( func_assignment.parent.get() );
@@ -127,7 +127,7 @@ public class AST_SymbolCollector extends VisitorBase {
 
         while( current_node.scope.can_access( ident.name ) == false ) {
             if ( current_node.parent_scope.isEmpty()) {
-                System.out.println( new Error( "Symbol Collection Error", "Tried to access undeclared variable '" + ident.name + "' on line " + ident.matchInfo.lineNumber() + " column " + ident.matchInfo.columnNumber() ));
+                // System.out.println( new Error( "Symbol Collection Error", "Tried to access undeclared variable '" + ident.name + "' on line " + ident.matchInfo.lineNumber() + " column " + ident.matchInfo.columnNumber() ));
                 break; // Should exit here!
             } else {
                 current_node = current_node.parent_scope.get();
@@ -155,7 +155,7 @@ public class AST_SymbolCollector extends VisitorBase {
             }
             current = current.parent.get();
         }
-        System.out.println( "Found scope " + ((SymbolNode)current).scope_name);
+        // System.out.println( "Found scope " + ((SymbolNode)current).scope_name);
         return ((SymbolNode)current).scope;
     }
 }

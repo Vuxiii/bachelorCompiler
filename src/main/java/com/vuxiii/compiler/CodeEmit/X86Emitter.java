@@ -103,7 +103,7 @@ public class X86Emitter {
                     if ( exp.node instanceof LexLiteral ) {
                         LexLiteral id = (LexLiteral)exp.node;
                         if ( id.literal_type == PrimitiveType.STRING ) {
-                            System.out.println( id );
+                            // System.out.println( id );
                             subs += id.val.substring(1, id.val.length()-1 ) + "\\0";
                         } else {
                                   
@@ -134,8 +134,8 @@ public class X86Emitter {
 
         for ( String function : functions.keySet() ) {
             FunctionBlock fb = functions.get(function);
-            System.out.println( function );
-            System.out.println( scopes );
+            // System.out.println( function );
+            // System.out.println( scopes );
             if ( scopes.containsKey( "function " + function ) )
                 _run( fb.instructions, scopes.get( "function " + function ) );
             
@@ -157,8 +157,8 @@ public class X86Emitter {
     
     private void _run( List<Instruction> instructions, Symbols current_scope ) {
         
-        System.out.println( current_scope.get_variables() );
-        System.out.println( current_scope.variable_offsets );
+        // System.out.println( current_scope.get_variables() );
+        // System.out.println( current_scope.variable_offsets );
         
         var_offsets = current_scope.variable_offsets;
 
@@ -170,7 +170,7 @@ public class X86Emitter {
         //     var_offsets.put( var, current_scope.get_parameter_offset(var) );
         // }
 
-        System.out.println();
+        // System.out.println();
 
         for ( Instruction instruction : instructions ) {
 
@@ -210,7 +210,7 @@ public class X86Emitter {
                     Operand var = instruction.args.get().operands.get(0);
                     Operand target = instruction.args.get().operands.get(1);
                     
-                    System.out.println( "Trying to load " + var.get_string() );
+                    // System.out.println( "Trying to load " + var.get_string() );
 
                     OffsetLogic offsets = var_offsets.get( var.get_string() );
 
@@ -233,8 +233,8 @@ public class X86Emitter {
                 case STORE_VARIABLE: {
                     String var = instruction.args.get().operands.get(0).get_string();
                     Operand src_1 = instruction.args.get().operands.get(1);
-                    System.out.println( var );
-                    System.out.println( var_offsets );
+                    // System.out.println( var );
+                    // System.out.println( var_offsets );
                     OffsetLogic offsets = var_offsets.get( var );
 
                     push_code ( "" );
@@ -258,8 +258,8 @@ public class X86Emitter {
                 case STORE_POINTER: {
                     String var = instruction.args.get().operands.get(0).get_string();
                     Operand src_1 = instruction.args.get().operands.get(1);
-                    System.out.println( var );
-                    System.out.println( var_offsets );
+                    // System.out.println( var );
+                    // System.out.println( var_offsets );
                     OffsetLogic offsets = var_offsets.get( var );
 
                     push_code ( "" );

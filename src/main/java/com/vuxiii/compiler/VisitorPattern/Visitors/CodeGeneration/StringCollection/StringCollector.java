@@ -27,7 +27,7 @@ public class StringCollector extends Visitor {
         
         LexLiteral literal = (LexLiteral)node.value;
 
-        System.out.println( "Found string: " + node );
+        // System.out.println( "Found string: " + node );
 
         if ( node.arg_list.get() instanceof Argument )
             strings.put( node, new StringNode( literal.val, (Argument)node.arg_list.get() ) );
@@ -43,7 +43,7 @@ public class StringCollector extends Visitor {
 
         LexLiteral literal = (LexLiteral)node.value;
 
-        System.out.println( "Found string: " + node );
+        // System.out.println( "Found string: " + node );
 
         strings.put( node, new StringNode( literal.val ) );
     }

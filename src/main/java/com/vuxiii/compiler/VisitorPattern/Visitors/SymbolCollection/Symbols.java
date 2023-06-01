@@ -67,10 +67,10 @@ public class Symbols {
 
     public void add_fields( Declaration decl ) {
         RecordType type = (RecordType)decl.type;
-        System.out.println( "=============REGISTER=============" );
+        // System.out.println( "=============REGISTER=============" );
         AST_Printer prin = new AST_Printer();
         decl.accept(prin);
-        System.out.println( prin.get_ascii() );
+        // System.out.println( prin.get_ascii() );
         local_vars.put( decl.id.name, decl.id );
         OffsetLogic off = new OffsetLogic();
         off.add( -current_variable_offset, false );
@@ -101,10 +101,10 @@ public class Symbols {
                         System.out.println( print.get_ascii() );
                         System.exit(-1);
                     }
-                    System.out.println( "ADDED " + name + ", on the stack. It is a pointer.");
+                    // System.out.println( "ADDED " + name + ", on the stack. It is a pointer.");
 
                 } else {
-                    System.out.println( "ADDED " + name + ", on the stack. It is not a pointer.");
+                    // System.out.println( "ADDED " + name + ", on the stack. It is not a pointer.");
                 }
                 
                 variable_offsets.put( name, offlogic );
@@ -116,12 +116,12 @@ public class Symbols {
                 if ( f.field.kind == DeclarationKind.POINTER ) {
                     offlogic.add( 2, true );
                 } 
-                System.out.println( "It is on heap.... " + name );
+                // System.out.println( "It is on heap.... " + name );
                 variable_offsets.put( name, offlogic );
                 
             }
         }
-        System.out.println( variable_offsets );
+        // System.out.println( variable_offsets );
     }
 
     private void add_record_layout_on_heap( RecordType rec, OffsetLogic logic ) {
@@ -174,9 +174,9 @@ public class Symbols {
         // if ( variable.contains(".") )
         //     return variable_offsets.getOrDefault(variable.substring(0, variable.indexOf(".")), -420);
         // else
-        System.out.println("============================");
-        System.out.println( variable_offsets );
-        System.out.println("============================");
+        // System.out.println("============================");
+        // System.out.println( variable_offsets );
+        // System.out.println("============================");
         return variable_offsets.get(variable);
     }
 
@@ -192,8 +192,8 @@ public class Symbols {
 
         // Add for static_scope
         for ( String name : parent.get_variables() ) {
-            System.out.println( name );
-            System.out.println( parent.variable_offsets.get(name) );
+            // System.out.println( name );
+            // System.out.println( parent.variable_offsets.get(name) );
 
             OffsetLogic parent_logic = parent.variable_offsets.get(name);
             
@@ -209,6 +209,6 @@ public class Symbols {
             variable_offsets.put( name, logic );
         }
         
-        System.out.println( variable_offsets );
+        // System.out.println( variable_offsets );
     }
 }

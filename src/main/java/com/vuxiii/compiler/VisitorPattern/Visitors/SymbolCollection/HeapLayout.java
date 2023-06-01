@@ -44,7 +44,7 @@ public class HeapLayout {
             heap_layouts.put( record, this );
             id++;
         }
-        System.out.println( var_offset );
+        // System.out.println( var_offset );
         name = "heap" + id;
     }
 
@@ -61,7 +61,7 @@ public class HeapLayout {
             heap_layouts.put( decl, this );
             id++;
         }
-        System.out.println( var_offset );
+        // System.out.println( var_offset );
         name = "heap" + id;
 
     }

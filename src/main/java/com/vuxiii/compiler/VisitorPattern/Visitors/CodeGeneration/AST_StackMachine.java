@@ -92,7 +92,7 @@ public class AST_StackMachine extends Visitor {
 
         parameters = current_scope.get_parameters();
 
-        System.out.println( parameters );
+        // System.out.println( parameters );
 
         if ( strings == null ) {
             System.out.println( "WTYARTYSF" );
@@ -166,7 +166,7 @@ public class AST_StackMachine extends Visitor {
 
             // Push the bitfields on the stack
 
-            System.out.println( layout );
+            // System.out.println( layout );
             push( Instruction.comment("Bitfields"));
             for ( long field : layout.bitfields() ) {
                 push( new Instruction( Opcode.PUSH, Arguments.from_long( field ) ));
@@ -243,12 +243,12 @@ public class AST_StackMachine extends Visitor {
     @VisitorPattern( when = VisitOrder.ENTER_NODE, order = 1 )
     public void add_release_scope_header( Statement ret ) {
         if ( ret.kind.equals(StatementKind.RETURN) == false ) return;
-        System.out.println( "depth " + function_depth );
+        // System.out.println( "depth " + function_depth );
         if ( function_depth != 0 ) return;
 
         AST_Printer prins = new AST_Printer();
         ret.accept( prins );
-        System.out.println( prins.get_ascii() ); 
+        // System.out.println( prins.get_ascii() ); 
 
         push( new Instruction( Opcode.CALL, Arguments.from_label( "release_scope_header" ) ) );
     }
@@ -256,12 +256,12 @@ public class AST_StackMachine extends Visitor {
     @VisitorPattern( when = VisitOrder.EXIT_NODE, order = 1 )
     public void add_return( Statement ret ) {
         if ( ret.kind.equals(StatementKind.RETURN) == false ) return;
-        System.out.println( "depth " + function_depth );
+        // System.out.println( "depth " + function_depth );
         if ( function_depth != 0 ) return;
 
         AST_Printer prins = new AST_Printer();
         ret.accept( prins );
-        System.out.println( prins.get_ascii() ); 
+        // System.out.println( prins.get_ascii() ); 
 
         push( new Instruction( Opcode.POP, Arguments.from_register( Register.RAX ) ) );
         push( new Instruction( Opcode.RETURN ) );
@@ -278,7 +278,7 @@ public class AST_StackMachine extends Visitor {
 
     @VisitorPattern( when = VisitOrder.AFTER_CHILD, order = 1 )
     public void if_list_insert_jumps( IfList if_list ) {
-        System.out.println( "IN IF LIST AFTER CHILD!!!!!!");
+        // System.out.println( "IN IF LIST AFTER CHILD!!!!!!");
         if ( function_depth != 0 ) return;
         push( new Instruction( Opcode.JUMP, Arguments.from_label( if_list.end_of_ifs ) ) );
         if ( end_of_body_label.length() == 0 ) return;
@@ -417,8 +417,8 @@ public class AST_StackMachine extends Visitor {
 
         
         String func_name = call.func_name.name;
-        System.out.println( func_name );
-        System.out.println( functions );
+        // System.out.println( func_name );
+        // System.out.println( functions );
         Assignment func = functions.get( func_name ).function;
 
         

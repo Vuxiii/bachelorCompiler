@@ -52,11 +52,11 @@ public class SymbolNode extends ASTNode {
     }
 
     public HeapLayout get_heap_layout( String var_name ) {
-        System.out.println("-----------------------");
-        System.out.println( heap_layouts );
-        System.out.println( var_name );
+        // System.out.println("-----------------------");
+        // System.out.println( heap_layouts );
+        // System.out.println( var_name );
         int i = var_name.lastIndexOf( "." );
-        System.out.println( var_name.substring(0, i) );
+        // System.out.println( var_name.substring(0, i) );
         String new_string = var_name.substring(0, i);
         if ( new_string.contains(".")) {
             return heap_layouts.get( new_string.substring( new_string.indexOf("."), i) );

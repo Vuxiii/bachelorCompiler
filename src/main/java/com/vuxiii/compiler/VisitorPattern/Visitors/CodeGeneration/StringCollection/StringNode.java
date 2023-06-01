@@ -56,7 +56,7 @@ public class StringNode {
         }
 
         stop_indicators.add( count_length(str_literal.substring( 1, str_literal.length()-1 ) ) );
-        System.out.println( stop_indicators );
+        // System.out.println( stop_indicators );
     }
 
     public StringNode( String str_literal, ArgumentList arg_list ) {
@@ -88,7 +88,7 @@ public class StringNode {
         num_of_values_on_stack = s;
 
         stop_indicators.add( count_length(str_literal.substring( 1, str_literal.length()-1 ) ) );
-        System.out.println( stop_indicators );
+        // System.out.println( stop_indicators );
     }
 
     public StringNode( String str_literal ) {
@@ -102,7 +102,7 @@ public class StringNode {
 
 
         stop_indicators.add( count_length(str_literal.substring( 1, str_literal.length()-1 ) ) );
-        System.out.println( stop_indicators );
+        // System.out.println( stop_indicators );
     }
 
     public int count_length( String s ) {
