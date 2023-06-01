@@ -10,6 +10,9 @@
   - [Adding another Token to the Lexer/Parser](#adding-another-token-to-the-lexerparser)
   - [Visitor Pattern](#visitor-pattern)
   - [Debugging](#debugging)
+    - [AST\_Printer](#ast_printer)
+  - [Language semantics and Syntax](#language-semantics-and-syntax)
+    - [Declarations](#declarations)
 
 ---
 
@@ -45,7 +48,7 @@ The above should no longer be needed. I think I have successfully published the 
 
 For this project I am using `Java 17`
 
-To run the compiler, I have provided a bash file called `run.sh`, that should be able to execute the program.
+To run the compiler, I have provided a bash file called `run.sh`, that should be able to execute the program. Afterwards call `comp.sh` which assembles the program, links it, and finally runs the program. 
 
 ---
 

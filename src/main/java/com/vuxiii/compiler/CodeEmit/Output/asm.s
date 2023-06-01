@@ -1,11 +1,11 @@
 .section .data
 # [ String Buffers and Substitutes ]
+string0: .ascii "fib(%) = %\n"
+string0subs: .ascii ""
 string1: .ascii "fib(%) = %\n"
 string1subs: .ascii ""
 string2: .ascii "The %th fib number is: %\n"
 string2subs: .ascii ""
-string0: .ascii "fib(%) = %\n"
-string0subs: .ascii ""
 
 # [ Pointers to Record Layouts ]
 

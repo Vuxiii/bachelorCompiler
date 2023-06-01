@@ -167,7 +167,7 @@ fill=red!30]
 
 \vfill\vfill
 
-{\large\today} % At the very end, insert date for turning in, but leave it like this during the advising
+{\large June 1, 2023} % At the very end, insert date for turning in, but leave it like this during the advising
 
 \vfill\vfill
 \includegraphics[width=0.4\textwidth]{SDU_BLACK_RGB.png}\\[1cm]
@@ -179,22 +179,20 @@ fill=red!30]
 \pagenumbering{roman} 
 
 \begin{abstract}
-\paragraph{English}
-your abstract in English
 
 \paragraph{Danish}
-your abstract in Danish
-\end{abstract}
 
-\newpage
-\section*{Acknowledgments}
-Thank you, Mom \& Dad!
+Denne rapport går igennem alle trinnene til at udvikle en compiler der er nem at vedligeholde. Dette opnås ved at opdele compileren i modulære faser der nemt kan udskiftes eller forlænges med andre komponenter. Rapporten gennemgår udviklingen af værktøjer som Flex og Bison og hvordan disse sættes sammen til at danne frontend delen af compileren. Ved brug af visitor pattern samles data omkring programmet ind, som bruges til at konvertere kilde koden til assembly. Til sidst gennemgår rapporten en implementation af en Garbage Collector, som følger med sproget. 
+
+\paragraph{English}
+
+This report covers all the steps involved in developing a maintainable compiler. This is achieved by dividing the compiler into modular phases that can be easily replaced or extended with other components. The report discusses the development of tools such as Flex and Bison and how they are combined to form the frontend part of the compiler. By utilizing the visitor pattern the compiler gathers data from the source program and converts the source code into assembly. Finally, the report presents an implementation of a Garbage Collector that accompanies the language.
+
+\end{abstract}
 
 \newpage
 \tableofcontents
 
-\newpage
-\subfile{sections/abstract.tex}
 \newpage
 \pagenumbering{arabic} 
 \setcounter{page}{1}
@@ -211,187 +209,175 @@ Thank you, Mom \& Dad!
 \chapter{Runtime Machine}
 \subfile{sections/runtime.tex}
 \chapter{Concluding Remarks}
-\section{Further Improvements}
 
+As indicated in the report some features are missing, such as loops, additional types, and arrays. Loops and arrays will be rather simple to implement. Loops are modified if statements with a jump statement at the end of the body that jumps to the guard. If the guard fails it should jump below the body of the loop. Arrays can be implemented as a struct with $n$ number of elements indicated at compile time. Additional types are a bit more complex. To add types the compiler needs a type checker to ensure that only legal operations are performed on the types. Additionally, the compiler needs information about the physical sizes of the types. Currently the compiler assumes that every type is of size 8 bytes. 
+
+The parser requires a lot of space on the heap. Currently the parser takes more than 50 megabytes of space. Constructing the parse table for the language takes about ten seconds on my machine, so I have opted to serialize the parse table into a file and load that file for compilation. However, there is still some overhead in loading the parse table from the file. Adapting Parsley to convert the LR(1) parser into an LALR(1) parser would improve on the space requirements and thereby also decrease the overhead of loading the compiler. Alternatively Parsley could be changed by instead of producing a parse table it would construct high level code that can be modified by the compiler auther afterwards.
+
+Java is incredibly slow for this sort of task. For compilers to be enjoyable for the user, the compiler needs to be fast. Because of the interpreted nature of Java and its garbage collector and the overhead of the parser this simply is not possible. Currently the biggest bottleneck in the compiler is the frontend. It has however been fun.
 
 \bibliography{refs}
 \bibliographystyle{plain}
+% \appendix
 
-\appendix
+% \newpage
 
-\newpage
+% \chapter*{Appendix: Lists of Stuff}
+% \label{appendix}
+% This is under development!
 
-\chapter*{Appendix: Lists of Stuff}
-\label{appendix}
-This is under development!
+% These issues are to some extent my personal opinions!
 
-These issues are to some extent my personal opinions!
+% The topics are to a large extent guided by the type of mistakes Danish
+% students would make.
 
-The topics are to a large extent guided by the type of mistakes Danish
-students would make.
+% There are of course numerous issues that I do not discuss, some of
+% which are hard for Danes, such a subjunctive forms, rules (other
+% than the obvious) for the use of singular vs.\ plural forms, etc.
 
-There are of course numerous issues that I do not discuss, some of
-which are hard for Danes, such a subjunctive forms, rules (other
-than the obvious) for the use of singular vs.\ plural forms, etc.
+% \section*{Matters of Style}
 
-\section*{Matters of Style}
+% \subsection*{Miscellaneous}
+% \begin{itemize}
+% \item
+% Id est: use punctuation as
+% ``\ldots,\textvisiblespace{}i.e.,\textvisiblespace''.
+% The construction should be followed by more than just one word,
+% usually a whole or partial sentence.
+% The construction should never start a sentence.
+% To be very strict, it should also not start the inside
+% of a parenthesis (use ``that is'' followed by a comma instead).
+% The same rules apply to ``e.g.''
+% If you insist on \emph{not} using a comma, make sure to use a backslash
+% to prevent \LaTeX{} from making an end-of-sentence space.
+% \item
+% Do not concatenate words or hyphenate them just because you would in Danish.
+% It is called ``type checker'', ``data structure'', ``garbage collector'', etc.
+% \item
+% Do not start a sentence with ``Else''; use ``Otherwise''.
+% \item
+% Do not start a sentence with ``But''; use ``However'', ``On the contrary'',
+% or something else appropriate.
+% \item
+% When capitalizing a headline, capitalize both words in a hyphenated
+% construction.
+% \item
+% Capitalize named entities such as ``Figure~42''.
+% \item
+% Unless one is comparing numbers, small numbers in text should be
+% spelled out.
+% \item
+%   There are (almost) always better (more precise) words than
+%   big, do, put, and things.
+% \item
+% In formal writing, do not use contractions such as ``don't''.
+% \item
+%   In formal writing, ``like'', in comparisons, should most often be ``such as''.
+% \item
+%   Do not use ``OK''.
+% \item
+% ``Look at'' is informal and should often be replaced by ``Consider''.
+% \item
+%   Use ``essentially'' very sparingly. Never use it if something is
+%   actually exactly as described. Otherwise, it is often possible
+%   to explain or hint at the difference with few words instead of
+%   using ``essentially''.
+% \item
+%   I see many word order errors such as
+%   ``the decisions resulted always in more work'' instead of
+%   ``the decisions always resulted in more work''.
+% \item
+%   ``It'' cannot be the subject of something such as ``it is forbidden to smoke
+%   here''. 
+% \item
+%   Do not use ``less'' for countable items, i.e., ``Adam had less apples than Eve'' is incorrect and should be ``Adam had fewer apples than Eve''.
+% \end{itemize}
 
-\subsection*{Miscellaneous}
-\begin{itemize}
-\item
-Id est: use punctuation as
-``\ldots,\textvisiblespace{}i.e.,\textvisiblespace''.
-The construction should be followed by more than just one word,
-usually a whole or partial sentence.
-The construction should never start a sentence.
-To be very strict, it should also not start the inside
-of a parenthesis (use ``that is'' followed by a comma instead).
-The same rules apply to ``e.g.''
-If you insist on \emph{not} using a comma, make sure to use a backslash
-to prevent \LaTeX{} from making an end-of-sentence space.
-\item
-Do not concatenate words or hyphenate them just because you would in Danish.
-It is called ``type checker'', ``data structure'', ``garbage collector'', etc.
-\item
-Do not start a sentence with ``Else''; use ``Otherwise''.
-\item
-Do not start a sentence with ``But''; use ``However'', ``On the contrary'',
-or something else appropriate.
-\item
-When capitalizing a headline, capitalize both words in a hyphenated
-construction.
-\item
-Capitalize named entities such as ``Figure~42''.
-\item
-Unless one is comparing numbers, small numbers in text should be
-spelled out.
-\item
-  There are (almost) always better (more precise) words than
-  big, do, put, and things.
-\item
-In formal writing, do not use contractions such as ``don't''.
-\item
-  In formal writing, ``like'', in comparisons, should most often be ``such as''.
-\item
-  Do not use ``OK''.
-\item
-``Look at'' is informal and should often be replaced by ``Consider''.
-\item
-  Use ``essentially'' very sparingly. Never use it if something is
-  actually exactly as described. Otherwise, it is often possible
-  to explain or hint at the difference with few words instead of
-  using ``essentially''.
-\item
-  I see many word order errors such as
-  ``the decisions resulted always in more work'' instead of
-  ``the decisions always resulted in more work''.
-\item
-  ``It'' cannot be the subject of something such as ``it is forbidden to smoke
-  here''. 
-\item
-  Do not use ``less'' for countable items, i.e., ``Adam had less apples than Eve'' is incorrect and should be ``Adam had fewer apples than Eve''.
-\end{itemize}
+% \subsection*{Commas}
+% \begin{itemize}
+% \item
+% Place a comma before ``then'' or instead of a ``then'' that has been left out
+% in an ``if-then'' construction. Also after the first part of ``since'' constructions and similar (where ``then'' is of course out of the question).
+% \item
+%   Use commas around ``however'' and similar constructions.
+% \item
+%   In lists, use comma after the penultimate item in the list, e.g., before ``and''. Also use a comma before ``etc''.
+% \item
+%   There are exceptions, but normally there should not be a comma before ``that''.
+% \item
+%   Use a comma after an introductory clause or word, just before a main clause.
+%   Main clauses joint by most conjunctions (``and'', ``but'', etc.)
+%   should also be separated by commas.
+% \end{itemize}
 
-\subsection*{Commas}
-\begin{itemize}
-\item
-Place a comma before ``then'' or instead of a ``then'' that has been left out
-in an ``if-then'' construction. Also after the first part of ``since'' constructions and similar (where ``then'' is of course out of the question).
-\item
-  Use commas around ``however'' and similar constructions.
-\item
-  In lists, use comma after the penultimate item in the list, e.g., before ``and''. Also use a comma before ``etc''.
-\item
-  There are exceptions, but normally there should not be a comma before ``that''.
-\item
-  Use a comma after an introductory clause or word, just before a main clause.
-  Main clauses joint by most conjunctions (``and'', ``but'', etc.)
-  should also be separated by commas.
-\end{itemize}
+% \section*{\LaTeX{}}
+% \begin{itemize}
+% \item
+% Use commands for most constructions and variable names other than
+% one letter math variables; see examples in this file.
+% \item
+% Remember backslash after abbreviation periods as
+% ``vs.$\backslash$\textvisiblespace''.
+% \item
+% Never typeset names in math mode, i.e.,
+% ``{\$}left{\$}'' is strictly forbidden. Use
+% ``{\$}$\backslash{}$mathit\{left\}{\$}'', or just
+% ``$\backslash{}$textit\{left\}'' if you do not need math mode.
+% This is how ugly is looks if you use math mode: $left$.
+% And this is when it is done correctly: \textit{left}.
+% \item
+% Use $\sim$ (space forbidding line break) between names of numbered
+% entities, e.g., write ``Figure$\sim$42'' to avoid that ``42'' can
+% appear at the start of a line. (Of course, you would never write ``42'',
+% but instead refer to a label.)
+% \item
+% Use one hyphen to hyphenate words and two hyphens to create the little line
+% between two numbers of an interval. A dash should be either two hyphens
+% surrounded by space or three hyphens and no space. It is a style issue
+% and a paper should only contain one type.
+% \item
+% Sometimes a style is enforced on you, but if you can decide
+% yourself, I find it much easier to read a text where paragraphs are
+% separated by vertical space than when a new paragraph is just indicated
+% by indentation. It is of course a style matter that should be defined
+% in the preamble.
+% \item
+% Use \verb"\cdots" for missing parts of a sequence when there are no commas;
+% if there are commas, as in $1, 2, \ldots, n$, use \verb"\ldots" to show
+% the continuation.
+% \end{itemize}
 
-\section*{\LaTeX{}}
-\begin{itemize}
-\item
-Use commands for most constructions and variable names other than
-one letter math variables; see examples in this file.
-\item
-Remember backslash after abbreviation periods as
-``vs.$\backslash$\textvisiblespace''.
-\item
-Never typeset names in math mode, i.e.,
-``{\$}left{\$}'' is strictly forbidden. Use
-``{\$}$\backslash{}$mathit\{left\}{\$}'', or just
-``$\backslash{}$textit\{left\}'' if you do not need math mode.
-This is how ugly is looks if you use math mode: $left$.
-And this is when it is done correctly: \textit{left}.
-\item
-Use $\sim$ (space forbidding line break) between names of numbered
-entities, e.g., write ``Figure$\sim$42'' to avoid that ``42'' can
-appear at the start of a line. (Of course, you would never write ``42'',
-but instead refer to a label.)
-\item
-Use one hyphen to hyphenate words and two hyphens to create the little line
-between two numbers of an interval. A dash should be either two hyphens
-surrounded by space or three hyphens and no space. It is a style issue
-and a paper should only contain one type.
-\item
-Sometimes a style is enforced on you, but if you can decide
-yourself, I find it much easier to read a text where paragraphs are
-separated by vertical space than when a new paragraph is just indicated
-by indentation. It is of course a style matter that should be defined
-in the preamble.
-\item
-Use \verb"\cdots" for missing parts of a sequence when there are no commas;
-if there are commas, as in $1, 2, \ldots, n$, use \verb"\ldots" to show
-the continuation.
-\end{itemize}
+% \section*{Writing Advice for TCS}
+% \begin{itemize}
+% \item
+% Think carefully about the naming of objects. When more than one object
+% of the same type is used, it is often a good idea to use letters close
+% to each other in the alphabet. That establishes a sort of typed language
+% that helps the reader.
+% However, skip letters with very established meaning, e.g., it is
+% often not good to use $f$ for something that is not a function.
+% Primes can also be used to stay in the same name space.
+% Also using first letters of the names of entities, equivalent Greek
+% letters, etc.\ can be helpful.
+% And do not give a name to a concept or introduce notation for it
+% unless you need it later.
+% \item
+% Sentences explaining progress in proof can be helpful: Where are we, and what
+% are we doing now?
+% \item
+% Do not say ``It is easy to see that \ldots''. If it is true, you
+% can almost always in the same space say ``Since this and that, \ldots''.
+% \item
+% Insert data unreduced into formulas and then use arithmetic,
+% so it is easy to see where things come from, i.e., do not combine
+% insertion and reduction steps.
+% \item
+%   Be careful with pronouns and be sure that it is clear what they refer to.
+%   Very often it is better to write the term ``it'' is referring to instead of writing ``it''.
+% \item
+%   Things that are the same should be written the same, so that one can more clearly see differences. Technical writing is different from writing literature! Also use a fixed word for any action, i.e., do not use put, place, write, etc. for
+%   the action.
+% \end{itemize}
 
-\section*{Writing Advice for TCS}
-\begin{itemize}
-\item
-Think carefully about the naming of objects. When more than one object
-of the same type is used, it is often a good idea to use letters close
-to each other in the alphabet. That establishes a sort of typed language
-that helps the reader.
-However, skip letters with very established meaning, e.g., it is
-often not good to use $f$ for something that is not a function.
-Primes can also be used to stay in the same name space.
-Also using first letters of the names of entities, equivalent Greek
-letters, etc.\ can be helpful.
-And do not give a name to a concept or introduce notation for it
-unless you need it later.
-\item
-Sentences explaining progress in proof can be helpful: Where are we, and what
-are we doing now?
-\item
-Do not say ``It is easy to see that \ldots''. If it is true, you
-can almost always in the same space say ``Since this and that, \ldots''.
-\item
-Insert data unreduced into formulas and then use arithmetic,
-so it is easy to see where things come from, i.e., do not combine
-insertion and reduction steps.
-\item
-  Be careful with pronouns and be sure that it is clear what they refer to.
-  Very often it is better to write the term ``it'' is referring to instead of writing ``it''.
-\item
-  Things that are the same should be written the same, so that one can more clearly see differences. Technical writing is different from writing literature! Also use a fixed word for any action, i.e., do not use put, place, write, etc. for
-  the action.
-\end{itemize}
-
-\section*{Slides for the Presentation}
-\begin{itemize}
-\item
-  Use the slides primarily for figures, graphs, and keywords. It is seldom a
-  good idea to include many full sentences
-  (except maybe a theorem statement) and
-  almost never a good idea with full paragraphs of text.
-\item
-  Think about how you \emph{supplement} your written work,
-  rather than just showing excerpts.
-  For instance, if you show the workings of an algorithm, you can have the
-  algorithm on one side and the result it is working on on the other side,
-  and you can highlight lines of the algorithm as the results change
-  incrementally.
-\end{itemize}
 
 \end{document}

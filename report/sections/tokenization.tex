@@ -5,7 +5,7 @@ One way to solve this problem is to split the input after each space and then ha
 Flex uses regex to describe which strings match selected tokens, and returns a list of tokens based on what it matches. Let us create a tool similar to this.
 
 \section{DFA}
-We first need to know some theory of deterministic finite automata. A DFA is a collection of states, that for each state has arcs that links it to other states. The deterministic part of the name, comes from the fact that for each state it has as many arcs as the alfabet resulting in the machine always knowing which arc it should traverse. The alfabet is a collection of characters or symbols that the state machine knows about. To make the machine finite we need to mark some of the states to be accepting, meaning that when it reaches such a state it is allowed to stop or continue if more symbols follow. An example of a DFA is shown below.
+We first need to know some theory of deterministic finite automata. A DFA is a collection of states, that for each state has arcs that links it to other states. The machine takes a symbol form the input one by one and finds the corresponding arc to get to the next state. The deterministic part of the name, comes from the fact that for each state it has as many arcs as there are symbols in the alfabet resulting in the machine always knowing which arc it should traverse. The alfabet is a collection of characters or symbols that the state machine knows about. To make the machine finite we need to mark some of the states to be accepting, meaning that when it reaches such a state it is allowed to stop or continue if more symbols follow. An example of a DFA is shown below.
 
 \begin{center}
 \begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto] 
@@ -27,7 +27,7 @@ The above DFA accepts any input where it either starts with any number og 0's (a
 
 \section{NFA}
 
-The difference between a non deterministic finite automata (NFA) and a DFA is that NFAs allow the use of $\epsilon$, which indicates that in the current state, we can progress through the arc marked with an $\epsilon$ which simulates our machine being in multiple states at any given point in time. Furthermore a state can have zero outgoing arcs or even multiple of the same symbol. Hence the non deterministic part of the name. This allows us to both be lazy while diagramming a machine and build much more expressive machines. An example can be seen below:
+The difference between a non deterministic finite automata (NFA) and a DFA is that NFAs allow the use of $\epsilon$ arcs. $\epsilon$ arcs allows the machine to be in multiple states at the same time. If the machine comes across a state containing $\epsilon$ arcs it may choose to cross that arc. Furthermore a state can have zero outgoing arcs or even multiple of the same symbol. Hence the non deterministic part of the name. NFAs allows us to both be lazy while diagramming a machine and easier build much more expressive machines. An example can be seen below:
 
 
 \begin{center}
@@ -53,7 +53,7 @@ Notice the state $q_1$. It doesn't have any outgoing arcs with a $0$. And the st
 
 In this section I will show that any NFA can be converted to an equivalent DFA through a series of steps. 
 
-It is important to remember that NFAs can be in multiple states at any given point. For this reason we will collaps some states into a single state symbolising the NFA being in multiple states at once.
+It is important to remember that NFAs can be in multiple states at any given point. For this reason we will collaps some states into a single state simulating the NFA being in multiple states at once.
 
 Given a set of states we can compute the epsilon closure for that set  by:
 \begin{enumerate}

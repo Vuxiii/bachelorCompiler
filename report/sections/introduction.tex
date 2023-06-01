@@ -12,23 +12,26 @@ A compiler is divided up into two main phases. The front end, and the back end o
 The backend of the compiler defines the semantics of the language. What happens when the user makes a function call, should it spawn a new thread and make that thread execute the function while the main thread continues execution, or should something happen anytime the value $42$ is computed. The backend allows us to define what should happen at any time during runtime:
 \begin{itemize}
   \item In the first step of the backend we take the raw abstract syntax tree and remove any unnessecary artifacts from the parser. This results in a clean AST which is easier to work with.
-  \item Lastly we go traverse the tree to produce the assembly language.
+  \item The compiler then traverses the AST to collect different information about the program it is about to compile.
+  \item With the collected information it constructs intermediary code.
+  \item Lastly the intermediary code is converted into assembly code.
 \end{itemize}
 
 \section*{Language Semantics and Syntax}
 For this simple language there exists a few keywords, which we will dive into now.
 
 \begin{itemize}
-  \item let: This keyword declares that a variable is about to be declared.
-  \item type: Indicate that a new type is about to be declared. In C this is the same as a struct.
-  \item if: If indicates that we are about to check if some expression is true and if it is execute the following block.
-  \item else: If the if statement fails execute the following block.
-  \item return: Return from a function call with a given value.
-  \item int: A type representing whole numbers using two's complement.
-  \item print: Prints a string the std out.
+  \item \textbf{let}: This keyword declares that a variable is about to be declared.
+  \item \textbf{type}: Indicate that a new type is about to be declared. In C this is the same as a struct.
+  \item \textbf{if}: If indicates that we are about to check if some expression is true and if it is execute the following block.
+  \item \textbf{else}: If the if statement fails execute the following block.
+  \item \textbf{return}: Return from a function call with a given value.
+  \item \textbf{int}: A type representing whole numbers using two's complement.
+  \item \textbf{print}: Prints a string the std out.
+  \item \textbf{*}: Indicates that the field or variable should be allocated on the heap.
 \end{itemize}
 
-
+\newpage
 
 \begin{lstlisting}[language=Python,title=Fibonacci Example]
 let fib: (a: int) -> int;

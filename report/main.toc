@@ -1,11 +1,11 @@
-\contentsline {paragraph}{English}{i}{}%
 \contentsline {paragraph}{Danish}{i}{}%
+\contentsline {paragraph}{English}{i}{}%
 \contentsline {chapter}{\numberline {1}Introduction}{1}{}%
 \contentsline {chapter}{\numberline {2}Tokenization}{4}{}%
 \contentsline {section}{\numberline {2.1}DFA}{4}{}%
 \contentsline {section}{\numberline {2.2}NFA}{5}{}%
 \contentsline {section}{\numberline {2.3}NFA to DFA}{6}{}%
-\contentsline {section}{\numberline {2.4}Regex to NFA}{6}{}%
+\contentsline {section}{\numberline {2.4}Regex to NFA}{7}{}%
 \contentsline {subsection}{\numberline {2.4.1}Concatenation}{7}{}%
 \contentsline {subsection}{\numberline {2.4.2}Union}{8}{}%
 \contentsline {subsection}{\numberline {2.4.3}Star}{8}{}%
@@ -17,14 +17,13 @@
 \contentsline {section}{\numberline {3.5}Constructing a Parse Table}{14}{}%
 \contentsline {section}{\numberline {3.6}Parsley}{17}{}%
 \contentsline {chapter}{\numberline {4}Compilation}{19}{}%
-\contentsline {section}{\numberline {4.1}Symbol Collection}{19}{}%
-\contentsline {section}{\numberline {4.2}String Collection}{20}{}%
+\contentsline {section}{\numberline {4.1}String Collection}{19}{}%
+\contentsline {section}{\numberline {4.2}Symbol Collection}{20}{}%
 \contentsline {subsection}{\numberline {4.2.1}Garbage Collector}{20}{}%
 \contentsline {subsection}{\numberline {4.2.2}Stack Layout}{21}{}%
 \contentsline {subsection}{\numberline {4.2.3}Struct Layout}{21}{}%
-\contentsline {section}{\numberline {4.3}Intermediate Representation}{21}{}%
+\contentsline {section}{\numberline {4.3}Intermediate Representation}{22}{}%
 \contentsline {section}{\numberline {4.4}Constructing the Language Semantics}{22}{}%
-\contentsline {section}{\numberline {4.5}Code Emit}{23}{}%
-\contentsline {chapter}{\numberline {5}Runtime Machine}{24}{}%
-\contentsline {chapter}{\numberline {6}Concluding Remarks}{27}{}%
-\contentsline {section}{\numberline {6.1}Further Improvements}{27}{}%
+\contentsline {section}{\numberline {4.5}Code Emit}{24}{}%
+\contentsline {chapter}{\numberline {5}Runtime Machine}{25}{}%
+\contentsline {chapter}{\numberline {6}Concluding Remarks}{28}{}%

@@ -1,15 +1,17 @@
 Let us dive into the backend of the compiler. Here we define the semantics of our language. At this stage we have the AST from the parser which we will traverse multiple times in order to collect various components and information about the source code, which determine what should happen at runtime. This stage can be divided into multiple phases just like the frontend. For this compiler the phases are as follows: 
 \begin{enumerate}
-    \item Symbol Collection
     \item String Collection
+    \item Symbol Collection
     \item Register The Stack's Layout
     \item Register The Structs' Layout
     \item Intermediate Code Generation
     \item Code Emit
 \end{enumerate}
 
+To traverse the AST we will be using the visitor pattern. This allows us to write the logic for traversing the AST once. We can then send different visitors through the AST and execute specific code depending on the currently visited node.
+\section{String Collection}
 
-use to generate IR (intermediate representation). IR is a construct designed to make it easier to manipulate and handle the code during construction. For this project the IR is a set of instructions and 
+This collector traverses the AST to locate any strings that are used in the source code. A program can quickly use alot of strings, and some of which are repeated multiple times. For space efficiency reasons we want to only store unique strings in the final output code.
 
 \section{Symbol Collection}
 The goal of the symbol collector is to collect the symbols defined in the source code and map them accordingly. Symbols are variables, struct definitions and function names. Variables are usually placed on the stack unless it has been heap allocated. We traverse the AST and collect all declarations one by one. 
@@ -30,9 +32,6 @@ fun1 = () {
 
 In the above example at line 7 there currently are two stack frames. One for the outer scope, and one for the scope of the function \textit{fun1}. In order to read the value of \textit{var1} we first need to go to the outer frame, and then find the correct offset for that specific variable on the stack. For that reason we construct a lookup table to see if we are in the same scope as the referenced symbol. If we are not, we need to locate it. This can be done by following the old basepointer stored on the stack and recursivly check if we are in the correct scope.  
 
-\section{String Collection}
-
-This collector traverses the AST to locate any strings that are used in the source code. A program can quickly use alot of strings, and some of which are repeated multiple times. For space efficiency reasons we want to only store unique strings in the final output code.
 
 \subsection{Garbage Collector}
 Arguably a garbage collector is not a part of the compiler, however, the metadata that the garbage collector needs will be collected in the compiler.
@@ -53,6 +52,7 @@ type Thing: {
 
 In the above example the bitfield for the struct Thing will have the first bit set to zero, because there are less than 64 fields the struct. The second and the fifth bits are set to one and the rest zero. 
 
+
 \subsection{Stack Layout}
 We will now discuss how to collect the pointers located on the stack. For each possible stack frame we have to generate a layout which keeps track of where a pointer is located in respect to the currently active stack frame. Stack frames occur in functions and in the main scope. This means that we traverse the main scope to identify its layout, and for each function do the same. For each traversal of the AST we locate any pointer declarations to the heap. Since the symbol collector already is mapping offsets for each local variable, we can use this offset counter to mark pointers on the stack. 
 
@@ -68,16 +68,27 @@ Now that the components needed to construct the emitted code have been collected
 
 At this point we have some options. We can go through the AST and start by constructing the IR for each function and then assemble the code located in the main scope. This will result in multiple lists of IR code. By choosing this path it will be easier in the code emit phase. Another option is to go through the AST line by line and construct everything inorder. This brings some disadvantages. We have no seperation of the main code and functions. Another huge consideration is parallalization of the IR code construction. With the latter choice it would be very difficult to find different compilation units that can be compiled seperatly. Using the former technique we can divide each function assembly as its own compilation unit and harness the power of the computer's cores. Therefore let us choose that option. Because each function definition is a subtree it is easy to isolate them. 
 
-Let us now go through how we can construct different semantics that high level languages contain. 
+Let us now go through how we can construct different high levels emantics. 
 
 \begin{itemize}
-    \item \textbf{Variables}: Variables needs two actions that can be performed with them. Firstly it needs to be able to store some data. Secondly we need to be able to read the value it stores. The symbol collector has already chosen a spot on the stack for each variable. 
-    \item \textbf{Structs}: Structs are a collection of variables located right next to each other. For that reason fields in a struct can simply be though of as variables with a longer name.
-    \item \textbf{Functions}: Functions are seperate blocks of code that can be called throughout the execution of the program. Each function will have a label that the program can jump to when a function call to that function has been reached. For the functions footer it needs a return such that the assembler can clean up after itself and return to the calling code.
-    \item \textbf{Branching}: Branching is a sequence of conditions that when met execute a block of code. This language supports if statements, if else statements, and if else if statements. If the first condition fails, the runtime checks the next condition until it has exhausted the list of if statements. If the list contains an else statement that block of code will be executed if none of the prior conditions were met. After a successful condition and the execution of the block has finished, it jump to the end of the list statements. This ensures that only a single block of code will be executed.
+    \item \textbf{Variables}: Variables have two actions that can be performed with them. First it is to be able to store some data. Second we can read the value it stores. The symbol collector has already chosen a spot on the stack for each variable, so to read and store values the compiler can refere to that location. If the variable referenced is outside the current scope, the runtime needs to retrieve the old base pointer located on the stack until it has the correct pointer to where the variable is stored. This, however, makes accessing out of scope variables very expensive. For each level of nesting it requires an additional move instruction whereas before it only required a single move instruction for variables located in the current scope.
+    \item \textbf{Pointers}: We tell the runtime that we want some memory on the heap capable of storing the desired type of the variable. 
+    \item \textbf{Structs}: Structs are a collection of variables located right next to each other. For that reason fields in a struct can simply be thought of as variables with a longer name.
+    \item \textbf{Functions}: Functions are seperate blocks of code that can be called throughout the execution of the program. Each function has a label that the program can jump to when a call to that function has been made. For the functions footer it needs a return such that the assembler can clean up after itself and return to the calling code.
+    \item \textbf{Branching}: Branching is a sequence of conditions, that when met, executes a block of code. This language supports if statements, if else statements, and if else if statements. This is implemented by placing labels that mark each conditional check and another marker at the end of the if statements. If the first condition fails, the runtime checks the next condition until it has exhausted the list of if statements or if one of the conditions succeed. If the list contains an else statement that block of code will be executed if none of the prior conditions were met. After a successful condition and the execution of the block has finished, it jump to the end of the list of if statements. This ensures that only a single block of code will be executed.
     \item \textbf{Printing}: This language supports string interpolation in print statements. This works by printing the string in slices and inserting the specified input in between the slices. The arguments to be interpolated are evaluated from left to right and inserted in that order into the string.
+    \item \textbf{Loops}: While this language does not implement a while loop, it will be easy to implement one by using the same logic as brancing does. Instead of jumping to the end of the while loop on a successful execution of the loop body, it jumps to the guard of the loop. This implements a while loop.
 \end{itemize}
 
 \section{Code Emit}
 
-The variables will then be placed in order on the stack after the base pointer. Functions will be placed outside the main entry point in the assembly, such that these are callable later on. Struct definitions are essentially just a bunch of variables packed together and placed contiguously on the stack. 
+The last stage in the compilation process is the actual code emit. The emitter first inserts some data fields for storing strings that are used in the program, stack layout pointers and struct layout pointers. All three types of fields could easily be filled in during compile time, however, I have chosen to fill the last two types at the start of the programs runtime. This offers no advantage and should have been done at compile time to avoid unnecesary overhead during runtime. After the fields have been filled out the compiler moves on to emit the code for each function body. For each function it puts a label for that function, a header, the body and lastly a footer. The header contains instructions to store the old base pointer and set up a new base pointer. It also registers a new stack frame with the runtime. The footer removes the stack frame from the runtime and restores the old base pointer. The only thing that remains is the main body of the program. 
+
+The main program also contains a header and a footer just like functions. Additionally the main program initializes the garbage collector, and registers the stack and struct layouts. After this the compiler iterates through the list of IR code and converts it to assembly. Because the IR is just above assembly converting it is straight forward. The IR code for adding two registers together looks like this:
+\begin{lstlisting}[language=Python]
+ADD [RBX, RCX]
+\end{lstlisting}
+Which would become:
+\begin{lstlisting}[language=Python]
+addq %rbx, %rcx
+\end{lstlisting}

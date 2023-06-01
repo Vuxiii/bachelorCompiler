@@ -1,8 +1,8 @@
-The next major step in the compilation process is processing the tokens received from the previous step and combine them into an abstract syntax tree (AST). This AST contains the semantics of the program, and by traversing the tree we will be able to emit the target language. 
+The next major step in the compilation process is processing the tokens received from the previous step and combine them into an abstract syntax tree (AST). This AST contains the semantics of the program to be compiled, and by traversing the tree we will be able to emit the target language. 
 
-The main two ways of writing a parser is by either utilizing a parser generator or by writing the parser by hand. This can be done by using a recursive decent technique. Depending on the situation the latter technique can have its merrits. It will provide a much finer grained control over what is possible to parse. The error messages can also be super precise. Essentially, writing a parser by hand the compiler author is able to parse any imaginable language. However, maintaining such a beast can quickly become a nightmare as the language grows and new syntax needs to be added. 
+The two main ways of writing a parser is by either utilizing a parser generator or by writing the parser by hand. This can be done by using a recursive decent technique. Depending on the situation the latter technique can have its merrits. It will provide a much finer grained control over what is possible to parse. The error messages can also be super precise. Essentially, writing a parser by hand the compiler author is able to parse any imaginable language. However, maintaining such a beast can quickly become a nightmare as the language grows and new syntax needs to be added. 
 
-Which brings us to parser generators. Tools such as \textit{yacc} or \textit{Bison} generate parsers capable of parsing LR (1) and LALR (1) languages by taking as input a Context Free Grammar (CFG). By utilizing a parser generator we will gain greater flexibility maintaining the compiler and further expanding the acceptable language by modifying the CFG, which is the main advantage of going with this approach. However, the parse table generated for my language takes an enourmus 51 megabytes. 
+Which brings us to parser generators. Tools such as \textit{yacc} or \textit{Bison} generate parsers capable of parsing LR (1) and LALR (1) languages by taking as input a Context Free Grammar (CFG). By utilizing a parser generator we will gain greater flexibility maintaining the compiler and further expanding the acceptable language by modifying the CFG, which is the main advantage of going with this approach. However, the parse table generated for my language takes an enormous 51 megabytes. 
 
 There is a third way, which involves using both a parser generator and extending it by hand. This can provide much finergrained error messages to the user, as the compiler author is able to analyze the current state of the compiler at the point of failure, and figure out what went wrong by backtracking the call stack or by looking at the upcomming nodes.
 
@@ -76,7 +76,7 @@ The first set is the collection of terminals that can appear as the first symbol
 
 
 \begin{equation*}
-  \begin{split}
+  \begin{split}enou
       A &\rightarrow C
   \end{split}
 \end{equation*}
@@ -91,7 +91,16 @@ From what we know now, we can compute the first set for each non terminal:
 
 \section{FOLLOW Set}
 
-The follow set is the collection of symbols that may appear after a non terminal. Just like the first set it contains four collection of terminals.
+The follow set is the collection of symbols that may appear after a non terminal. Just like the first set it contains four collection of terminals. From the above example we would get:
+
+\begin{itemize}
+  \item FOLLOW(S) = $\SET{}$
+  \item FOLLOW(A) = $\SET{FIRST(C), FIRST(B)}$ = $\SET{b, c}$
+  \item FOLLOW(B) = $\SET{FIRST(C), FIRST(B)}$ = $\SET{b, c}$
+  \item FOLLOW(C) = $\SET{FIRST(B), FIRST(C)}$ = $\SET{b, c}$
+\end{itemize}
+
+In the above $FIRST(C) \in FOLLOW(A)$ because the second production rule contains a $C$ just after $A$ and because in the first production rule $A$ is followed by $BC$ where $B$ is nullable. $FIRST(B) \in FOLLOW(A)$ because the in the first production rule $A$ is immediatly followed by $B$.  
 
 \section{Constructing a Parse Table}
 
@@ -118,7 +127,7 @@ We will get the following:
   \end{split}
 \end{equation*}
 
-The dot indicates which symbol the parser expects to see next, if it were to reduce using that production rule. The dollar sign is an End Of Parse (EOP) symbol indicating that the parser has successfully read the entire input. The questionmark is the lookahead symbol which is the symbol the parser expects to see if this given production rule's reduction. Since nothing is supposed to come after the the start production it is marked with a questionmark indicating that nothing is expected after. 
+The dot indicates which symbol the parser expects to see next, if it were to reduce using that production rule. The dollar sign is an End Of Parse (EOP) symbol indicating that the parser has successfully read the entire input. The questionmark is the lookahead symbol which is the symbol the parser expects to see if this given production rule's reduction was chosen. Since nothing is supposed to come after the the start production, it is marked with a questionmark indicating that nothing is expected after. 
 
 Let us now dive into the first phase. The goal of this phase is to include all the rules from the grammar that this state can produce. For each production in the state take the symbol just right of the dot and if it is a nonterminal add the production rules of that nonterminal. This will give us the following initial state:
 
@@ -186,8 +195,8 @@ Now that we know what each action does, we can go through the rules for deciding
 \begin{enumerate}
   \item If the symbol to the right of the dot is a dollar, put an accept action.
   \item If the symbol to the right of the dot is a terminal, put a shift action and let $i$ be the id of the state reachable by traversing using that symbol.
-  \item If the symbol to the right of the dot is a non terminal, put a hoto action and let $i$ be the id of the state reachable by traversing using that symbol.
-  \item If no symbols are to the right of the dot, add a reduce action for each symbol in the lookahead set with the $k$'th rule.
+  \item If the symbol to the right of the dot is a non terminal, put a goto action and let $i$ be the id of the state reachable by traversing using that symbol.
+  \item If no symbols are to the right of the dot, add a reduce action with the $k$'th rule for each symbol in the lookahead.
 \end{enumerate}
 
 By following the above directions, we can produce a parse table for the above given grammar:
@@ -210,7 +219,7 @@ If at any point the parser sees a symbol that has an empty cell, it will produce
 
 \section{Parsley}
 
-Parsley is the finished parser generator capable of producing an LR(1) parser given any CFG. Using Parsley we can construct a parser for the tokenizer capable of parsing Regex. Using the parser from Parsley we provide that parser the syntax of the language we want and that will return a DFA capable of tokenizing the source code. With this the first step of the frontend is finished. The second step of the frontend is the parser for the actual languange syntax. Just like with constructing a parser capable of recognizing Regex, we provide Parsley with the CFG for the language and it returns a parser for the compiler. These steps of the compiler chain are only present while  developing the compiler. The diagram below shows how the frontend fits together
+Parsley is the finished parser generator capable of producing an LR(1) parser given any CFG. Using Parsley we can construct a parser for the tokenizer capable of parsing Regex. By providing the Regex parser the syntax of the language we want, it will return a DFA capable of tokenizing the source code. With this the first step of the frontend is finished. The second step of the frontend is the parser for the actual languange syntax. Just like with constructing a parser capable of recognizing Regex, we provide Parsley with the CFG for the language and it returns a parser for the compiler. These steps of the compiler chain are only present while  developing the compiler. The diagram below shows how the frontend fits together
 \begin{figure}[H]
 \begin{tikzpicture}[node distance=4cm]
   \node (parsley) [square] {Parsley};
